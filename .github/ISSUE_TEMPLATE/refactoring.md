@@ -1,0 +1,25 @@
+---
+name: Refactoring
+about: Describe this issue template's purpose here.
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+---
+name: 🔧Refactoring
+about: 코드의 품질과 유지 보수성을 개선하기 위한 리팩토링 작업을 제안합니다.
+title: "[Refactor]"
+labels: refactoring
+assignees: ''
+---
+
+## ♻️개선 목적
+리팩토링의 이유와 개선하려는 문제를 간략히 설명해 주세요.
+
+### 📝개선 방안
+리팩토링 후 예상되는 코드 개선 방안을 서술해 주세요:
+
+- 어떤 방식으로 코드를 개선할 계획인지 적어주세요.
+- 사용할 디자인 패턴 또는 기술이 있다면 적어주세요.
