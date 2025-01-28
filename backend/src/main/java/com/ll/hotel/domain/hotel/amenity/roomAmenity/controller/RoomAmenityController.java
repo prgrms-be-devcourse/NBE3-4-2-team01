@@ -69,4 +69,14 @@ public class RoomAmenityController {
                 RoomAmenityDTO.toDTO(roomAmenity)
         );
     }
+
+    @DeleteMapping("/{id}")
+    public RsData<Void> delete(@PathVariable("id") Long id) {
+        RoomAmenity roomAmenity = roomAmenityService.findById(id);
+        roomAmenityService.delete(roomAmenity);
+        return new RsData<>(
+                "200",
+                "'%s' 항목이 삭제되었습니다.".formatted(roomAmenity.getDescription())
+        );
+    }
 }

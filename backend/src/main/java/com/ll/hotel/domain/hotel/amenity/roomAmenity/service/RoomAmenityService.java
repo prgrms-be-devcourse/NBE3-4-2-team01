@@ -42,4 +42,8 @@ public class RoomAmenityService {
     public void flush() {
         roomAmenityRepository.flush();
     }
+
+    public void delete(RoomAmenity roomAmenity) {
+        roomAmenityRepository.delete(roomAmenity);
+    }
 }
