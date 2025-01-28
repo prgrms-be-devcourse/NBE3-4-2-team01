@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AppConfig {
+
     @Getter
     private static ObjectMapper objectMapper;
 

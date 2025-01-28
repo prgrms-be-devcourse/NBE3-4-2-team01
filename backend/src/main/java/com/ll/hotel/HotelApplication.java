@@ -1,4 +1,4 @@
-package com.ll.hotel.main;
+package com.ll.hotel;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
