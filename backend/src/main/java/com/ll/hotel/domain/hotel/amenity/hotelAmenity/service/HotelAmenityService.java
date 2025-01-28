@@ -33,4 +33,13 @@ public class HotelAmenityService {
         return hotelAmenityRepository.findById(id)
                 .orElseThrow(() -> new ServiceException("404", "유효하지 않은 편의시설입니다."));
     }
+
+    @Transactional
+    public void modify(HotelAmenity hotelAmenity, HotelAmenityRequest.Details details) {
+        hotelAmenity.setDescription(details.description());
+    }
+
+    public void flush() {
+        hotelAmenityRepository.flush();
+    }
 }

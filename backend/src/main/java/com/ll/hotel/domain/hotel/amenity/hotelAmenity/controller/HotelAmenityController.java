@@ -54,4 +54,19 @@ public class HotelAmenityController {
                 HotelAmenityDTO.toDTO(hotelAmenity)
         );
     }
+
+    @PutMapping("/{id}")
+    public RsData<HotelAmenityDTO> modify(@PathVariable("id") Long id,
+                                               @RequestBody HotelAmenityRequest.Details details) {
+        HotelAmenity hotelAmenity = hotelAmenityService.findById(id);
+        hotelAmenityService.modify(hotelAmenity, details);
+
+        hotelAmenityService.flush();
+
+        return new RsData<>(
+                "200",
+                "항목이 수정되었습니다.",
+                HotelAmenityDTO.toDTO(hotelAmenity)
+        );
+    }
 }
