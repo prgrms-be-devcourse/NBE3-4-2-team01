@@ -28,4 +28,30 @@ public class RoomAmenityController {
                 RoomAmenityDTO.toDTO(roomAmenity)
         );
     }
+
+    @GetMapping
+    public RsData<List<RoomAmenityDTO>> getAll() {
+
+        List<RoomAmenityDTO> roomAmenityList = roomAmenityService.findAll()
+                .stream()
+                .map(RoomAmenityDTO::toDTO).toList();
+
+        return new RsData<>(
+                "200",
+                "모든 항목이 조회되었습니다.",
+                roomAmenityList
+        );
+    }
+
+    @GetMapping("/{id}")
+    public RsData<RoomAmenityDTO> getById(@PathVariable("id") Long id) {
+
+        RoomAmenity roomAmenity = roomAmenityService.findById(id);
+
+        return new RsData<>(
+                "200",
+                "항목이 조회되었습니다.",
+                RoomAmenityDTO.toDTO(roomAmenity)
+        );
+    }
 }

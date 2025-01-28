@@ -24,4 +24,13 @@ public class RoomAmenityService {
 
         return roomAmenityRepository.save(roomAmenity);
     }
+
+    public List<RoomAmenity> findAll() {
+        return roomAmenityRepository.findAll();
+    }
+
+    public RoomAmenity findById(Long id) {
+        return roomAmenityRepository.findById(id)
+                .orElseThrow(() -> new ServiceException("404", "유효하지 않은 편의시설입니다."));
+    }
 }
