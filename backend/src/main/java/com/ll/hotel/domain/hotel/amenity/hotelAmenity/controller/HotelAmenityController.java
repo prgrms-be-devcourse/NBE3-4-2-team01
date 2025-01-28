@@ -7,10 +7,9 @@ import com.ll.hotel.domain.hotel.amenity.hotelAmenity.service.HotelAmenityServic
 import com.ll.hotel.global.rsData.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin/amenities")
@@ -26,6 +25,32 @@ public class HotelAmenityController {
         return new RsData<>(
                 "201",
                 "'항목이 추가되었습니다.",
+                HotelAmenityDTO.toDTO(hotelAmenity)
+        );
+    }
+
+    @GetMapping
+    public RsData<List<HotelAmenityDTO>> getAll() {
+
+        List<HotelAmenityDTO> hotelAmenityList = hotelAmenityService.findAll()
+                .stream()
+                .map(HotelAmenityDTO::toDTO).toList();
+
+        return new RsData<>(
+                "200",
+                "모든 항목이 조회되었습니다.",
+                hotelAmenityList
+        );
+    }
+
+    @GetMapping("/{id}")
+    public RsData<HotelAmenityDTO> getById(@PathVariable("id") Long id) {
+
+        HotelAmenity hotelAmenity = hotelAmenityService.findById(id);
+
+        return new RsData<>(
+                "200",
+                "항목이 조회되었습니다.",
                 HotelAmenityDTO.toDTO(hotelAmenity)
         );
     }
