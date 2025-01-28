@@ -1,13 +1,4 @@
 ---
-name: Feature
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
-
----
-
----
 name: ✨Feature
 about: 새로운 기능이나 개선 사항을 제안해주세요.
 title: "[FEAT]"

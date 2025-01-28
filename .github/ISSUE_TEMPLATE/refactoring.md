@@ -1,13 +1,4 @@
 ---
-name: Refactoring
-about: Describe this issue template's purpose here.
-title: ''
-labels: ''
-assignees: ''
-
----
-
----
 name: 🔧Refactoring
 about: 코드의 품질과 유지 보수성을 개선하기 위한 리팩토링 작업을 제안합니다.
 title: "[Refactor]"
