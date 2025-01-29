@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/hotel_amenities")
+@RequestMapping("/admin/hotel-amenities")
 @RequiredArgsConstructor
 public class HotelAmenityController {
     private final HotelAmenityService hotelAmenityService;
@@ -24,7 +24,7 @@ public class HotelAmenityController {
 
         return new RsData<>(
                 "201",
-                "'항목이 추가되었습니다.",
+                "항목이 추가되었습니다.",
                 HotelAmenityDTO.toDTO(hotelAmenity)
         );
     }
@@ -76,7 +76,7 @@ public class HotelAmenityController {
         hotelAmenityService.delete(hotelAmenity);
         return new RsData<>(
                 "200",
-                "'%s' 항목이 삭제되었습니다.".formatted(hotelAmenity.getDescription())
+                "항목이 삭제되었습니다."
         );
     }
 }
