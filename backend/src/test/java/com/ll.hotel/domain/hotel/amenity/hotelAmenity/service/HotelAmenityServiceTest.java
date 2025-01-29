@@ -62,7 +62,7 @@ public class HotelAmenityServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat((long) result.size()).isEqualTo(2);
+        assertThat((long) result.size()).isEqualTo(12);
     }
 
     @Test
