@@ -43,7 +43,6 @@ public class Member {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -52,8 +51,10 @@ public class Member {
     @Column(nullable = false)
     private MemberStatus memberStatus;
 
+    @OneToOne(mappedBy = "member")
+    private Business business;
+
     public String getUserRole() {
         return this.role.name();
     }
-
 }
