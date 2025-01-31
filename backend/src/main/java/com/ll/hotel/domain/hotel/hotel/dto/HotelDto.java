@@ -1,6 +1,7 @@
 package com.ll.hotel.domain.hotel.hotel.dto;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
+import com.ll.hotel.domain.hotel.option.hotelOption.dto.HotelOptionDto;
 import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalTime;
@@ -76,8 +77,8 @@ public record HotelDto(
                         .map(GetAllRoomResponse::new)
                         .collect(Collectors.toList()),
                 hotel.getHotelOptions().stream()
-                        .map(HotelOptionDto::new)
-                        .map(HotelOptionDto::hotelOptionName)
+                        .map(HotelOptionDto::toDto)
+                        .map(HotelOptionDto::name)
                         .collect(Collectors.toSet())
         );
     }
