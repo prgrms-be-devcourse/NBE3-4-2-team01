@@ -42,4 +42,8 @@ public class RoomOptionService {
     public void flush() {
         roomOptionRepository.flush();
     }
+
+    public void delete(RoomOption roomOption) {
+        roomOptionRepository.delete(roomOption);
+    }
 }
