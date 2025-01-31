@@ -33,4 +33,13 @@ public class RoomOptionService {
         return roomOptionRepository.findById(id)
                 .orElseThrow(() -> new ServiceException("404", "유효하지 않은 편의시설입니다."));
     }
+
+    @Transactional
+    public void modify(RoomOption roomOption, RoomOptionRequest.Details details) {
+        roomOption.setName(details.name());
+    }
+
+    public void flush() {
+        roomOptionRepository.flush();
+    }
 }

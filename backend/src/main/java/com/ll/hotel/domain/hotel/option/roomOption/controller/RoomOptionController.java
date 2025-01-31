@@ -54,4 +54,19 @@ public class RoomOptionController {
                 RoomOptionDto.toDto(roomOption)
         );
     }
+
+    @PutMapping("/{id}")
+    public RsData<RoomOptionDto> modify(@PathVariable("id") Long id,
+                                        @RequestBody RoomOptionRequest.Details details) {
+        RoomOption roomOption = roomOptionService.findById(id);
+        roomOptionService.modify(roomOption, details);
+
+        roomOptionService.flush();
+
+        return new RsData<>(
+                "200",
+                "항목이 수정되었습니다.",
+                RoomOptionDto.toDto(roomOption)
+        );
+    }
 }
