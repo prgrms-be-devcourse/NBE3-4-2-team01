@@ -18,7 +18,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "reviews")
 @EntityListeners(AuditingEntityListener.class)
 public class Review extends BaseTime {
-
     @ManyToOne(fetch = FetchType.LAZY)
     private Hotel hotel;
 

@@ -47,11 +47,6 @@ public record HotelDto(
 
         @NonNull
         List<GetAllRoomResponse> rooms,
-
-//        @NonNull
-//        List<GetReviewResponse> reviews,
-
-        @NonNull
         Set<String> hotelOptions
 
         // 호텔 Favorite

@@ -14,7 +14,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<RsData<Empty>> handle(ServiceException ex) {
-
         RsData<Empty> rsData = ex.getRsData();
 
         return ResponseEntity

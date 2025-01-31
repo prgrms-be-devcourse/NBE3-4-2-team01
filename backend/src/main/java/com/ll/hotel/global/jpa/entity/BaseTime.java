@@ -1,7 +1,10 @@
 package com.ll.hotel.global.jpa.entity;
 
+import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
+import com.ll.hotel.domain.hotel.room.entity.Room;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +16,7 @@ import java.time.LocalDateTime;
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
-public class BaseTime extends BaseEntity{
+public class BaseTime extends BaseEntity {
     @CreatedDate
     @Setter(AccessLevel.PRIVATE)
     private LocalDateTime createdAt;

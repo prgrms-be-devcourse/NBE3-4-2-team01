@@ -2,7 +2,6 @@ package com.ll.hotel.domain.image;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
