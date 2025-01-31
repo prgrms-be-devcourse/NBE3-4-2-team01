@@ -1,13 +1,4 @@
 ---
-name: Bug
-about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
----
-
----
 name: 🐞Bug
 about: 버그를 신고하고 문제를 해결할 수 있도록 도와주세요.
 title: "[BUG]"
