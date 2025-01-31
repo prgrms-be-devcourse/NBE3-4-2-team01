@@ -28,7 +28,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         try {
             OAuth2User oauth2User = super.loadUser(userRequest);
             log.debug("OAuth2User Attributes: {}", oauth2User.getAttributes());
-            return oauth2User;
+            return processOAuth2User(userRequest, oauth2User);
         } catch (Exception e) {
             log.error("OAuth2 로그인 처리 중 오류 발생", e);
             throw new OAuth2AuthenticationException("OAuth2 로그인 처리 중 오류가 발생했습니다.");
@@ -74,6 +74,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 회원가입 처리 또는 로그인 처리
         if (!memberService.existsByMemberEmail(email)) {
+
+            // TODO: OAuth2 사용자의 추가 정보 입력 받기
+            // 아래는 임시로 추가 정보 없이 회원가입 처리, 아마 NPE가 발생할 것 같음, 이게 실행되게 하려면
             log.debug("새로운 OAuth2 사용자 등록: {}", email);
             MemberDTO memberDTO = new MemberDTO(
                 null,
