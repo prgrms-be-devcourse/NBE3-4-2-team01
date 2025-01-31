@@ -12,7 +12,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
 
     @Transactional
-    public Payment saveUids(String merchantUid, String impUid) {
+    public Payment create(String merchantUid, String impUid) {
         Payment payment = Payment.builder()
                 .merchantUid(merchantUid)
                 .impUid(impUid)

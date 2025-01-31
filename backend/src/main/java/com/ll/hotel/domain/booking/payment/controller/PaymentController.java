@@ -1,6 +1,8 @@
 package com.ll.hotel.domain.booking.payment.controller;
 
+import com.ll.hotel.domain.booking.payment.dto.PaymentResponse;
 import com.ll.hotel.domain.booking.payment.dto.UidsResponse;
+import com.ll.hotel.domain.booking.payment.entity.Payment;
 import com.ll.hotel.domain.booking.payment.service.PaymentService;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
@@ -21,25 +23,25 @@ public class PaymentController {
     private String channelKey;
 
     @GetMapping("/uids")
-    @Transactional
     public RsData<UidsResponse> getUids() {
         String merchantUid = Ut.random.generateUID(10);
         return new RsData<>(
                 "200",
-                "Uid 조회에 성공했습니다.",
+                "Uid 발급에 성공했습니다.",
                 new UidsResponse(apiId, channelKey, merchantUid)
         );
     }
 
     @PostMapping
     @Transactional
-    public RsData<Empty> saveUids(
-            @RequestParam String merchantUid,
-            @RequestParam String impUid) {
-        paymentService.saveUids(merchantUid, impUid);
+    public RsData<PaymentResponse> pay(
+            @RequestParam("merchant_uid") String merchantUid,
+            @RequestParam("imp_uid") String impUid) {
+        Payment payment = paymentService.create(merchantUid, impUid);
         return new RsData<>(
                 "200",
-                "결제에 성공했습니다."
+                "결제에 성공했습니다.",
+                PaymentResponse.from(payment)
         );
     }
 }
