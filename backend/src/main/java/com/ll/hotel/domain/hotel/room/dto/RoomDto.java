@@ -1,5 +1,6 @@
 package com.ll.hotel.domain.hotel.room.dto;
 
+import com.ll.hotel.domain.hotel.option.roomOption.dto.RoomOptionDto;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
@@ -57,8 +58,8 @@ public record RoomDto(
                         .map(RoomImageDto::new)
                         .collect(Collectors.toList()),
                 room.getRoomOptions().stream()
-                        .map(RoomOptionDto::new)
-                        .map(RoomOptionDto::roomOptionName)
+                        .map(RoomOptionDto::toDto)
+                        .map(RoomOptionDto::name)
                         .collect(Collectors.toSet())
         );
     }
