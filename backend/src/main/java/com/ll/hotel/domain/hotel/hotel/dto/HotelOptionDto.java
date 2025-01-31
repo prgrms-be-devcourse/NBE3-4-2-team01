@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.hotel.hotel.dto;
 
-import com.ll.hotel.domain.hotel.hotel.entity.HotelOption;
+import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import jakarta.validation.constraints.NotBlank;
 
 public record HotelOptionDto(
@@ -12,7 +12,7 @@ public record HotelOptionDto(
     public HotelOptionDto(HotelOption hotelOption) {
         this(
                 hotelOption.getId(),
-                hotelOption.getHotelOptionName()
+                hotelOption.getName()
         );
     }
 }
