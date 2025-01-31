@@ -42,4 +42,8 @@ public class HotelOptionService {
     public void flush() {
         hotelOptionRepository.flush();
     }
+
+    public void delete(HotelOption hotelOption) {
+        hotelOptionRepository.delete(hotelOption);
+    }
 }

@@ -69,4 +69,14 @@ public class HotelOptionController {
                 HotelOptionDto.toDto(hotelOption)
         );
     }
+
+    @DeleteMapping("/{id}")
+    public RsData<Void> delete(@PathVariable("id") Long id) {
+        HotelOption hotelOption = hotelOptionService.findById(id);
+        hotelOptionService.delete(hotelOption);
+        return new RsData<>(
+                "200",
+                "항목이 삭제되었습니다."
+        );
+    }
 }
