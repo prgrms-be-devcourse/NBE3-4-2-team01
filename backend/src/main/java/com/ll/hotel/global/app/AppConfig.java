@@ -14,4 +14,9 @@ public class AppConfig {
     public void setObjectMapper(ObjectMapper objectMapper) {
         AppConfig.objectMapper = objectMapper;
     }
+
+    public static boolean isNotProd() {
+        return true;
+    }
+
 }

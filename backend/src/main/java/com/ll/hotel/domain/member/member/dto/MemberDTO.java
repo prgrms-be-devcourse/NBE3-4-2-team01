@@ -1,17 +1,19 @@
 package com.ll.hotel.domain.member.member.dto;
 
+import com.ll.hotel.domain.member.member.entity.Role;
+import com.ll.hotel.domain.member.member.type.MemberStatus;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-@Data
-@AllArgsConstructor
-public class MemberDTO {
-    private String memberEmail;
-    private String memberName;
-    private String memberPhoneNumber;
-    private LocalDate birthDate;
-    private String role;
-    private String userStatus;
-} 
+public record MemberDTO(
+        Long id,
+        String memberEmail,
+        String memberName,
+        String memberPhoneNumber,
+        LocalDate birthDate,
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt,
+        Role role,
+        MemberStatus memberStatus
+) {}

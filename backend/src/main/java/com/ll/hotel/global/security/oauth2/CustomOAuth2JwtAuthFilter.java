@@ -1,4 +1,4 @@
-package com.ll.hotel.global.security;
+package com.ll.hotel.global.security.oauth2;
 
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;

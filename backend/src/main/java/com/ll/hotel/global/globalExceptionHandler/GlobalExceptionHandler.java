@@ -1,5 +1,6 @@
 package com.ll.hotel.global.globalExceptionHandler;
 
+import com.ll.hotel.global.app.AppConfig;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;

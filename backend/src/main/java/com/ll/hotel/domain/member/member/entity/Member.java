@@ -1,11 +1,23 @@
 package com.ll.hotel.domain.member.member.entity;
 
-import com.ll.hotel.domain.member.member.type.MemberStatus;
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.ll.hotel.domain.member.member.type.MemberStatus;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @Entity
@@ -15,7 +27,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "member")
-public class MemberEntity {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,6 +62,10 @@ public class MemberEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private MemberStatus MemberStatus;
+    private MemberStatus memberStatus;
+
+    public String getUserRole() {
+        return this.role.name();
+    }
 
 } 

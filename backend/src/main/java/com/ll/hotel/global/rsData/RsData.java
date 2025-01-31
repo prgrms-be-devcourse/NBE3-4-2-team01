@@ -6,6 +6,7 @@ import com.ll.hotel.standard.base.Empty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
@@ -17,7 +18,7 @@ public class RsData<T> {
     private final String resultCode;
     @NonNull
     private final String msg;
-    @NonNull
+    @Nullable
     private final T data;
 
     public RsData(String resultCode, String msg) {

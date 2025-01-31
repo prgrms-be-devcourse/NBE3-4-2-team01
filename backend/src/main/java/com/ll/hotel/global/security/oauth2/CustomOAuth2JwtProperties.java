@@ -1,4 +1,4 @@
-package com.ll.hotel.global.security;
+package com.ll.hotel.global.security.oauth2;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

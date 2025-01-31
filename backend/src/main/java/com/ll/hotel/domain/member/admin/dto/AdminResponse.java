@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.member.admin.dto;
 
-public record AdminResBody(
+public record AdminResponse(
     AdminDTO adminDto,
     String message
 ) {} 

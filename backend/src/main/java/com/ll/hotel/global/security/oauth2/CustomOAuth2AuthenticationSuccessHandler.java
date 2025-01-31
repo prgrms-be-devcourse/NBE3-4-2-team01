@@ -1,78 +1,85 @@
-package com.ll.hotel.global.security;
+package com.ll.hotel.global.security.oauth2;
 
-import com.ll.hotel.global.security.dto.GeneratedToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ll.hotel.domain.member.member.service.RefreshTokenService;
+import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.util.Ut;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CustomOAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private final Ut ut;
+    private final RefreshTokenService tokenService;
+    private final ObjectMapper objectMapper;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        if (response.isCommitted()) {
-            log.warn("응답이 이미 커밋되었습니다. 리다이렉트를 수행할 수 없습니다.");
-            return;
-        }
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+        log.debug("OAuth2User attributes: {}", oauth2User.getAttributes());
 
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        
-        try {
-            String email = oAuth2User.getAttribute("email");
-            String provider = oAuth2User.getAttribute("provider");
-            boolean isExist = oAuth2User.getAttribute("exist");
+        String email = extractEmail(oauth2User);
+        if (email != null) {
+            String accessToken = ut.generateAccessToken(email, "ROLE_USER");
+            String refreshToken = ut.generateRefreshToken(email, "ROLE_USER");
             
-            if (email == null || provider == null) {
-                log.error("필수 OAuth2 속성이 누락되었습니다. email: {}, provider: {}", email, provider);
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "필수 OAuth2 속성이 누락되었습니다.");
-                return;
-            }
+            tokenService.saveTokenInfo(email, refreshToken, accessToken);
+            log.debug("Saved OAuth2 refresh token for email: {}", email);
 
-            String role = oAuth2User.getAuthorities().stream()
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("사용자 권한이 없습니다."))
-                    .getAuthority();
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("accessToken", accessToken);
+            tokens.put("refreshToken", refreshToken);
 
-            String targetUrl;
-            if (isExist) {
-                GeneratedToken token = ut.generateToken(email, role);
-                log.info("JWT 토큰 생성 성공: {}", token.accessToken());
-
-                targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/")
-                        .queryParam("accessToken", token.accessToken())
-                        .build()
-                        .encode(StandardCharsets.UTF_8)
-                        .toUriString();
-            } else {
-                targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/users/join")
-                        .queryParam("email", email)
-                        .queryParam("provider", provider)
-                        .build()
-                        .encode(StandardCharsets.UTF_8)
-                        .toUriString();
-            }
-
-            if (!response.isCommitted()) {
-                getRedirectStrategy().sendRedirect(request, response, targetUrl);
-            }
-        } catch (Exception e) {
-            log.error("인증 성공 처리 중 오류 발생", e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "인증 처리 중 오류가 발생했습니다.");
+            RsData<Map<String, String>> rsData = new RsData<>("200-1", "로그인 성공", tokens);
+            
+            response.setContentType("application/json;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write(objectMapper.writeValueAsString(rsData));
+        } else {
+            RsData<Void> rsData = new RsData<>("400-1", "이메일을 찾을 수 없습니다.");
+            response.setContentType("application/json;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(objectMapper.writeValueAsString(rsData));
         }
+    }
+
+    private String extractEmail(OAuth2User oauth2User) {
+        Map<String, Object> attributes = oauth2User.getAttributes();
+        
+        // Google
+        if (attributes.containsKey("email")) {
+            return (String) attributes.get("email");
+        }
+        
+        // Naver
+        if (attributes.containsKey("response")) {
+            Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+            if (response.containsKey("email")) {
+                return (String) response.get("email");
+            }
+        }
+        
+        // Kakao
+        if (attributes.containsKey("kakao_account")) {
+            Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+            if (kakaoAccount.containsKey("email")) {
+                return (String) kakaoAccount.get("email");
+            }
+        }
+        
+        return null;
     }
 }

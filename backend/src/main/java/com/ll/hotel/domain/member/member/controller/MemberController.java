@@ -1,35 +1,33 @@
 package com.ll.hotel.domain.member.member.controller;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ll.hotel.domain.member.member.dto.MemberDTO;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.RefreshTokenRepository;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.domain.member.member.service.RefreshTokenService;
 import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.global.security.dto.GeneratedToken;
 import com.ll.hotel.global.security.dto.RefreshToken;
 import com.ll.hotel.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class AuthController {
+@RequestMapping("/api/users")
+public class MemberController {
     private final MemberService memberService;
     private final RefreshTokenRepository tokenRepository;
     private final RefreshTokenService tokenService;
     private final Ut ut;
 
-    @PostMapping("token/logout")
+    @PostMapping("/logout")
     public RsData<String> logout(@RequestHeader("Authorization") final String accessToken) {
         try {
             if (!ut.verifyToken(accessToken)) {
@@ -53,7 +51,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/token/refresh")
+    @PostMapping("/refresh")
     public RsData<String> refresh(@RequestHeader("Authorization") final String refreshToken) {
         try {
             log.debug("Received refresh token: {}", refreshToken);
@@ -62,12 +60,12 @@ public class AuthController {
             String token = refreshToken.replace("Bearer ", "");
             
             // Refresh Token을 사용하여 새로운 Access Token 발급
-            Optional<RefreshToken> refreshTokenObj = tokenRepository.findByRefreshToken(token);
+            boolean tokenExists = tokenRepository.existsByRefreshToken(token);
             
-            log.debug("Found refresh token in repository: {}", refreshTokenObj.isPresent());
+            log.debug("Found refresh token in repository: {}", tokenExists);
 
-            if (refreshTokenObj.isPresent() && ut.verifyToken(token)) {
-                RefreshToken resultToken = refreshTokenObj.get();
+            if (tokenExists && ut.verifyToken(token)) {
+                RefreshToken resultToken = tokenRepository.findByRefreshToken(token).orElseThrow();
                 String email = resultToken.getId();  // 이메일은 id에서 가져옴
                 String newAccessToken = ut.generateAccessToken(email, ut.getRole(token));
                 resultToken.updateAccessToken(newAccessToken);
@@ -83,69 +81,47 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public RsData<GeneratedToken> login(@RequestParam String email, @RequestParam String password) {
-        log.debug("Login attempt for email: {}", email);
-        
-        // 먼저 이메일로 회원 존재 여부 확인
-        boolean memberExists = memberService.existsByMemberEmail(email);
-        log.debug("Member exists check result: {}", memberExists);
-        
-        if (!memberExists) {
-            log.debug("Member not found with email: {}", email);
-            return new RsData<>("400-1", "존재하지 않는 이메일입니다.", new GeneratedToken("", ""));
-        }
-        
-        // 사용자 인증 로직
-        boolean authenticated = memberService.authenticate(email, password);
-        log.debug("Authentication result for email {}: {}", email, authenticated);
-        
-        if (authenticated) {
-            String accessToken = ut.generateAccessToken(email, "ROLE_USER");
-            String refreshToken = ut.generateRefreshToken(email, "ROLE_USER");
-
-            // Redis에 토큰 저장
-            tokenService.saveTokenInfo(email, refreshToken, accessToken);
-            log.debug("Saved refresh token for email: {}", email);
-
-            GeneratedToken tokens = new GeneratedToken(accessToken, refreshToken);
-            return new RsData<>("200-1", "로그인 성공", tokens);
+    public RsData<Map<String, String>> login(@RequestBody LoginRequest request) {
+        if (!memberService.authenticate(request.email(), request.password())) {
+            return new RsData<>("400-1", "로그인 실패", null);
         }
 
-        log.debug("Password authentication failed for email: {}", email);
-        return new RsData<>("400-1", "잘못된 비밀번호입니다.", new GeneratedToken("", ""));
+        String accessToken = ut.generateAccessToken(request.email(), "ROLE_USER");
+        String refreshToken = ut.generateRefreshToken(request.email(), "ROLE_USER");
+        
+        tokenService.saveTokenInfo(request.email(), refreshToken, accessToken);
+
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", accessToken);
+        tokens.put("refreshToken", refreshToken);
+
+        return new RsData<>("200-1", "로그인 성공", tokens);
     }
 
     @PostMapping("/join")
-    public RsData<MemberDTO> join(
-            @RequestParam String email,
-            @RequestParam String password,
-            @RequestParam String name,
-            @RequestParam String phoneNumber,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthDate
-    ) {
-        log.debug("Join attempt for email: {}", email);
+    public RsData<MemberDTO> join(@RequestBody JoinRequest request) {
+        log.debug("Join attempt for email: {}", request.email());
         
-        // 이메일 중복 체크
-        if (memberService.existsByMemberEmail(email)) {
-            log.debug("Email already exists: {}", email);
+        if (memberService.existsByMemberEmail(request.email())) {
+            log.debug("Email already exists: {}", request.email());
             return new RsData<>("400-1", "이미 존재하는 이메일입니다.", null);
         }
         
         try {
             MemberDTO memberDTO = new MemberDTO(
                     null,
-                    email,
-                    name,
-                    phoneNumber,
-                    birthDate,
+                    request.email(),
+                    request.name(),
+                    request.phoneNumber(),
+                    request.birthDate(),
                     null,
                     null,
                     null,
                     null
             );
             
-            Member member = memberService.join(memberDTO, password);
-            log.debug("Member joined successfully with email: {}", email);
+            Member member = memberService.join(memberDTO, request.password());
+            log.debug("Member joined successfully with email: {}", request.email());
             
             MemberDTO responseDTO = new MemberDTO(
                     member.getMemberId(),
@@ -166,3 +142,14 @@ public class AuthController {
         }
     }
 }
+
+record LoginRequest(String email, String password) {}
+
+record JoinRequest(
+    String email,
+    String password,
+    String name,
+    String phoneNumber,
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    LocalDate birthDate
+) {}
