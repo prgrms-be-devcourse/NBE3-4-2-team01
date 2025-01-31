@@ -54,4 +54,19 @@ public class HotelOptionController {
                 HotelOptionDto.toDto(hotelOption)
         );
     }
+
+    @PutMapping("/{id}")
+    public RsData<HotelOptionDto> modify(@PathVariable("id") Long id,
+                                         @RequestBody HotelOptionRequest.Details details) {
+        HotelOption hotelOption = hotelOptionService.findById(id);
+        hotelOptionService.modify(hotelOption, details);
+
+        hotelOptionService.flush();
+
+        return new RsData<>(
+                "200",
+                "항목이 수정되었습니다.",
+                HotelOptionDto.toDto(hotelOption)
+        );
+    }
 }
