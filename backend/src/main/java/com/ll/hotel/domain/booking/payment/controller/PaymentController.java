@@ -1,41 +1,37 @@
 package com.ll.hotel.domain.booking.payment.controller;
 
-import com.ll.hotel.domain.booking.payment.dto.PaymentResponse;
-import com.ll.hotel.domain.booking.payment.dto.UidResponse;
+import com.ll.hotel.domain.booking.payment.dto.UidsResponse;
 import com.ll.hotel.domain.booking.payment.service.PaymentService;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
 import com.ll.hotel.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/api/bookings/payments/")
+@RestController
+@RequestMapping("/api/bookings/payments")
 @RequiredArgsConstructor
 public class PaymentController {
     private final PaymentService paymentService;
+    @Value("${spring.portone.apiId}")
+    private String apiId;
+    @Value("${spring.portone.channel-key}")
+    private String channelKey;
 
-    @GetMapping
-    public String paymentTest() {
-        return "paymentTest";
-    }
-
-    @GetMapping("/merchant_uid")
-    @ResponseBody
+    @GetMapping("/uids")
     @Transactional
-    public RsData<UidResponse> getMerchantUid() {
-        String Uid = Ut.random.generateUID(10);
+    public RsData<UidsResponse> getUids() {
+        String merchantUid = Ut.random.generateUID(10);
         return new RsData<>(
                 "200",
-                "Uid 생성에 성공했습니다.",
-                new UidResponse(Uid)
+                "Uid 조회에 성공했습니다.",
+                new UidsResponse(apiId, channelKey, merchantUid)
         );
     }
 
     @PostMapping
-    @ResponseBody
     @Transactional
     public RsData<Empty> saveUids(
             @RequestParam String merchantUid,
