@@ -1,25 +1,23 @@
 package com.ll.hotel.standard.util;
 
-import java.util.Date;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ll.hotel.domain.member.member.service.RefreshTokenService;
+import com.ll.hotel.global.app.AppConfig;
+import com.ll.hotel.global.security.dto.GeneratedToken;
+import com.ll.hotel.global.security.dto.SecurityUserDto;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ll.hotel.domain.member.member.service.RefreshTokenService;
-import com.ll.hotel.global.app.AppConfig;
-import com.ll.hotel.global.initData.BaseInit;
-import com.ll.hotel.global.security.dto.GeneratedToken;
-import com.ll.hotel.global.security.dto.SecurityUserDto;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Date;
 
 @Slf4j
 @Service
@@ -28,7 +26,6 @@ public class Ut {
 
     private final CustomOAuth2JwtProperties jwtProperties;
     private final RefreshTokenService tokenService;
-    private final BaseInit baseInit;
 
     public static class str {
         public static boolean isBlank(String str) {
@@ -66,7 +63,7 @@ public class Ut {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshPeriod))
-                .signWith(baseInit.getSecretKey())
+                .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecret())
                 .compact();
     }
 
@@ -82,7 +79,7 @@ public class Ut {
                         .setClaims(claims)
                         .setIssuedAt(now)
                         .setExpiration(new Date(now.getTime() + tokenPeriod))
-                        .signWith(baseInit.getSecretKey())
+                        .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecret())
                         .compact();
 
     }
@@ -96,7 +93,7 @@ public class Ut {
             log.debug("Verifying token: {}", token);
             
             Jws<Claims> claims = Jwts.parserBuilder()
-                    .setSigningKey(baseInit.getSecretKey())
+                    .setSigningKey(jwtProperties.getSecret())
                     .build()
                     .parseClaimsJws(token);
                     
@@ -116,14 +113,14 @@ public class Ut {
     public String getUid(String token) {
         // Bearer 접두사 제거
         token = token.replace("Bearer ", "");
-        return Jwts.parserBuilder().setSigningKey(baseInit.getSecretKey()).build().parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder().setSigningKey(jwtProperties.getSecret()).build().parseClaimsJws(token).getBody().getSubject();
     }
 
     // Role(권한) 추출
     public String getRole(String token) {
         // Bearer 접두사 제거
         token = token.replace("Bearer ", "");
-        return Jwts.parserBuilder().setSigningKey(baseInit.getSecretKey()).build().parseClaimsJws(token).getBody().get("role", String.class);
+        return Jwts.parserBuilder().setSigningKey(jwtProperties.getSecret()).build().parseClaimsJws(token).getBody().get("role", String.class);
     }
 
     public static SecurityUserDto getUser() {
