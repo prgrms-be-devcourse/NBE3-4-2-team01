@@ -1,6 +1,7 @@
 package com.ll.hotel.domain.member.member.entity;
 
 import com.ll.hotel.domain.member.member.type.MemberStatus;
+import com.ll.hotel.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,12 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "member")
-public class Member {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(unique = true, nullable = false)
-    private Long memberId;
+public class Member extends BaseEntity {
 
     @Column(unique = true, nullable = false)
     private String memberEmail; // 실제 로그인 ID

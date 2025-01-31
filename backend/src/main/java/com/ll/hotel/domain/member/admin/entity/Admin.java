@@ -1,6 +1,9 @@
 package com.ll.hotel.domain.member.admin.entity;
 
-import jakarta.persistence.*;
+import com.ll.hotel.global.jpa.entity.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.*;
 
 
@@ -11,10 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Table(name = "admin")
-public class Admin {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long adminId;
+public class Admin extends BaseEntity {
 
     @Column(unique = true, nullable = false)
     private String adminEmail;
