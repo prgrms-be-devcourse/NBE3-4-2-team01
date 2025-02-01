@@ -8,10 +8,12 @@ import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
 import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.standard.base.Empty;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,5 +63,12 @@ public class HotelController {
                 "호텔 정보 수정에 성공하였습니다.",
                 this.hotelService.modify(hotelId, request)
         );
+    }
+
+    @DeleteMapping("/{hotelId}")
+    public RsData<Empty> deleteHotel(@PathVariable Long hotelId) {
+        this.hotelService.delete(hotelId);
+
+        return RsData.OK;
     }
 }

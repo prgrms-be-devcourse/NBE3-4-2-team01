@@ -17,6 +17,7 @@ import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -142,5 +143,16 @@ public class HotelService {
 
         curOptions.addAll(toAdd);
         curOptions.removeAll(toRemove);
+    }
+
+    @Transactional
+    public void delete(Long hotelId) {
+        Optional<Hotel> opHotel = this.hotelRepository.findById(hotelId);
+
+        if (opHotel.isEmpty()) {
+            throw new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다.");
+        }
+
+        opHotel.get().setHotelStatus(HotelStatus.UNAVAILABLE);
     }
 }
