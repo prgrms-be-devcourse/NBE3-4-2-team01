@@ -9,6 +9,7 @@ import com.ll.hotel.domain.image.Image;
 import com.ll.hotel.global.jpa.entity.BaseTime;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -46,10 +47,7 @@ public class Room extends BaseTime {
     @Column
     private Integer maxNumber;
 
-    /**
-     * 수정 필요
-     */
-    @Column
+    @Embedded
     private BedTypeNumber bedTypeNumber;
 
     @Column

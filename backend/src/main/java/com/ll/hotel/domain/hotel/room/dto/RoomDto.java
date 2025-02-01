@@ -2,6 +2,7 @@ package com.ll.hotel.domain.hotel.room.dto;
 
 import com.ll.hotel.domain.hotel.option.roomOption.dto.RoomOptionDto;
 import com.ll.hotel.domain.hotel.room.entity.Room;
+import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +30,7 @@ public record RoomDto(
         Integer maxNumber,
 
         @NonNull
-        String bedTypeNumber,
+        BedTypeNumber bedTypeNumber,
 
         @NonNull
         String roomStatus,
@@ -52,7 +53,7 @@ public record RoomDto(
                 room.getBasePrice(),
                 room.getStandardNumber(),
                 room.getMaxNumber(),
-                room.getBedTypeNumber().getBedTypeNumber(),
+                room.getBedTypeNumber(),
                 room.getRoomStatus().getValue(),
                 room.getRoomImages().stream()
                         .map(RoomImageDto::new)

@@ -1,5 +1,6 @@
 package com.ll.hotel.domain.hotel.room.dto;
 
+import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import lombok.NonNull;
@@ -25,7 +26,7 @@ public record GetRoomResponse(
         Integer maxNumber,
 
         @NotBlank
-        String bedTypeNumber,
+        BedTypeNumber bedTypeNumber,
 
         @NotBlank
         String roomStatus,

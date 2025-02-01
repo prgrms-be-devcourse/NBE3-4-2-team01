@@ -10,7 +10,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.web.multipart.MultipartFile;
 
 public record PutHotelRequest(
         @NotBlank @Length(min = 2, max = 30)
@@ -44,7 +43,7 @@ public record PutHotelRequest(
         String hotelStatus,
 
         @NotNull
-        List<MultipartFile> hotelImages,
+        List<String> hotelImages,
 
         @NotNull
         Set<String> hotelOptions

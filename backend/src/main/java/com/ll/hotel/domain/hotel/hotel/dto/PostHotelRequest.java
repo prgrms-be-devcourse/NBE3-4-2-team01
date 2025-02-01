@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.web.multipart.MultipartFile;
 
 public record PostHotelRequest(
         @NotBlank @Length(min = 2, max = 30)
@@ -42,7 +41,7 @@ public record PostHotelRequest(
         @NotBlank
         String hotelExplainContent,
 
-        List<MultipartFile> hotelImages,
+        List<String> hotelImages,
 
         Set<String> hotelOptions
 ) {

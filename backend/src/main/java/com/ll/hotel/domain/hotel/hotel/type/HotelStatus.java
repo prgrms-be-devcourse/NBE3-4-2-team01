@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum HotelStatus {
     AVAILABLE("사용 가능"),
     PENDING("승인 대기 중"),
-    UNAVAILABLE("사용 중");
+    UNAVAILABLE("사용 불가");
 
     private final String value;
 }

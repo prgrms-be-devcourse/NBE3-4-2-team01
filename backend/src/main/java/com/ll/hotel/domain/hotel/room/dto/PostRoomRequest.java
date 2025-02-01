@@ -4,11 +4,12 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.web.multipart.MultipartFile;
 
 public record PostRoomRequest(
         @NotBlank @Length(min = 2, max = 30) String roomName,
@@ -21,14 +22,15 @@ public record PostRoomRequest(
 
         @NotNull @Min(value = 1) Integer maxNumber,
 
-        @NotBlank String bedTypeNumber,
+        @NotBlank Map<String, Integer> bedTypeNumber,
 
-        List<MultipartFile> roomImages,
+        List<String> roomImages,
 
         Set<String> roomOptions
 ) {
     public PostRoomRequest {
         roomImages = roomImages == null ? new ArrayList<>() : roomImages;
         roomOptions = roomOptions == null ? new HashSet<>() : roomOptions;
+        bedTypeNumber = bedTypeNumber == null ? new HashMap<>() : bedTypeNumber;
     }
 }

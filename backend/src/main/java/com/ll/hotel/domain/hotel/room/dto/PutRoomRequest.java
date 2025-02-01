@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Set;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.web.multipart.MultipartFile;
 
 public record PutRoomRequest(
 
@@ -22,7 +21,7 @@ public record PutRoomRequest(
 
         @NotBlank String bedTypeNumber,
 
-        @NotNull List<MultipartFile> roomImages,
+        @NotNull List<String> roomImages,
 
         @NotNull Set<String> roomOptions
 ) {

@@ -1,6 +1,7 @@
 package com.ll.hotel.domain.hotel.room.dto;
 
 import com.ll.hotel.domain.hotel.room.entity.Room;
+import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import jakarta.validation.constraints.NotBlank;
 import lombok.NonNull;
 
@@ -20,7 +21,7 @@ public record GetAllRoomResponse(
         Integer maxNumber,
 
         @NotBlank
-        String bedTypeNumber,
+        BedTypeNumber bedTypeNumber,
 
         @NonNull
         String thumbnailUrl
@@ -32,7 +33,7 @@ public record GetAllRoomResponse(
                 room.getBasePrice(),
                 room.getStandardNumber(),
                 room.getMaxNumber(),
-                room.getBedTypeNumber().getBedTypeNumber(),
+                room.getBedTypeNumber(),
                 room.getRoomImages().isEmpty() ? null
                         : room.getRoomImages().get(0).getImageUrl()
         );
