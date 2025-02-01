@@ -2,6 +2,7 @@ package com.ll.hotel.domain.hotel.hotel.dto;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.option.hotelOption.dto.HotelOptionDto;
+import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalTime;
@@ -52,7 +53,6 @@ public record HotelDto(
 //        @NonNull
 //        List<GetReviewResponse> reviews,
 
-        @NonNull
         Set<String> hotelOptions
 
         // 호텔 Favorite
@@ -77,9 +77,37 @@ public record HotelDto(
                         .map(GetAllRoomResponse::new)
                         .collect(Collectors.toList()),
                 hotel.getHotelOptions().stream()
-                        .map(HotelOptionDto::toDto)
-                        .map(HotelOptionDto::name)
+                        .map(HotelOption::getName)
                         .collect(Collectors.toSet())
         );
     }
+
+//    public HotelDto(long hotelId, String hotelName, String hotelEmail, String hotelPhoneNumber, String streetAddress,
+//                    Integer zipCode, Integer hotelGrade, LocalTime checkInTime, LocalTime checkOutTime,
+//                    String hotelExplainContent, HotelStatus hotelStatus, List<Image> hotelImages,
+//                    List<Room> rooms, Set<HotelOption> hotelOptions
+//    ) {
+//        this(
+//                hotelId,
+//                hotelName,
+//                hotelEmail,
+//                hotelPhoneNumber,
+//                streetAddress,
+//                zipCode,
+//                hotelGrade,
+//                checkInTime,
+//                checkOutTime,
+//                hotelExplainContent,
+//                hotelStatus.getValue(),
+//                hotelImages.stream()
+//                        .map(HotelImageDto::new)
+//                        .collect(Collectors.toList()),
+//                rooms.stream()
+//                        .map(GetAllRoomResponse::new)
+//                        .collect(Collectors.toList()),
+//                hotelOptions.stream()
+//                        .map(HotelOption::getName)
+//                        .collect(Collectors.toSet())
+//        );
+//    }
 }
