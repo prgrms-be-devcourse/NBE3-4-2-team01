@@ -25,7 +25,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
                 AND i2.imageType = :imageType
             )
             """)
-    List<GetAllRoomResponse> findAllRooms(@Param("hotelId") long hotelId, @Param("imageType")ImageType imageType);
+    List<GetAllRoomResponse> findAllRooms(@Param("hotelId") long hotelId, @Param("imageType") ImageType imageType);
 //    @Query("""
 //            SELECT new com.ll.hotel.domain.hotel.room.dto.RoomDetailDto
 //            (r.id, r.hotel.id, r.roomName, r.roomNumber, r.basePrice, r.standardNumber, r.maxNumber,
@@ -50,5 +50,14 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             AND i.referenceId = :roomlId
             AND i.imageType = :imageType
             """)
-    Optional<Room> findRoomDetail(@Param("hotelId") long hotelId, @Param("roomId") long roomId, @Param("imageType") ImageType imageType);
+    Optional<Room> findRoomDetail(@Param("hotelId") long hotelId, @Param("roomId") long roomId,
+                                  @Param("imageType") ImageType imageType);
+
+    @Query("""
+            SELECT r
+            FROM Room r
+            LEFT JOIN FETCH r.roomOptions
+            WHERE r.id = :roomId
+            """)
+    Optional<Room> findRoomOptionsById(@Param("roomId") long roomId);
 }

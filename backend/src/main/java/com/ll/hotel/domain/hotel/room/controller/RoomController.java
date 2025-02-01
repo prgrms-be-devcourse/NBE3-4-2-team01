@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -58,6 +59,15 @@ public class RoomController {
                 "200",
                 "객실 정보를 정상적으로 불러왔습니다.",
                 this.roomService.findRoomDetail(hotelId, roomId)
+        );
+    }
+
+    @GetMapping("/{roomId}/room-option")
+    public RsData<GetRoomOptionResponse> findRoomOptions(@PathVariable long hotelId, @PathVariable long roomId) {
+        return new RsData<>(
+                "200",
+                "객실의 옵션 정보를 정상적으로 불러왔습니다.",
+                this.roomService.findRoomOptions(hotelId, roomId)
         );
     }
 }

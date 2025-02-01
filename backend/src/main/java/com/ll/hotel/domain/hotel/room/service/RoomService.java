@@ -15,6 +15,7 @@ import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
 import com.ll.hotel.domain.image.ImageType;
 import java.util.List;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -64,5 +65,16 @@ public class RoomService {
                 .orElseThrow(() -> new ServiceException("404-1", "호텔, 또는 객실 정보가 존재하지 않습니다."));
 
         return new GetRoomResponse(room);
+    }
+
+    @Transactional
+    public GetRoomOptionResponse findRoomOptions(long hotelId, long roomId) {
+        Hotel hotel = this.hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보가 존재하지 않습니다."));
+
+        Room room = this.roomRepository.findRoomOptionsById(roomId)
+                .orElseThrow(() -> new ServiceException("404-2", "객실, 혹은 객실 옵션 정보가 존재하지 않습니다."));
+
+        return new GetRoomOptionResponse(room);
     }
 }
