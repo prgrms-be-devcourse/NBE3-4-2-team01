@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
+import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
+import com.ll.hotel.domain.image.ImageType;
+import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -48,5 +51,9 @@ public class RoomService {
                 .orElseThrow(() -> new ServiceException("404-2", "객실 정보를 찾을 수 없습니다."));
 
         room.setRoomStatus(RoomStatus.UNAVAILABLE);
+    }
+
+    public List<GetAllRoomResponse> findAllRooms(long hotelId) {
+        return this.roomRepository.findAllRooms(hotelId, ImageType.ROOM);
     }
 }

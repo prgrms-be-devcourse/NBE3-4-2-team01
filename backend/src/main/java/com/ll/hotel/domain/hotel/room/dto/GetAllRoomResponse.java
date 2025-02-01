@@ -38,4 +38,15 @@ public record GetAllRoomResponse(
                         : room.getRoomImages().get(0).getImageUrl()
         );
     }
+
+    public GetAllRoomResponse(long roomId, String roomName, Integer basePrice, Integer standardNumber,
+                              Integer maxNumber, BedTypeNumber bedTypeNumber, String thumbnailUrl) {
+        this.roomId = roomId;
+        this.roomName = roomName;
+        this.basePrice = basePrice;
+        this.standardNumber = standardNumber;
+        this.maxNumber = maxNumber;
+        this.bedTypeNumber = bedTypeNumber;
+        this.thumbnailUrl = thumbnailUrl != null ? thumbnailUrl : "/images/default.jpg";
+    }
 }
