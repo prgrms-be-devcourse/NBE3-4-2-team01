@@ -9,6 +9,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelResponse;
+import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,5 +29,13 @@ public class HotelController {
                 "호텔을 정상적으로 등록하였습니다.",
                 this.hotelService.create(postHotelRequest)
         );
+    }
+
+    @GetMapping
+    public RsData<List<GetAllHotelResponse>> findAllHotels() {
+        return new RsData<>(
+                "200",
+                "호텔 정보를 정상적으로 불러왔습니다.",
+                this.hotelService.findAll());
     }
 }

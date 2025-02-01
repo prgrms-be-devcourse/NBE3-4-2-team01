@@ -7,6 +7,9 @@ import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelResponse;
+import com.ll.hotel.domain.image.ImageType;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,5 +44,10 @@ public class HotelService {
                 .build();
 
         return new PostHotelResponse(this.hotelRepository.save(hotel));
+    }
+
+    @Transactional
+    public List<GetAllHotelResponse> findAll() {
+        return this.hotelRepository.findAllHotels(ImageType.HOTEL);
     }
 }
