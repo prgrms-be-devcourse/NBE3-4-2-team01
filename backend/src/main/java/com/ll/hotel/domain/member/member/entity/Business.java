@@ -1,5 +1,6 @@
 package com.ll.hotel.domain.member.member.entity;
 
+import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -31,4 +32,7 @@ public class Business extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
+    @OneToOne(mappedBy = "business", fetch = FetchType.LAZY)
+    private Hotel hotel;
 }

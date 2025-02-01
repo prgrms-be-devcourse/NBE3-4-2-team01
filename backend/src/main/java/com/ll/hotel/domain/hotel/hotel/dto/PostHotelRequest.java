@@ -14,6 +14,9 @@ import java.util.Set;
 import org.hibernate.validator.constraints.Length;
 
 public record PostHotelRequest(
+        @NotNull
+        Long businessId,
+
         @NotBlank @Length(min = 2, max = 30)
         String hotelName,
 
