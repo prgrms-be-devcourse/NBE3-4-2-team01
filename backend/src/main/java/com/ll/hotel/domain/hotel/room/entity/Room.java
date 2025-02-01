@@ -68,9 +68,4 @@ public class Room extends BaseTime {
 
     @ManyToMany
     Set<RoomOption> roomOptions;
-
-//    public void addRoomImage(RoomImage roomImage) {
-//        this.roomImages.add(roomImage);
-//        roomImage.setRoom(this);
-//    }
 }

@@ -14,6 +14,7 @@ import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
 import com.ll.hotel.domain.image.ImageType;
 import java.util.List;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -55,5 +56,13 @@ public class RoomService {
 
     public List<GetAllRoomResponse> findAllRooms(long hotelId) {
         return this.roomRepository.findAllRooms(hotelId, ImageType.ROOM);
+    }
+
+    @Transactional
+    public GetRoomResponse findRoomDetail(long hotelId, long roomId) {
+        Room room = this.roomRepository.findRoomDetail(hotelId, roomId, ImageType.ROOM)
+                .orElseThrow(() -> new ServiceException("404-1", "호텔, 또는 객실 정보가 존재하지 않습니다."));
+
+        return new GetRoomResponse(room);
     }
 }

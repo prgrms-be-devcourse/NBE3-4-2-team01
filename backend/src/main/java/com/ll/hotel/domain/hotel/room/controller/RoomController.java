@@ -5,6 +5,7 @@ import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
 import com.ll.hotel.domain.hotel.room.service.RoomService;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,15 @@ public class RoomController {
                 "200",
                 "모든 객실 정보를 정상적으로 불러왔습니다.",
                 this.roomService.findAllRooms(hotelId)
+        );
+    }
+
+    @GetMapping("/{roomId}")
+    public RsData<GetRoomResponse> findRoomDetail(@PathVariable long hotelId, @PathVariable long roomId) {
+        return new RsData<>(
+                "200",
+                "객실 정보를 정상적으로 불러왔습니다.",
+                this.roomService.findRoomDetail(hotelId, roomId)
         );
     }
 }

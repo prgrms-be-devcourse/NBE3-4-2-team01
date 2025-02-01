@@ -1,8 +1,12 @@
 package com.ll.hotel.domain.hotel.room.dto;
 
+import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
+import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 
 public record GetRoomResponse(
@@ -32,20 +36,47 @@ public record GetRoomResponse(
         String roomStatus,
 
         @NonNull
-        List<RoomImageDto> roomImages
+        List<RoomImageDto> roomImages,
+
+        @NonNull
+        Set<String> roomOptions
 ) {
-    public GetRoomResponse(RoomDto roomDto) {
+    public GetRoomResponse(Room room) {
         this(
-                roomDto.roomId(),
-                roomDto.hotelId(),
-                roomDto.roomName(),
-                roomDto.roomNumber(),
-                roomDto.basePrice(),
-                roomDto.standardNumber(),
-                roomDto.maxNumber(),
-                roomDto.bedTypeNumber(),
-                roomDto.roomStatus(),
-                roomDto.roomImages()
+                room.getId(),
+                room.getHotel().getId(),
+                room.getRoomName(),
+                room.getRoomNumber(),
+                room.getBasePrice(),
+                room.getStandardNumber(),
+                room.getMaxNumber(),
+                room.getBedTypeNumber(),
+                room.getRoomStatus().getValue(),
+                room.getRoomImages().stream()
+                        .map(RoomImageDto::new)
+                        .collect(Collectors.toList()),
+                room.getRoomOptions().stream()
+                        .map(RoomOption::getName)
+                        .collect(Collectors.toSet())
         );
     }
+
+//    /**
+//     * 수정 필요
+//     */
+//    public GetRoomResponse(RoomDetailDto roomDetailDto,
+//                           List<RoomImageDto> roomImages) {
+//        this(
+//                roomDetailDto.id(),
+//                roomDetailDto.hotelId(),
+//                roomDetailDto.roomName(),
+//                roomDetailDto.roomNumber(),
+//                roomDetailDto.basePrice(),
+//                roomDetailDto.standardNumber(),
+//                roomDetailDto.maxNumber(),
+//                roomDetailDto.bedTypeNumber(),
+//                roomDetailDto.roomStatus(),
+//                roomImages
+//        );
+//    }
 }
