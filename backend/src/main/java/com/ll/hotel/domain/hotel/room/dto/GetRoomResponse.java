@@ -4,6 +4,7 @@ import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import jakarta.validation.constraints.NotBlank;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -55,28 +56,11 @@ public record GetRoomResponse(
                 room.getRoomImages().stream()
                         .map(RoomImageDto::new)
                         .collect(Collectors.toList()),
-                room.getRoomOptions().stream()
+                room.getRoomOptions() != null
+                        ? room.getRoomOptions().stream()
                         .map(RoomOption::getName)
                         .collect(Collectors.toSet())
+                        : new HashSet<>()
         );
     }
-
-//    /**
-//     * 수정 필요
-//     */
-//    public GetRoomResponse(RoomDetailDto roomDetailDto,
-//                           List<RoomImageDto> roomImages) {
-//        this(
-//                roomDetailDto.id(),
-//                roomDetailDto.hotelId(),
-//                roomDetailDto.roomName(),
-//                roomDetailDto.roomNumber(),
-//                roomDetailDto.basePrice(),
-//                roomDetailDto.standardNumber(),
-//                roomDetailDto.maxNumber(),
-//                roomDetailDto.bedTypeNumber(),
-//                roomDetailDto.roomStatus(),
-//                roomImages
-//        );
-//    }
 }
