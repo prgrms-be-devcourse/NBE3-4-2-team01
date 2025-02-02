@@ -16,4 +16,12 @@ public class S3Util {
             case REVIEW -> "reviews/" + id + "/" + fileName;
         };
     }
+
+    public static String extractObjectKeyFromUrl(String url) {
+        int domainEndIndex = url.indexOf(".com/");
+        if (domainEndIndex != -1) {
+            return url.substring(domainEndIndex + 5); // ".com/" 의 길이인 5를 더해줍니다
+        }
+        return null;
+    }
 }

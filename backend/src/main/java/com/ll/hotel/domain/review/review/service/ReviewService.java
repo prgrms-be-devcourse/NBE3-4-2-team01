@@ -7,6 +7,7 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.review.review.entity.Review;
 import com.ll.hotel.domain.review.review.repository.ReviewRepository;
 import com.ll.hotel.domain.review.review.type.ReviewStatus;
+import com.ll.hotel.global.exceptions.ServiceException;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,5 +40,15 @@ public class ReviewService {
 
         Review savedReview = reviewRepository.save(review);
         return savedReview.getId();
+    }
+
+    // 리뷰의 content, rating 수정
+    public void updateReviewContentAndRating(long reviewId, String content, int rating){
+        Review review = reviewRepository.findByIdWithFilter(reviewId)
+                .orElseThrow(() -> new ServiceException("400-1", "수정할 리뷰가 존재하지 않습니다."));
+
+        review.setContent(content);
+        review.setRating(rating);
+        review.setReviewStatus(ReviewStatus.UPDATED);
     }
 }

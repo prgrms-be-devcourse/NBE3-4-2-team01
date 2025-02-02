@@ -1,8 +1,10 @@
 package com.ll.hotel.domain.image.service;
 
+import com.ll.hotel.domain.hotel.room.converter.ImageConverter;
 import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.repository.ImageRepository;
 import com.ll.hotel.domain.image.type.ImageType;
+import com.ll.hotel.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,5 +24,11 @@ public class ImageService {
                 .toList();
 
         imageRepository.saveAll(images);
+    }
+
+    public void deleteImagesByIdAndUrls(ImageType imageType, long id, List<String> urls) {
+        if(Ut.list.hasValue(urls)) {
+            imageRepository.deleteByReferenceIdAndImageUrls(imageType, id, urls);
+        }
     }
 }

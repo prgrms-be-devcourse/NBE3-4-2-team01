@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
@@ -52,6 +54,29 @@ public class S3Service {
             return presignedRequest.url();
         } catch (SdkException e) {
             throw new CustomS3Exception("500-2", "Presigned URL 생성 실패", e);
+        }
+    }
+
+    // URL 리스트를 받아 Object 모두 삭제
+    public void deleteObjectsByUrls(List<String> urls) {
+        if(!Ut.list.hasValue(urls)) return;
+
+        try {
+            List<ObjectIdentifier> objectIdentifiers = urls.stream()
+                    .map(S3Util::extractObjectKeyFromUrl)
+                    .map(key -> ObjectIdentifier.builder().key(key).build())
+                    .toList();
+
+            DeleteObjectsRequest deleteRequest = DeleteObjectsRequest.builder()
+                    .bucket(bucketName)
+                    .delete(delete -> delete.objects(objectIdentifiers))
+                    .build();
+
+            // S3 객체 삭제 요청
+            s3Client.deleteObjects(deleteRequest);
+
+        } catch (SdkException e) {
+            throw new CustomS3Exception("500-3", "S3 객체 삭제 실패", e);
         }
     }
 }

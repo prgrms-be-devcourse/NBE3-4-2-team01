@@ -4,6 +4,7 @@ import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.review.review.dto.PostReviewRequest;
 import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
+import com.ll.hotel.domain.review.review.dto.UpdateReviewRequest;
 import com.ll.hotel.domain.review.review.service.ReviewService;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.rsData.RsData;
@@ -69,4 +70,45 @@ public class ReviewController {
         return RsData.OK;
     }
 
+    @PutMapping("/{reviewId}")
+    @Operation(summary = "리뷰 수정")
+    public RsData<PresignedUrlsResponse> updateReview(
+            @PathVariable("reviewId") long reviewId,
+            @RequestBody UpdateReviewRequest updateReviewRequest
+    ) {
+        // 인증 체크 (로그인된 사용자인가?)
+
+        // 권한 체크 (예약자가 맞는가?)
+        System.out.println("리뷰 수정 : " + reviewId );
+        System.out.println(updateReviewRequest);
+        // content, rating 수정
+        reviewService.updateReviewContentAndRating(reviewId, updateReviewRequest.content(), updateReviewRequest.rating());
+
+        List<String> deleteImageUrls = Optional.ofNullable(updateReviewRequest.deleteImageUrls())
+                .orElse(Collections.emptyList());
+
+        for(String deleteImageUrl : deleteImageUrls) {
+            System.out.println("삭제할 URL 목록 : " + deleteImageUrl);
+        }
+        // DB 사진 삭제
+        imageService.deleteImagesByIdAndUrls(ImageType.REVIEW, reviewId, deleteImageUrls);
+        // S3 사진 삭제
+        s3Service.deleteObjectsByUrls(deleteImageUrls);
+
+        List<String> extensions = Optional.ofNullable(updateReviewRequest.newImageExtensions())
+                .orElse(Collections.emptyList());
+
+        for(String extension : extensions) {
+            System.out.println("추가할 img 확장자 목록 : " + extension);
+        }
+
+        // 새로운 사진의 Presigned URL 반환
+        List<URL> urls = s3Service.generatePresignedUrls(ImageType.REVIEW, reviewId, extensions);
+
+        return new RsData<>(
+                "200-1",
+                "리뷰가 업데이트 되었습니다.",
+                new PresignedUrlsResponse(reviewId, urls)
+        );
+    }
 }
