@@ -230,6 +230,27 @@ class HotelServiceTest {
         assertEquals(hotel.getHotelEmail(), "moHotel@naver.com");
     }
 
+    @Test
+    @DisplayName("호텔 삭제")
+    public void deleteHotel() {
+        Business business = this.businessRepository.findAll().getFirst();
+
+        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+                "010-1234-1234", "서울시", 0123,
+                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
+
+        PostHotelResponse postHotelResponse = this.hotelService.create(postHotelRequest);
+
+        Hotel hotel = this.hotelRepository.findById(postHotelResponse.hotelId()).get();
+
+        business.setHotel(hotel);
+        this.businessRepository.save(business);
+
+        this.hotelService.delete(hotel.getId());
+
+        assertEquals(HotelStatus.UNAVAILABLE, hotel.getHotelStatus());
+    }
+
     public void createOthersForHotel() {
         Member member = Member.builder()
                 .memberEmail("member@naver.com")
