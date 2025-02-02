@@ -6,6 +6,8 @@ import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
+import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
@@ -195,6 +197,37 @@ class HotelServiceTest {
         assertEquals(LocalTime.of(14, 0), dto.checkInTime());
         assertEquals(dto.hotelImages().size(), 0);
         assertEquals(dto.hotelOptions().size(), 0);
+    }
+
+    @Test
+    @DisplayName("호텔 수정")
+    public void modifyHotel() {
+        Business business = businessRepository.findAll().getFirst();
+
+        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+                "010-1234-1234", "서울시", 0123,
+                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
+
+        PostHotelResponse postHotelResponse = this.hotelService.create(postHotelRequest);
+
+        Hotel hotel = this.hotelRepository.findById(postHotelResponse.hotelId()).get();
+
+        long hotelId = hotel.getId();
+        business.setHotel(hotel);
+        this.businessRepository.save(business);
+
+        PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", null, null, null,
+                null, null, null, null, null, null);
+
+        PutHotelResponse res1 = this.hotelService.modify(hotel.getId(), req1);
+
+        hotel = this.hotelRepository.findById(res1.hotelId()).get();
+
+        assertEquals(hotel.getId(), hotelId);
+        assertEquals(hotel.getStreetAddress(),"서울시");
+        assertEquals(hotel.getCheckInTime(), LocalTime.of(12, 0));
+        assertEquals(hotel.getHotelName(), "수정된 호텔1");
+        assertEquals(hotel.getHotelEmail(), "moHotel@naver.com");
     }
 
     public void createOthersForHotel() {

@@ -120,7 +120,7 @@ public class HotelService {
     @Transactional
     public void modifyOptions(Hotel hotel, Set<String> optionNames) {
         if (optionNames == null || optionNames.isEmpty()) {
-            hotel.getHotelOptions().clear();
+            hotel.setHotelOptions(new HashSet<>());
             return;
         }
 
