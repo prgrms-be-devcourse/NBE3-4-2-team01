@@ -6,6 +6,8 @@ import com.ll.hotel.domain.hotel.room.service.RoomService;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
+import com.ll.hotel.domain.hotel.room.dto.PutRoomRequest;
+import com.ll.hotel.domain.hotel.room.dto.PutRoomResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -69,5 +72,15 @@ public class RoomController {
                 "객실의 옵션 정보를 정상적으로 불러왔습니다.",
                 this.roomService.findRoomOptions(hotelId, roomId)
         );
+    }
+
+    @PutMapping("{roomId}")
+    public RsData<PutRoomResponse> modify(@PathVariable long hotelId,
+                                          @PathVariable long roomId,
+                                          @RequestBody PutRoomRequest request) {
+        return new RsData<>(
+                "200-1",
+                "객실 정보를 수정했습니다.",
+                this.roomService.modify(hotelId, roomId, request));
     }
 }
