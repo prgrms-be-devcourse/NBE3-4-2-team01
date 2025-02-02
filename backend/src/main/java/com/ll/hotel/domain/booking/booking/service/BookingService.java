@@ -3,6 +3,7 @@ package com.ll.hotel.domain.booking.booking.service;
 import com.ll.hotel.domain.booking.booking.dto.BookingRequest;
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.booking.booking.repository.BookingRepository;
+import com.ll.hotel.domain.booking.booking.type.BookingStatus;
 import com.ll.hotel.domain.booking.payment.entity.Payment;
 import com.ll.hotel.domain.booking.payment.repository.PaymentRepository;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
@@ -10,6 +11,7 @@ import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,8 +47,13 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    public void delete(Booking booking) {
-        bookingRepository.delete(booking);
+    public void cancel(Booking booking) {
+        if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
+            throw new ServiceException("200", "이미 취소된 예약입니다.");
+        }
+
+        booking.setBookingStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
     }
 
     public Optional<Booking> findById(Long id) {

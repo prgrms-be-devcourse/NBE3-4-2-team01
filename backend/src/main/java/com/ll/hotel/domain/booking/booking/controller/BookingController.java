@@ -32,7 +32,7 @@ public class BookingController {
         Booking booking = bookingService.create(member, bookingRequest);
 
         return new RsData<>(
-                "200",
+                "201",
                 String.format("%s번 예약이 완료되었습니다.", booking.getBookingNumber()),
                 BookingResponse.from(booking)
         );
@@ -95,7 +95,7 @@ public class BookingController {
                 () -> new ServiceException("404", "예약 정보를 찾을 수 없습니다.")
         );
 
-        bookingService.delete(booking);
+        bookingService.cancel(booking);
 
         return new RsData<>(
                 "200",
