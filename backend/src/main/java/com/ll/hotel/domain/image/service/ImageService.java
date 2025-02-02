@@ -1,28 +1,26 @@
 package com.ll.hotel.domain.image.service;
 
-import com.ll.hotel.domain.image.repository.ImageRepository;
 import com.ll.hotel.domain.image.entity.Image;
+import com.ll.hotel.domain.image.repository.ImageRepository;
 import com.ll.hotel.domain.image.type.ImageType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ImageService {
 
     private final ImageRepository imageRepository;
 
-    public List<Image> findImagesByHotelId(long id) {
-        return imageRepository.findByImageTypeAndReferenceId(ImageType.HOTEL, id);
-    }
+    public void saveImages(ImageType imageType, long id, List<String> imageUrls) {
+        List<Image> images = imageUrls.stream()
+                .map(imageUrl -> ImageConverter.toImage(imageType, id, imageUrl))
+                .toList();
 
-    public List<Image> findImagesByRoomId(long id) {
-        return imageRepository.findByImageTypeAndReferenceId(ImageType.ROOM, id);
-    }
-
-    public List<Image> findImagesByReviewId(long id) {
-        return imageRepository.findByImageTypeAndReferenceId(ImageType.REVIEW, id);
+        imageRepository.saveAll(images);
     }
 }
