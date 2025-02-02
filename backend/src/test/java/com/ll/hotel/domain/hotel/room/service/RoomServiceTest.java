@@ -217,6 +217,25 @@ class RoomServiceTest {
         assertFalse(res.roomOptions().contains("AirConditioner"));
     }
 
+    @Test
+    @DisplayName("객실 삭제")
+    public void deleteRoom() {
+        Hotel hotel = this.hotelRepository.findAll().getFirst();
+        Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
+        Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
+
+        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
+
+        this.roomService.create(hotel.getId(), req1);
+
+        Room room = this.roomRepository.findAll().getFirst();
+        Long roomId = room.getId();
+
+        this.roomService.delete(hotel.getId(), roomId);
+
+        assertEquals(RoomStatus.UNAVAILABLE, room.getRoomStatus());
+    }
+
     public void createHotel() {
         Member member = Member.builder()
                 .memberEmail("member@naver.com")
