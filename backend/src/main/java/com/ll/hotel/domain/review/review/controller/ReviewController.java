@@ -2,6 +2,7 @@ package com.ll.hotel.domain.review.review.controller;
 
 import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
+import com.ll.hotel.domain.review.review.dto.GetReviewResponse;
 import com.ll.hotel.domain.review.review.dto.PostReviewRequest;
 import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
 import com.ll.hotel.domain.review.review.dto.UpdateReviewRequest;
@@ -132,5 +133,21 @@ public class ReviewController {
         }
 
         return RsData.OK;
+    }
+
+    @GetMapping("/{reviewId}")
+    @Operation(summary = "리뷰 수정하기 전 기존 정보 제공")
+    public RsData<GetReviewResponse> getReview(
+            @PathVariable("reviewId") long reviewId
+    ) {
+        // 인증 체크 (로그인된 사용자인가?)
+
+        // 권한 체크 (예약자가 맞는가?)
+        System.out.println("리뷰 수정 전 정보 획득 : " + reviewId );
+        return new RsData<>(
+                "200-1",
+                "리뷰 조회 성공",
+                reviewService.getReviewResponse(reviewId)
+        );
     }
 }
