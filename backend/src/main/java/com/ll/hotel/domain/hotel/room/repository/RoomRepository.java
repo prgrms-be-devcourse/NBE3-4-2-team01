@@ -1,6 +1,5 @@
 package com.ll.hotel.domain.hotel.room.repository;
 
-import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.image.ImageType;
 import java.util.List;
@@ -11,8 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface RoomRepository extends JpaRepository<Room, Long> {
     @Query("""
-            SELECT
-            r.id, r.roomName, r.basePrice, r.standardNumber, r.maxNumber, r.bedTypeNumber, i.imageUrl
+            SELECT r, i
             FROM Room r
             LEFT JOIN r.roomImages i
             ON i.referenceId = r.id
@@ -24,8 +22,10 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
                 WHERE i2.referenceId = r.id
                 AND i2.imageType = :imageType
             )
+            OR i is NULL
             """)
-    List<GetAllRoomResponse> findAllRooms(@Param("hotelId") long hotelId, @Param("imageType") ImageType imageType);
+    List<Room> findAllRooms(@Param("hotelId") long hotelId, @Param("imageType") ImageType imageType);
+
 //    @Query("""
 //            SELECT new com.ll.hotel.domain.hotel.room.dto.RoomDetailDto
 //            (r.id, r.hotel.id, r.roomName, r.roomNumber, r.basePrice, r.standardNumber, r.maxNumber,

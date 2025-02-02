@@ -34,19 +34,9 @@ public record GetAllRoomResponse(
                 room.getStandardNumber(),
                 room.getMaxNumber(),
                 room.getBedTypeNumber(),
-                room.getRoomImages().isEmpty() ? null
-                        : room.getRoomImages().get(0).getImageUrl()
+                room.getRoomImages().isEmpty()
+                        ? "/images/default.jpg"
+                        : room.getRoomImages().getFirst().getImageUrl()
         );
-    }
-
-    public GetAllRoomResponse(long roomId, String roomName, Integer basePrice, Integer standardNumber,
-                              Integer maxNumber, BedTypeNumber bedTypeNumber, String thumbnailUrl) {
-        this.roomId = roomId;
-        this.roomName = roomName;
-        this.basePrice = basePrice;
-        this.standardNumber = standardNumber;
-        this.maxNumber = maxNumber;
-        this.bedTypeNumber = bedTypeNumber;
-        this.thumbnailUrl = thumbnailUrl != null ? thumbnailUrl : "/images/default.jpg";
     }
 }

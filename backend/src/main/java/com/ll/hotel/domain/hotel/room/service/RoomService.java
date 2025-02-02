@@ -17,6 +17,7 @@ import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import com.ll.hotel.domain.hotel.room.type.RoomStatus;
 import com.ll.hotel.domain.image.ImageType;
 import com.ll.hotel.global.exceptions.ServiceException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,6 +56,7 @@ public class RoomService {
         return new PostRoomResponse(this.roomRepository.save(room));
     }
 
+    @Transactional
     public void delete(long hotelId, long roomId) {
         Hotel hotel = this.hotelRepository.findById(hotelId)
                 .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
@@ -65,8 +67,16 @@ public class RoomService {
         room.setRoomStatus(RoomStatus.UNAVAILABLE);
     }
 
+    @Transactional
     public List<GetAllRoomResponse> findAllRooms(long hotelId) {
-        return this.roomRepository.findAllRooms(hotelId, ImageType.ROOM);
+        List<Room> rooms = this.roomRepository.findAllRooms(hotelId, ImageType.ROOM);
+        List<GetAllRoomResponse> responses = new ArrayList<>();
+
+        for (Room room : rooms) {
+            responses.add(new GetAllRoomResponse(room));
+        }
+
+        return responses;
     }
 
     @Transactional
