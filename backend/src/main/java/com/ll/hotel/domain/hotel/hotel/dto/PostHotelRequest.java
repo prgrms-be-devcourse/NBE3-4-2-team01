@@ -1,5 +1,6 @@
 package com.ll.hotel.domain.hotel.hotel.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -36,9 +37,11 @@ public record PostHotelRequest(
         Integer hotelGrade,
 
         @NotNull
+        @JsonFormat(pattern = "HH:mm")
         LocalTime checkInTime,
 
         @NotNull
+        @JsonFormat(pattern = "HH:mm")
         LocalTime checkOutTime,
 
         @NotBlank

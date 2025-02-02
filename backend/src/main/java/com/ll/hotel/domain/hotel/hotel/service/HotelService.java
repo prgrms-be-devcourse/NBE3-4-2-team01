@@ -7,9 +7,9 @@ import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,12 +20,10 @@ public class HotelService {
     /**
      * HotelImage, hotelOption 등록 추가 필요
      */
+    @Transactional
     public PostHotelResponse create(PostHotelRequest postHotelRequest) {
-        Optional<Business> business = this.businessRepository.findById(postHotelRequest.businessId());
-
-        if (business.isEmpty()) {
-            throw new ServiceException("404-1", "사업자가 존재하지 않습니다.");
-        }
+        Business business = this.businessRepository.findById(postHotelRequest.businessId())
+                .orElseThrow(() -> new ServiceException("404-1", "사업자가 존재하지 않습니다."));
 
         Hotel hotel = Hotel.builder()
                 .hotelName(postHotelRequest.hotelName())
@@ -37,7 +35,7 @@ public class HotelService {
                 .checkInTime(postHotelRequest.checkInTime())
                 .checkOutTime(postHotelRequest.checkOutTime())
                 .hotelExplainContent(postHotelRequest.hotelExplainContent())
-                .business(business.get())
+                .business(business)
                 // 호텔 이미지 등록 추가 필요
                 // 호텔 옵션 등록 추가 필요
                 .build();
