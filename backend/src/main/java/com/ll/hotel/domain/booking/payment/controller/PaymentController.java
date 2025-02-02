@@ -33,7 +33,7 @@ public class PaymentController {
     public RsData<UidResponse> getUid() {
         String merchantUid = Ut.random.generateUID(10);
         return new RsData<>(
-                "200",
+                "201",
                 "Uid 발급에 성공했습니다.",
                 new UidResponse(apiId, channelKey, merchantUid)
         );
@@ -46,16 +46,16 @@ public class PaymentController {
             @RequestBody @Valid PaymentRequest paymentRequest) {
         Payment payment = paymentService.create(paymentRequest);
         return new RsData<>(
-                "200",
+                "201",
                 "결제에 성공했습니다.",
                 PaymentResponse.from(payment)
         );
     }
 
     // 조회
-    @GetMapping
+    @GetMapping("/{payment_id}")
     public RsData<PaymentResponse> getPayment(
-            @RequestParam("payment_id") Long paymentId) {
+            @PathVariable("payment_id") Long paymentId) {
         Payment payment = paymentService.findById(paymentId);
         return new RsData<>(
                 "200",
@@ -64,9 +64,9 @@ public class PaymentController {
         );
     }
 
-    /*@DeleteMapping
+    @DeleteMapping("/{payment_id}")
     @Transactional
-    public RsData<PaymentResponse> refund(
+    public RsData<PaymentResponse> cancel(
             @PathVariable("payment_id") Long paymentId) {
         Payment payment = paymentService.softDelete(paymentId);
         return new RsData<>(
@@ -74,5 +74,5 @@ public class PaymentController {
                 "환불에 성공했습니다.",
                 PaymentResponse.from(payment)
         );
-    }*/
+    }
 }
