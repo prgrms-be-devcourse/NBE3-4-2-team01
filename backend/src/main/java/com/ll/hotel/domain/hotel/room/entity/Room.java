@@ -66,6 +66,6 @@ public class Room extends BaseTime {
     @Builder.Default
     private List<Image> roomImages = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     Set<RoomOption> roomOptions;
 }

@@ -41,6 +41,13 @@ public class RoomService {
                 .orElseThrow(() -> new ServiceException("404-1", "호텔의 정보가 존재하지 않습니다."));
 
         BedTypeNumber bedTypeNumber = BedTypeNumber.fromJson(postRoomRequest.bedTypeNumber());
+        Set<RoomOption> roomOptions = new HashSet<>();
+
+        for (String name : postRoomRequest.roomOptions()) {
+            RoomOption roomOption = RoomOption.builder().name(name).build();
+            roomOptions.add(roomOption);
+            this.roomOptionRepository.save(roomOption);
+        }
 
         Room room = Room.builder()
                 .hotel(hotel)
@@ -50,7 +57,7 @@ public class RoomService {
                 .standardNumber(postRoomRequest.standardNumber())
                 .maxNumber(postRoomRequest.maxNumber())
                 .bedTypeNumber(bedTypeNumber)
-                // 객실 옵션 추가
+                .roomOptions(roomOptions)
                 .build();
 
         return new PostRoomResponse(this.roomRepository.save(room));

@@ -1,12 +1,15 @@
 package com.ll.hotel.domain.hotel.room.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
 import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.entity.Room;
@@ -21,8 +24,10 @@ import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -158,7 +163,7 @@ class RoomServiceTest {
         GetRoomResponse res = this.roomService.findRoomDetail(hotel.getId(), roomId);
 
         assertEquals(res.id(), roomId);
-        assertEquals(res.hotelId(),hotel.getId());
+        assertEquals(res.hotelId(), hotel.getId());
         assertEquals(res.roomName(), "객실1");
         assertEquals(res.roomNumber(), req1.roomNumber());
         assertEquals(res.basePrice(), req1.basePrice());
@@ -175,7 +180,7 @@ class RoomServiceTest {
         res = this.roomService.findRoomDetail(hotel.getId(), roomId);
 
         assertEquals(res.id(), roomId);
-        assertEquals(res.hotelId(),hotel.getId());
+        assertEquals(res.hotelId(), hotel.getId());
         assertEquals(res.roomName(), "객실2");
         assertEquals(res.roomNumber(), req2.roomNumber());
         assertEquals(res.basePrice(), req2.basePrice());
@@ -186,6 +191,30 @@ class RoomServiceTest {
         assertEquals(res.roomImages().size(), 0);
         assertEquals(res.roomOptions().size(), 0);
         assertEquals(res.standardNumber(), 3);
+    }
+
+    @Test
+    @DisplayName("객실 옵션 조회")
+    public void findRoomOptions() {
+        Hotel hotel = this.hotelRepository.findAll().getFirst();
+        Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
+        Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
+
+        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
+
+        this.roomService.create(hotel.getId(), req1);
+
+        Room room = this.roomRepository.findAll().getFirst();
+        Long roomId = room.getId();
+
+        GetRoomOptionResponse res = this.roomService.findRoomOptions(hotel.getId(), roomId);
+
+        assertEquals(res.roomId(), roomId);
+        assertEquals(res.roomOptions().size(), 3);
+        assertTrue(res.roomOptions().contains("ShowerRoom"));
+        assertTrue(res.roomOptions().contains("Computer"));
+        assertTrue(res.roomOptions().contains("TV"));
+        assertFalse(res.roomOptions().contains("AirConditioner"));
     }
 
     public void createHotel() {
