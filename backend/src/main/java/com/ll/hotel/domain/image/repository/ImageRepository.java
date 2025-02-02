@@ -1,5 +1,6 @@
 package com.ll.hotel.domain.image.repository;
 
+import com.ll.hotel.domain.image.dto.ImageDto;
 import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.type.ImageType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +26,18 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     );
 
     long deleteByImageTypeAndReferenceId(ImageType imageType, Long referenceId);
+
+    @Query("""  
+        SELECT new com.ll.hotel.domain.image.dto.ImageDto(
+            i.referenceId,
+            i.imageUrl
+        )
+        FROM Image i
+        WHERE i.referenceId IN :reviewIds
+        AND i.imageType = :imageType
+    """)
+    List<ImageDto> findImageUrlsByReviewIdsAndImageType(
+            @Param("reviewIds") List<Long> reviewIds,
+            @Param("imageType") ImageType imageType
+    );
 }

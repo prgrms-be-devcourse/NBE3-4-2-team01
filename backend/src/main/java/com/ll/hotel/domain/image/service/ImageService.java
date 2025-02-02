@@ -35,4 +35,8 @@ public class ImageService {
     public long deleteImages(ImageType imageType, long id) {
         return imageRepository.deleteByImageTypeAndReferenceId(imageType, id);
     }
+
+    public List<Image> findImagesById(ImageType imageType, long id) {
+        return imageRepository.findByImageTypeAndReferenceId(imageType, id);
+    }
 }

@@ -2,10 +2,7 @@ package com.ll.hotel.domain.review.review.controller;
 
 import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
-import com.ll.hotel.domain.review.review.dto.GetReviewResponse;
-import com.ll.hotel.domain.review.review.dto.PostReviewRequest;
-import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
-import com.ll.hotel.domain.review.review.dto.UpdateReviewRequest;
+import com.ll.hotel.domain.review.review.dto.*;
 import com.ll.hotel.domain.review.review.service.ReviewService;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.rsData.RsData;
@@ -148,6 +145,39 @@ public class ReviewController {
                 "200-1",
                 "리뷰 조회 성공",
                 reviewService.getReviewResponse(reviewId)
+        );
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "내 리뷰 목록 조회")
+    public RsData<List<MyReviewResponse>> getMyReviews(
+            @RequestParam("memberId") Long memberId // 임시
+    ) {
+        // 인증 체크 (로그인된 사용자인가?)
+
+        // 권한 체크 (예약자가 맞는가?)        System.out.println("멤버 리뷰 목록 획득 : " + memberId); // 임시
+
+        return new RsData<>(
+                "200-1",
+                "나의 리뷰 목록 생성",
+                reviewService.getMyReviewResponses(memberId)
+        );
+    }
+
+    @GetMapping("/hotels/{hotelId}")
+    @Operation(summary = "호텔 리뷰 목록 조회")
+    public RsData<List<HotelReviewResponse>> getHotelReviews(
+            @PathVariable("hotelId") long hotelId
+    ) {
+        // 인증 체크 (로그인된 사용자인가?)
+
+        // 권한 체크 (호텔 관리자가 맞는가?)
+        System.out.println("호텔 리뷰 목록 획득 : " + hotelId );
+
+        return new RsData<>(
+                "200-1",
+                "호텔 리뷰 목록 생성",
+                reviewService.getHotelReviewResponses(hotelId)
         );
     }
 }

@@ -4,11 +4,11 @@ import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.image.entity.Image;
+import com.ll.hotel.domain.image.dto.ImageDto;
 import com.ll.hotel.domain.image.repository.ImageRepository;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.review.dto.GetReviewResponse;
-import com.ll.hotel.domain.review.review.dto.ReviewDto;
+import com.ll.hotel.domain.review.review.dto.*;
 import com.ll.hotel.domain.review.review.entity.Review;
 import com.ll.hotel.domain.review.review.repository.ReviewRepository;
 import com.ll.hotel.domain.review.review.type.ReviewStatus;
@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -81,5 +83,51 @@ public class ReviewService {
                 .toList();
 
         return new GetReviewResponse(reviewDto, imageUrls);
+    }
+
+    // 현재 접속한 유저가 작성한 모든 리뷰 조회 (답변, 이미지 포함)
+    public List<MyReviewResponse> getMyReviewResponses(long memberId) {
+        List<MyReviewWithCommentDto> myReviews = reviewRepository.findReviewsWithCommentByMemberId(memberId);
+
+        List<Long> reviewIds = myReviews.stream()
+                .map(dto -> dto.reviewDto().reviewId())
+                .toList();
+
+        Map<Long, List<String>> reviewImageUrls = imageRepository.findImageUrlsByReviewIdsAndImageType(
+                        reviewIds, ImageType.REVIEW)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        ImageDto::referenceId, // referenceId로 그룹화
+                        Collectors.mapping(ImageDto::imageUrl, Collectors.toList())));
+
+        return myReviews.stream()
+                .map(myReview -> new MyReviewResponse(
+                        myReview,
+                        reviewImageUrls.getOrDefault(myReview.reviewDto().reviewId(), List.of()) // 이미지 URL 매핑
+                ))
+                .toList();
+    }
+
+    // 호텔의 모든 리뷰 조회 (답변, 이미지 포함)
+    public List<HotelReviewResponse> getHotelReviewResponses(long hotelId) {
+        List<HotelReviewWithCommentDto> hotelReviews = reviewRepository.findReviewsWithCommentByHotelId(hotelId);
+
+        List<Long> reviewIds = hotelReviews.stream()
+                .map(dto -> dto.reviewDto().reviewId())
+                .toList();
+
+        Map<Long, List<String>> reviewImageUrls = imageRepository.findImageUrlsByReviewIdsAndImageType(
+                        reviewIds, ImageType.REVIEW)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        ImageDto::referenceId, // referenceId로 그룹화
+                        Collectors.mapping(ImageDto::imageUrl, Collectors.toList())));
+
+        return hotelReviews.stream()
+                .map(hotelReview -> new HotelReviewResponse(
+                        hotelReview,
+                        reviewImageUrls.getOrDefault(hotelReview.reviewDto().reviewId(), List.of()) // 이미지 URL 매핑
+                ))
+                .toList();
     }
 }
