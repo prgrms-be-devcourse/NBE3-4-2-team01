@@ -15,6 +15,7 @@ import com.ll.hotel.domain.image.ImageType;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +61,14 @@ public class HotelService {
 
     @Transactional
     public List<GetAllHotelResponse> findAll() {
-        return this.hotelRepository.findAllHotels(ImageType.HOTEL);
+        List<Hotel> hotels = this.hotelRepository.findAllHotels(ImageType.HOTEL);
+        List<GetAllHotelResponse> responses = new ArrayList<>();
+
+        for (Hotel hotel : hotels) {
+            responses.add(new GetAllHotelResponse(hotel));
+        }
+
+        return responses;
     }
 
     @Transactional

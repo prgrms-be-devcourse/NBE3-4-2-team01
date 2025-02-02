@@ -1,7 +1,6 @@
 package com.ll.hotel.domain.hotel.hotel.dto;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
-import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.NonNull;
 
@@ -23,16 +22,16 @@ public record GetAllHotelResponse(
         @NotBlank
         String thumbnailUrl
 ) {
-    public GetAllHotelResponse(long hotelId, String hotelName, String streetAddress,
-                               Integer zipCode, HotelStatus hotelStatus, String thumbnailUrl) {
+    public GetAllHotelResponse(Hotel hotel) {
         this(
-                hotelId,
-                hotelName,
-                streetAddress,
-                zipCode,
-                hotelStatus.getValue(),
-                // 썸네일이 없을 시, 기본 썸네일 출력
-                thumbnailUrl != null ? thumbnailUrl : "/images/default.jpg"
+                hotel.getId(),
+                hotel.getHotelName(),
+                hotel.getStreetAddress(),
+                hotel.getZipCode(),
+                hotel.getHotelStatus().getValue(),
+                hotel.getHotelImages().isEmpty()
+                        ? "/images/default.jpg"
+                        : hotel.getHotelImages().getFirst().getImageUrl()
         );
     }
 }
