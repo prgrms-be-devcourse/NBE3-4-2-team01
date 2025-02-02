@@ -1,5 +1,8 @@
-package com.ll.hotel.domain.image;
+package com.ll.hotel.domain.image.service;
 
+import com.ll.hotel.domain.image.repository.ImageRepository;
+import com.ll.hotel.domain.image.entity.Image;
+import com.ll.hotel.domain.image.type.ImageType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

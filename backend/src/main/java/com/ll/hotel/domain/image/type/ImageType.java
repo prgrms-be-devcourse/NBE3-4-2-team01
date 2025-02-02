@@ -1,4 +1,4 @@
-package com.ll.hotel.domain.image;
+package com.ll.hotel.domain.image.type;
 
 public enum ImageType {
     HOTEL,
