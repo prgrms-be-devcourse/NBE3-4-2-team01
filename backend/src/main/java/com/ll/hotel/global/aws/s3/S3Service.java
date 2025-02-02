@@ -8,13 +8,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
-import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 import java.net.URL;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -78,5 +78,70 @@ public class S3Service {
         } catch (SdkException e) {
             throw new CustomS3Exception("500-3", "S3 객체 삭제 실패", e);
         }
+    }
+
+    // S3의 폴더의 모든 Object 들 삭제
+    public void deleteAllObjectsById(ImageType imageType, long id) {
+        // folderPath 로 변환
+        String folderPath = S3Util.getFolderPath(imageType, id);
+
+        try {
+            // 폴더 내 모든 객체 목록 조회
+            List<S3Object> objects = listAllObjectsInFolder(folderPath);
+
+            // 객체가 없으면 종료
+            if (objects.isEmpty()) {
+                return;
+            }
+
+            // 삭제할 객체 키 목록 생성
+            List<ObjectIdentifier> objectIdentifiers = new ArrayList<>();
+            for (S3Object object : objects) {
+                objectIdentifiers.add(
+                        ObjectIdentifier.builder()
+                                .key(object.key())
+                                .build()
+                );
+            }
+
+            // 객체 삭제 요청 (한 번에 최대 1000개 객체 삭제 가능)
+            DeleteObjectsRequest deleteRequest = DeleteObjectsRequest.builder()
+                    .bucket(bucketName)
+                    .delete(delete -> delete.objects(objectIdentifiers))
+                    .build();
+
+            // S3 객체 삭제 요청
+            s3Client.deleteObjects(deleteRequest);
+
+        } catch (SdkException e) {
+            throw new CustomS3Exception("500-4", "폴더 내 객체 삭제 실패", e);
+        }
+    }
+
+    // 폴더의 모든 Object 조회
+    private List<S3Object> listAllObjectsInFolder(String folderPath) {
+        List<S3Object> objects = new ArrayList<>();
+
+        try {
+            ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
+                    .bucket(bucketName)
+                    .prefix(folderPath)
+                    .build();
+
+            ListObjectsV2Response listResponse;
+            do {
+                listResponse = s3Client.listObjectsV2(listRequest);
+                objects.addAll(listResponse.contents());
+                listRequest = ListObjectsV2Request.builder()
+                        .bucket(bucketName)
+                        .prefix(folderPath)
+                        .continuationToken(listResponse.nextContinuationToken())
+                        .build();
+            } while (Boolean.TRUE.equals(listResponse.isTruncated()));
+        } catch (SdkException e) {
+            throw new CustomS3Exception("500-5", "폴더 객체 조회 실패", e);
+        }
+
+        return objects;
     }
 }

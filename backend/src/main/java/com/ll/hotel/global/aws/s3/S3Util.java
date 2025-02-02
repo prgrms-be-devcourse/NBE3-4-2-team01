@@ -24,4 +24,14 @@ public class S3Util {
         }
         return null;
     }
+
+    public static String getFolderPath(ImageType imageType, long id) {
+        String type = switch(imageType) {
+            case HOTEL -> "hotels";
+            case ROOM -> "rooms";
+            case REVIEW -> "reviews";
+        };
+
+        return type + "/" + id + "/";
+    }
 }

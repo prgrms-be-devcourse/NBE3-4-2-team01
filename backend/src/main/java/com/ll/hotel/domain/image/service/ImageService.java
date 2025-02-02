@@ -31,4 +31,8 @@ public class ImageService {
             imageRepository.deleteByReferenceIdAndImageUrls(imageType, id, urls);
         }
     }
+
+    public long deleteImages(ImageType imageType, long id) {
+        return imageRepository.deleteByImageTypeAndReferenceId(imageType, id);
+    }
 }

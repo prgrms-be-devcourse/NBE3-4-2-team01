@@ -51,4 +51,12 @@ public class ReviewService {
         review.setRating(rating);
         review.setReviewStatus(ReviewStatus.UPDATED);
     }
+
+    // 리뷰 삭제
+    public void deleteReview(long reviewId) {
+        Review review = reviewRepository.findByIdWithFilter(reviewId)
+                .orElseThrow(() -> new ServiceException("400-1", "삭제할 리뷰가 존재하지 않습니다."));
+
+        review.setReviewStatus(ReviewStatus.DELETED);
+    }
 }

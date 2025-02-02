@@ -23,4 +23,6 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
             @Param("referenceId") Long referenceId,
             @Param("imageUrls") List<String> imageUrls
     );
+
+    long deleteByImageTypeAndReferenceId(ImageType imageType, Long referenceId);
 }

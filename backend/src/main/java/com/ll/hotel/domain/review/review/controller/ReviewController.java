@@ -111,4 +111,26 @@ public class ReviewController {
                 new PresignedUrlsResponse(reviewId, urls)
         );
     }
+
+    @DeleteMapping("/{reviewId}")
+    @Operation(summary = "리뷰 삭제")
+    public RsData<Empty> deleteReview(
+            @PathVariable("reviewId") long reviewId
+    ) {
+        // 인증 체크 (로그인된 사용자인가?)
+
+        // 권한 체크 (예약자가 맞는가?)
+        System.out.println("리뷰 삭제 : " + reviewId );
+
+        // 리뷰 상태를 DELETED 로 변경
+        reviewService.deleteReview(reviewId);
+        // DB 의 사진 URL 정보 삭제
+        long imageCount = imageService.deleteImages(ImageType.REVIEW, reviewId);
+        // S3 의 사진 삭제
+        if(imageCount > 0) {
+            s3Service.deleteAllObjectsById(ImageType.REVIEW, reviewId);
+        }
+
+        return RsData.OK;
+    }
 }
