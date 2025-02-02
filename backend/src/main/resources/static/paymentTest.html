@@ -9,16 +9,16 @@
 <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
 <script>
   async function pay() {
-    const response = await fetch("/api/bookings/payments/uids");
-    const data = await response.json(); // 응답 본문을 JSON 형식으로 파싱
+    const response = await fetch("/api/bookings/payments/uid");
+    const data = await response.json();
     const apiId = await data.data.apiId;
     const channelKey = await data.data.channelKey;
     const merchantUid = await data.data.merchantUid;
 
-    IMP.init(apiId); // 수정 금지
+    IMP.init(apiId);
     IMP.request_pay(
       {
-        channelKey: channelKey, // 수정 금지
+        channelKey: channelKey,
         merchant_uid: merchantUid,
         name: "주문명:결제테스트",
         amount: 1004,
@@ -32,8 +32,16 @@
           console.log(rsp);
 
           // 결제 성공 시 서버 API 호출
-          fetch(`/api/bookings/payments?merchant_uid=${rsp.merchant_uid}&imp_uid=${rsp.imp_uid}`, {
+          fetch(`/api/bookings/payments`, {
             method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              merchantUid: rsp.merchant_uid,
+              amount: rsp.paid_amount,
+              paidAtTimestamp: rsp.paid_at
+            }),
           })
           .then(response => {
             if (!response.ok) {

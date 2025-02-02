@@ -48,9 +48,6 @@ public class Booking extends BaseTime {
     private BookingStatus bookingStatus = BookingStatus.CONFIRMED;
 
     @Column
-    private int paymentPrice;
-
-    @Column
     private LocalDate checkInDate;
 
     @Column

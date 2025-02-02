@@ -38,7 +38,6 @@ public class BookingService {
                 .hotel(hotel.get())
                 .member(member)
                 .payment(payment.get())
-                .paymentPrice(room.get().getBasePrice())
                 .build();
 
         booking = bookingRepository.save(booking);
