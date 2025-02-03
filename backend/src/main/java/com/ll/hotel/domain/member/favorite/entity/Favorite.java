@@ -1,5 +1,6 @@
 package com.ll.hotel.domain.member.favorite.entity;
 
+import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -20,14 +21,14 @@ import java.util.List;
 public class Favorite extends BaseEntity {
 
     @Column(nullable = false, unique = true)
-    private String hotelId;
+    private long hotelId;
 
     @Column(nullable = false, unique = true)
-    private String memberId;
+    private long memberId;
 
     @ManyToMany
     private List<Member> memberList;
 
-/*    @ManyToMany
-    private List<Hotel> hotelList;*/
+    @ManyToMany
+    private List<Hotel> hotelList;
 } 

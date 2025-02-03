@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.ll.hotel.domain.member.favorite.entity.Favorite;
 
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
-    Favorite findByHotelIdAndMemberId(String hotelId, String memberId);
+    Favorite findByHotelIdAndMemberId(long hotelId, long memberId);
 }

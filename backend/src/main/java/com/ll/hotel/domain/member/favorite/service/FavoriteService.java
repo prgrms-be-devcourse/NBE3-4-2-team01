@@ -1,6 +1,7 @@
 package com.ll.hotel.domain.member.favorite.service;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
+import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.member.favorite.dto.FavoriteReqBody;
 import com.ll.hotel.domain.member.favorite.entity.Favorite;
 import com.ll.hotel.domain.member.favorite.repository.FavoriteRepository;
@@ -14,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FavoriteService {
     private final FavoriteRepository favoriteRepository;
+    private final HotelRepository hotelRepository;
 
     public Favorite addFavorite(FavoriteReqBody request) {
         Favorite favorite = Favorite.builder()
@@ -35,8 +37,8 @@ public class FavoriteService {
         List<Hotel> hotelList = new ArrayList<>();
         
         for (Favorite favorite : favorites) {
-//            Hotel hotel = hotelRepository.findById(favorite.getHotelId()).orElse(null);
-//            hotelList.add(hotel);
+            Hotel hotel = hotelRepository.findById(favorite.getHotelId()).orElse(null);
+            hotelList.add(hotel);
         }
         
         return hotelList;
