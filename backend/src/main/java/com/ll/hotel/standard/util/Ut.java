@@ -1,25 +1,21 @@
 package com.ll.hotel.standard.util;
 
-import java.util.Date;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ll.hotel.domain.member.member.service.RefreshTokenService;
 import com.ll.hotel.global.app.AppConfig;
 import com.ll.hotel.global.initData.BaseInit;
-import com.ll.hotel.global.security.dto.GeneratedToken;
-import com.ll.hotel.global.security.dto.SecurityUserDto;
 import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
-
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -62,4 +58,11 @@ public class Ut {
                     .signWith(secretKey)
                     .compact();
         }
+        public static Claims getClaims(CustomOAuth2JwtProperties jwtProperties, String token) {
+            SecretKey secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
+            token = token.replace("Bearer ", "").trim();
+
+            return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+        }
+    }
 }
