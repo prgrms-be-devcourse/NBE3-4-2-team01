@@ -2,6 +2,7 @@ package com.ll.hotel.domain.member.admin.controller;
 
 import com.ll.hotel.domain.member.admin.dto.AdminBusinessDto;
 import com.ll.hotel.domain.member.admin.dto.request.AdminBusinessRequest;
+import com.ll.hotel.domain.member.admin.dto.request.response.AdminBusinessResponse;
 import com.ll.hotel.domain.member.admin.service.AdminBusinessService;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.global.exceptions.ServiceException;
@@ -48,8 +49,8 @@ public class AdminBusinessController {
     }
 
     @PatchMapping("/{id}")
-    public RsData<AdminBusinessDto> approve(@PathVariable("id") Long id,
-                                           @RequestBody @Valid AdminBusinessRequest adminBusinessRequest) {
+    public RsData<AdminBusinessResponse> approve(@PathVariable("id") Long id,
+                                                 @RequestBody @Valid AdminBusinessRequest adminBusinessRequest) {
         Business business = adminBusinessService.findById(id);
 
         adminBusinessService.approve(business, adminBusinessRequest);
@@ -59,7 +60,7 @@ public class AdminBusinessController {
         return new RsData<>(
                 "200",
                 "사업자 승인 정보가 수정되었습니다.",
-                AdminBusinessDto.toDto(business)
+                new AdminBusinessResponse(business)
         );
     }
 }
