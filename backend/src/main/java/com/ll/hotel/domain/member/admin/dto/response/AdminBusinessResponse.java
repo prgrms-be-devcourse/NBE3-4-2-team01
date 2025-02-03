@@ -1,4 +1,4 @@
-package com.ll.hotel.domain.member.admin.dto.request.response;
+package com.ll.hotel.domain.member.admin.dto.response;
 
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;

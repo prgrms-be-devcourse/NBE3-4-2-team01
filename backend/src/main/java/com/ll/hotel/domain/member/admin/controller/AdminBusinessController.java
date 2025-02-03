@@ -2,7 +2,7 @@ package com.ll.hotel.domain.member.admin.controller;
 
 import com.ll.hotel.domain.member.admin.dto.AdminBusinessDto;
 import com.ll.hotel.domain.member.admin.dto.request.AdminBusinessRequest;
-import com.ll.hotel.domain.member.admin.dto.request.response.AdminBusinessResponse;
+import com.ll.hotel.domain.member.admin.dto.response.AdminBusinessResponse;
 import com.ll.hotel.domain.member.admin.service.AdminBusinessService;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.global.exceptions.ServiceException;
@@ -13,7 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin/business")
+@RequestMapping("/admin/businesses")
 @RequiredArgsConstructor
 public class AdminBusinessController {
     private final AdminBusinessService adminBusinessService;
