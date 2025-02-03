@@ -1,6 +1,5 @@
 package com.ll.hotel.domain.hotel.hotel.repository;
 
-import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.image.ImageType;
 import java.util.List;
@@ -35,12 +34,4 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             OR (i.referenceId = :hotelId AND i.imageType = :imageType))
             """)
     Optional<Hotel> findHotelDetail(@Param("hotelId") long hotelId, @Param("imageType") ImageType imageType);
-
-//    @Query("""
-//            SELECT i
-//            FROM Image i
-//            WHERE i.referenceId = :hotelId
-//            AND i.imageType = :imageType
-//            """)
-//    List<Image> findHotelImages(@Param("hotelId") long hotelId, @Param("imageType") ImageType imageType);
 }
