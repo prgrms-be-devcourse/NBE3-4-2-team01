@@ -1,11 +1,7 @@
 package com.ll.hotel.global.security;
 
 import com.ll.hotel.global.exceptions.JwtExceptionFilter;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthorizationRequestRepository;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2FailureHandler;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtAuthFilter;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2UserService;
-import com.ll.hotel.global.security.oauth2.entity.CustomOAuth2AuthenticationSuccessHandler;
+import com.ll.hotel.global.security.oauth2.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

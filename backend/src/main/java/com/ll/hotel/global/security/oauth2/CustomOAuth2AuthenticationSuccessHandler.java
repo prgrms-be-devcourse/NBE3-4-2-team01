@@ -1,4 +1,4 @@
-package com.ll.hotel.global.security.oauth2.entity;
+package com.ll.hotel.global.security.oauth2;
 
 
 import com.ll.hotel.domain.member.member.service.AuthTokenService;
