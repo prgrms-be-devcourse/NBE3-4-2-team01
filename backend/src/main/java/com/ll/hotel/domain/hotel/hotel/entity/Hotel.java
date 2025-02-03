@@ -72,6 +72,20 @@ public class Hotel extends BaseTime {
     @ManyToMany
     Set<Member> favorites;
 
+    @Column(nullable = false)
+    private Double averageRating;
+    @Column(nullable = false)
+    private Long totalReviewRatingSum;
+    @Column(nullable = false)
+    private Long totalReviewCount;
+
+    // 평균 레이팅 업데이트
+    public void updateAverageRating(int countOffset, int ratingOffset) {
+        this.totalReviewCount += countOffset;
+        this.totalReviewRatingSum += ratingOffset;
+        this.averageRating = Math.round(((double)totalReviewRatingSum / totalReviewCount) * 10.0) / 10.0;
+    }
+
     /**
      * 불필요 시 삭제
      */

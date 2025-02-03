@@ -2,6 +2,7 @@ package com.ll.hotel.domain.review.review.service;
 
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
+import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.dto.ImageDto;
@@ -30,13 +31,18 @@ public class ReviewService {
     private final EntityManager entityManager;
     private final ReviewRepository reviewRepository;
     private final ImageRepository imageRepository;
+    private final HotelRepository hotelRepository;
 
     // 리뷰 생성
     public long createReview(Long hotelId, Long roomId, Long memberId, Long bookingId, String content, int rating) {
-        Hotel hotel = entityManager.getReference(Hotel.class, hotelId);
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new ServiceException("400-1", "존재하지 않는 호텔입니다."));
         Member member = entityManager.getReference(Member.class, memberId);
         Room room = entityManager.getReference(Room.class, roomId);
         Booking booking = entityManager.getReference(Booking.class, bookingId);
+
+        // 호텔 평균 리뷰 수정
+        updateRatingOnReviewCreated(hotel, rating);
 
         Review review = Review.builder()
                 .hotel(hotel)
@@ -57,6 +63,9 @@ public class ReviewService {
         Review review = reviewRepository.findByIdWithFilter(reviewId)
                 .orElseThrow(() -> new ServiceException("400-1", "수정할 리뷰가 존재하지 않습니다."));
 
+        // 호텔 평균 리뷰 수정
+        updateRatingOnReviewModified(review.getHotel(), review.getRating(), rating);
+
         review.setContent(content);
         review.setRating(rating);
         review.setReviewStatus(ReviewStatus.UPDATED);
@@ -66,6 +75,9 @@ public class ReviewService {
     public void deleteReview(long reviewId) {
         Review review = reviewRepository.findByIdWithFilter(reviewId)
                 .orElseThrow(() -> new ServiceException("400-1", "삭제할 리뷰가 존재하지 않습니다."));
+
+        // 호텔 평균 리뷰 수정
+        updateRatingOnReviewDeleted(review.getHotel(), review.getRating());
 
         review.setReviewStatus(ReviewStatus.DELETED);
     }
@@ -129,5 +141,20 @@ public class ReviewService {
                         reviewImageUrls.getOrDefault(hotelReview.reviewDto().reviewId(), List.of()) // 이미지 URL 매핑
                 ))
                 .toList();
+    }
+
+    // 리뷰 생성의 평균 리뷰 수정
+    private void updateRatingOnReviewCreated(Hotel hotel, int rating) {
+        hotel.updateAverageRating(1, rating);
+    }
+
+    // 리뷰 수정의 평균 리뷰 수정
+    private void updateRatingOnReviewModified(Hotel hotel, int beforeRating, int afterRating) {
+        hotel.updateAverageRating(0, afterRating - beforeRating);
+    }
+
+    // 리뷰 삭제의 평균 리뷰 수정
+    private void updateRatingOnReviewDeleted(Hotel hotel, int rating) {
+        hotel.updateAverageRating(-1, -rating);
     }
 }
