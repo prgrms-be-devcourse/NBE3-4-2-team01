@@ -50,8 +50,7 @@ public class OAuth2Controller {
         
         return new RsData<>(
             "400-1",
-            "잘못된 요청입니다.",
-            null
+            "잘못된 요청입니다."
         );
     }
 }
