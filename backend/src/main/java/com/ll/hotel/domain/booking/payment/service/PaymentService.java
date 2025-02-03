@@ -57,7 +57,7 @@ public class PaymentService {
         Payment payment = findById(paymentId);
 
         if (payment.getPaymentStatus() == PaymentStatus.CANCELLED) {
-            throw new ServiceException("200", "이미 취소된 결제입니다.");
+            throw new ServiceException("400", "이미 취소된 결제입니다.");
         }
 
         WebClient webClient = WebClient.create("https://api.iamport.kr");
@@ -68,7 +68,9 @@ public class PaymentService {
             payment.setPaymentStatus(PaymentStatus.CANCELLED);
             return paymentRepository.save(payment);
         } else {
-            throw new ServiceException("401", "결제 취소에 실패했습니다.");
+            throw new ServiceException(
+                    response.getStatusCode().toString(),
+                    "결제 취소에 실패했습니다.");
         }
     }
 
@@ -85,7 +87,10 @@ public class PaymentService {
         if (tokenResponse.getStatusCode().is2xxSuccessful()) {
             return tokenResponse.getBody().response().accessToken();
         } else {
-            throw new ServiceException("401", "토큰 발급에 실패했습니다.");
+            throw new ServiceException(
+                    tokenResponse.getStatusCode().toString(),
+                    "토큰 발급에 실패했습니다."
+            );
         }
     }
 

@@ -49,7 +49,7 @@ public class BookingService {
 
     public void cancel(Booking booking) {
         if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
-            throw new ServiceException("200", "이미 취소된 예약입니다.");
+            throw new ServiceException("400", "이미 취소된 예약입니다.");
         }
 
         booking.setBookingStatus(BookingStatus.CANCELLED);
