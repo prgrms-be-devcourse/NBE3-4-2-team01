@@ -12,16 +12,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/business")
 @RequiredArgsConstructor
 public class AdminBusinessController {
     private final AdminBusinessService adminBusinessService;
 
-    @GetMapping("/business")
+    @GetMapping
     public RsData<Page<AdminBusinessDto>> getAll(
             @RequestParam(value = "page", defaultValue = "0") int page) {
 
-        Page<AdminBusinessDto> pagedAdminBusinessDto = adminBusinessService.findAllPagedForAdmin(page)
+        Page<AdminBusinessDto> pagedAdminBusinessDto = adminBusinessService.findAllPaged(page)
                 .map(AdminBusinessDto::toDto);
 
         if (!pagedAdminBusinessDto.hasContent()) {
@@ -35,7 +35,7 @@ public class AdminBusinessController {
         );
     }
 
-    @GetMapping("/business/{id}")
+    @GetMapping("/{id}")
     public RsData<AdminBusinessDto> getById(@PathVariable("id") Long id) {
 
         Business business = adminBusinessService.findById(id);
@@ -47,7 +47,7 @@ public class AdminBusinessController {
         );
     }
 
-    @PatchMapping("/business/{id}")
+    @PatchMapping("/{id}")
     public RsData<AdminBusinessDto> approve(@PathVariable("id") Long id,
                                            @RequestBody @Valid AdminBusinessRequest adminBusinessRequest) {
         Business business = adminBusinessService.findById(id);

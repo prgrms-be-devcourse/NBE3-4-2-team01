@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminBusinessService {
     private final BusinessRepository businessRepository;
 
-    public Page<Business> findAllPagedForAdmin(int page) {
+    public Page<Business> findAllPaged(int page) {
         Pageable pageable = PageRequest.of(page, 10);
         return businessRepository.findAll(pageable);
     }
