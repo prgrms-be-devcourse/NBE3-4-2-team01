@@ -1,14 +1,11 @@
 package com.ll.hotel.standard.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ll.hotel.domain.member.member.service.RefreshTokenService;
 import com.ll.hotel.global.app.AppConfig;
-import com.ll.hotel.global.initData.BaseInit;
 import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,12 +16,13 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class Ut {
 
-    private final CustomOAuth2JwtProperties jwtProperties;
-    private final RefreshTokenService tokenService;
-    private final BaseInit baseInit;
+    private final SecretKey secretKey;
+
+    public Ut(CustomOAuth2JwtProperties jwtProperties) {
+        this.secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
+    }
 
     public static class str {
         public static boolean isBlank(String str) {
@@ -58,6 +56,7 @@ public class Ut {
                     .signWith(secretKey)
                     .compact();
         }
+
         public static Claims getClaims(CustomOAuth2JwtProperties jwtProperties, String token) {
             SecretKey secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
             token = token.replace("Bearer ", "").trim();
