@@ -5,10 +5,8 @@ import com.ll.hotel.domain.booking.booking.dto.BookingResponse;
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.booking.booking.service.BookingService;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.standard.base.Empty;
 import com.ll.hotel.standard.page.dto.PageDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,16 +18,14 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class BookingController {
     private final BookingService bookingService;
-    //private final Rq rq;
+    private final Rq rq;
 
     // 예약
     @PostMapping
     @Transactional
     public RsData<BookingResponse> book(
             @RequestBody @Valid BookingRequest bookingRequest) {
-        //Member member = rq.findByActor().get();
-        Member member = new Member();
-        System.out.println(bookingRequest);
+        Member member = rq.getMember();
         Booking booking = bookingService.create(member, bookingRequest);
 
         return new RsData<>(
@@ -45,8 +41,7 @@ public class BookingController {
     public RsData<PageDto<BookingResponse>> getMyBookings(
             @RequestParam(defaultValue = "1", name = "page") int page,
             @RequestParam(defaultValue = "5", name = "page_size") int pageSize) {
-        //Member member = rq.findByActor().get();
-        Member member = new Member();
+        Member member = rq.getMember();
 
         return new RsData<>(
                 "200",

@@ -22,7 +22,7 @@ public record BookingResponse(
                 booking.getId(),
                 booking.getRoom().getId(),
                 booking.getHotel().getId(),
-                booking.getMember().getMemberId(),
+                booking.getMember().getId(),
                 booking.getBookingNumber(),
                 booking.getBookingStatus(),
                 booking.getCreatedAt(),

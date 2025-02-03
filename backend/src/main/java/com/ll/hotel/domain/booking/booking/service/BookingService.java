@@ -13,7 +13,6 @@ import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
