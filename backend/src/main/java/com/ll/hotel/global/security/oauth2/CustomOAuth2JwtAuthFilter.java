@@ -58,7 +58,7 @@ public class CustomOAuth2JwtAuthFilter extends OncePerRequestFilter implements O
                         .orElseThrow(() -> new ServiceException("MEMBER_NOT_FOUND", "해당 이메일의 회원이 존재하지 않습니다."));
 
                 SecurityUser userDto = of(
-                        findMember.getMemberId(),
+                        findMember.getId(),
                         findMember.getMemberName(),
                         findMember.getMemberEmail(),
                         "ROLE_" + findMember.getRole()

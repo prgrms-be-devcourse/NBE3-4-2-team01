@@ -1,20 +1,17 @@
 package com.ll.hotel.domain.member.member.service;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.ll.hotel.domain.member.member.dto.MemberDTO;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.rsData.RsData;
-
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +29,6 @@ public class MemberService {
                 .memberName(memberDTO.memberName())
                 .memberPhoneNumber(memberDTO.memberPhoneNumber())
                 .birthDate(memberDTO.birthDate())
-                .createdAt(LocalDateTime.now())
-                .modifiedAt(LocalDateTime.now())
                 .role(Role.USER)
                 .memberStatus(MemberStatus.ACTIVE)
                 .provider(provider)

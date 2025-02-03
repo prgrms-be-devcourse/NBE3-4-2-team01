@@ -52,7 +52,7 @@ public class MemberController {
                 "200-1",
                 "회원가입이 완료되었습니다.",
                 new MemberDTO(
-                    member.getMemberId(),
+                    member.getId(),
                     member.getMemberEmail(),
                     member.getMemberName(),
                     member.getMemberPhoneNumber(),
