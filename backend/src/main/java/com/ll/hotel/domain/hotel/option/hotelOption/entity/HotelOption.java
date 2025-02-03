@@ -19,10 +19,12 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(name = "hotel_option")
 public class HotelOption extends BaseEntity {
     @NotBlank(message = "필수 항목입니다.")
     @Size(max = 255, message = "최대 255자까지 작성 가능합니다.")
+    @EqualsAndHashCode.Include
     @Column(name = "hotel_option_name", unique = true, nullable = false, length = 255)
     private String name;
 

@@ -1,7 +1,13 @@
 package com.ll.hotel.domain.hotel.room.dto;
 
+import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
+import com.ll.hotel.domain.hotel.room.entity.Room;
+import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import jakarta.validation.constraints.NotBlank;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 
 public record GetRoomResponse(
@@ -25,26 +31,36 @@ public record GetRoomResponse(
         Integer maxNumber,
 
         @NotBlank
-        String bedTypeNumber,
+        BedTypeNumber bedTypeNumber,
 
         @NotBlank
         String roomStatus,
 
         @NonNull
-        List<RoomImageDto> roomImages
+        List<RoomImageDto> roomImages,
+
+        @NonNull
+        Set<String> roomOptions
 ) {
-    public GetRoomResponse(RoomDto roomDto) {
+    public GetRoomResponse(Room room) {
         this(
-                roomDto.roomId(),
-                roomDto.hotelId(),
-                roomDto.roomName(),
-                roomDto.roomNumber(),
-                roomDto.basePrice(),
-                roomDto.standardNumber(),
-                roomDto.maxNumber(),
-                roomDto.bedTypeNumber(),
-                roomDto.roomStatus(),
-                roomDto.roomImages()
+                room.getId(),
+                room.getHotel().getId(),
+                room.getRoomName(),
+                room.getRoomNumber(),
+                room.getBasePrice(),
+                room.getStandardNumber(),
+                room.getMaxNumber(),
+                room.getBedTypeNumber(),
+                room.getRoomStatus().getValue(),
+                room.getRoomImages().stream()
+                        .map(RoomImageDto::new)
+                        .collect(Collectors.toList()),
+                room.getRoomOptions() != null
+                        ? room.getRoomOptions().stream()
+                        .map(RoomOption::getName)
+                        .collect(Collectors.toSet())
+                        : new HashSet<>()
         );
     }
 }

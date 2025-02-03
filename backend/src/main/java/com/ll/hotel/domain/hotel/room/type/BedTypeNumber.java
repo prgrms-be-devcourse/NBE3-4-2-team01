@@ -1,19 +1,30 @@
 package com.ll.hotel.domain.hotel.room.type;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import jakarta.persistence.Embeddable;
+import java.util.Map;
 
-/**
- * 변경 가능성 높음
- */
-@Getter
-@AllArgsConstructor
-public enum BedTypeNumber {
-    SINGLE(1);
+@Embeddable
+public record BedTypeNumber(
+        int bed_single,
 
-    private final int value;
+        int bed_double,
 
-    public String getBedTypeNumber() {
-        return this.name() + " / " + this.getValue();
+        int bed_queen,
+
+        int bed_king,
+
+        int bed_twin,
+
+        int bed_triple
+) {
+    public static BedTypeNumber fromJson(Map<String, Integer> bedTypeNumber) {
+        return new BedTypeNumber(
+                bedTypeNumber.getOrDefault("SINGLE", 0),
+                bedTypeNumber.getOrDefault("DOUBLE", 0),
+                bedTypeNumber.getOrDefault("QUEEN", 0),
+                bedTypeNumber.getOrDefault("KING", 0),
+                bedTypeNumber.getOrDefault("TWIN", 0),
+                bedTypeNumber.getOrDefault("TRIPLE", 0)
+        );
     }
 }

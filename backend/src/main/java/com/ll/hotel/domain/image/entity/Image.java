@@ -1,5 +1,6 @@
-package com.ll.hotel.domain.image;
+package com.ll.hotel.domain.image.entity;
 
+import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
