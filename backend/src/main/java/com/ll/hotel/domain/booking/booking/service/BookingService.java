@@ -56,8 +56,9 @@ public class BookingService {
         bookingRepository.save(booking);
     }
 
-    public Optional<Booking> findById(Long id) {
-        return bookingRepository.findById(id);
+    public Booking findById(Long id) {
+        return bookingRepository.findById(id)
+                .orElseThrow(() -> new ServiceException("404", "예약 정보를 찾을 수 없습니다."));
     }
 
     public Page<Booking> findByMember(Member member, int page, int pageSize) {

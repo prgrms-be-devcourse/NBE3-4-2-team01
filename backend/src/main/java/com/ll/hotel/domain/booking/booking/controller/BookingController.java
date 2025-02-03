@@ -22,6 +22,7 @@ public class BookingController {
     private final BookingService bookingService;
     //private final Rq rq;
 
+    // 예약
     @PostMapping
     @Transactional
     public RsData<BookingResponse> book(
@@ -38,6 +39,7 @@ public class BookingController {
         );
     }
 
+    // 사용자측 예약 조회
     @GetMapping("/me")
     @Transactional
     public RsData<PageDto<BookingResponse>> getMyBookings(
@@ -56,6 +58,7 @@ public class BookingController {
         );
     }
 
+    // 호텔측 예약 조회
     @GetMapping("/hotels/{hotel_id}")
     @Transactional
     public RsData<PageDto<BookingResponse>> getHotelBookings(
@@ -72,13 +75,12 @@ public class BookingController {
         );
     }
 
+    // 예약 상세 조회
     @GetMapping("/{book_id}")
     @Transactional
     public RsData<BookingResponse> getBooking(
-            @PathVariable Long bookId) {
-        Booking booking = bookingService.findById(bookId).orElseThrow(
-                () -> new ServiceException("404", "예약 정보를 찾을 수 없습니다.")
-        );
+            @PathVariable Long bookingId) {
+        Booking booking = bookingService.findById(bookingId);
 
         return new RsData<>(
                 "200",
@@ -87,14 +89,12 @@ public class BookingController {
         );
     }
 
+    // 예약 취소
     @DeleteMapping("/{book_id}")
     @Transactional
     public RsData<Empty> cancel(
-            @PathVariable Long bookId) {
-        Booking booking = bookingService.findById(bookId).orElseThrow(
-                () -> new ServiceException("404", "예약 정보를 찾을 수 없습니다.")
-        );
-
+            @PathVariable Long bookingId) {
+        Booking booking = bookingService.findById(bookingId);
         bookingService.cancel(booking);
 
         return new RsData<>(
