@@ -12,7 +12,7 @@ public record HotelImageDto(
     public HotelImageDto(Image image) {
         this(
                 image.getId(),
-                image.getImageUrl()
+                image.getImageUrl() != null ? image.getImageUrl() : "/images/default.jpg"
         );
     }
 }

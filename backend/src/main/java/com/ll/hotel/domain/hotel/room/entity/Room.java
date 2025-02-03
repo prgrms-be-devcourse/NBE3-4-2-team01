@@ -9,7 +9,6 @@ import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.global.jpa.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -36,10 +35,7 @@ public class Room extends BaseTime {
     @Column
     private Integer maxNumber;
 
-    /**
-     * 수정 필요
-     */
-    @Column
+    @Embedded
     private BedTypeNumber bedTypeNumber;
 
     @Column
@@ -58,11 +54,6 @@ public class Room extends BaseTime {
     @Builder.Default
     private List<Image> roomImages = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     Set<RoomOption> roomOptions;
-
-//    public void addRoomImage(RoomImage roomImage) {
-//        this.roomImages.add(roomImage);
-//        roomImage.setRoom(this);
-//    }
 }

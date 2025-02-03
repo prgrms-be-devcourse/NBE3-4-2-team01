@@ -1,10 +1,11 @@
 package com.ll.hotel.domain.hotel.hotel.dto;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
-import com.ll.hotel.domain.hotel.option.hotelOption.dto.HotelOptionDto;
+import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,16 +44,10 @@ public record HotelDto(
         @NotBlank
         String hotelStatus,
 
-        @NonNull
         List<HotelImageDto> hotelImages,
 
-        @NonNull
         List<GetAllRoomResponse> rooms,
 
-//        @NonNull
-//        List<GetReviewResponse> reviews,
-
-        @NonNull
         Set<String> hotelOptions
 
         // 호텔 Favorite
@@ -76,10 +71,11 @@ public record HotelDto(
                 hotel.getRooms().stream()
                         .map(GetAllRoomResponse::new)
                         .collect(Collectors.toList()),
-                hotel.getHotelOptions().stream()
-                        .map(HotelOptionDto::toDto)
-                        .map(HotelOptionDto::name)
+                hotel.getHotelOptions() != null
+                        ? hotel.getHotelOptions().stream()
+                        .map(HotelOption::getName)
                         .collect(Collectors.toSet())
+                        : new HashSet<>()
         );
     }
 }
