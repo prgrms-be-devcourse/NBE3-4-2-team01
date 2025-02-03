@@ -69,6 +69,9 @@ public class HotelController {
     public RsData<Empty> deleteHotel(@PathVariable Long hotelId) {
         this.hotelService.delete(hotelId);
 
-        return RsData.OK;
+        return new RsData<>(
+                "200-1",
+                "호텔 삭제에 성공하였습니다."
+        );
     }
 }

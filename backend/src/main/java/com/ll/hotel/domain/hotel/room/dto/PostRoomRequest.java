@@ -22,7 +22,7 @@ public record PostRoomRequest(
 
         @NotNull @Min(value = 1) Integer maxNumber,
 
-        @NotBlank Map<String, Integer> bedTypeNumber,
+        Map<String, Integer> bedTypeNumber,
 
         List<String> roomImages,
 
@@ -31,6 +31,8 @@ public record PostRoomRequest(
     public PostRoomRequest {
         roomImages = roomImages == null ? new ArrayList<>() : roomImages;
         roomOptions = roomOptions == null ? new HashSet<>() : roomOptions;
-        bedTypeNumber = bedTypeNumber == null ? new HashMap<>() : bedTypeNumber;
+        bedTypeNumber = bedTypeNumber == null || bedTypeNumber.isEmpty()
+                ? new HashMap<>()
+                : bedTypeNumber;
     }
 }

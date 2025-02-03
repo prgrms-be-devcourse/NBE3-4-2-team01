@@ -1,6 +1,8 @@
 package com.ll.hotel.domain.hotel.hotel.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
@@ -11,6 +13,7 @@ import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
+import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
@@ -20,7 +23,10 @@ import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,9 +61,11 @@ class HotelServiceTest {
     public void createHotel() {
         Business business = this.businessRepository.findAll().getFirst();
 
+        Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
+
         PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
-                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
+                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
 
         PostHotelResponse postHotelResponse = this.hotelService.create(postHotelRequest);
 
@@ -65,6 +73,10 @@ class HotelServiceTest {
 
         business.setHotel(hotel);
         this.businessRepository.save(business);
+
+        Set<String> hotelNames = hotel.getHotelOptions().stream()
+                .map(HotelOption::getName)
+                .collect(Collectors.toSet());
 
         assertEquals(this.hotelRepository.count(), 1L);
 
@@ -74,6 +86,11 @@ class HotelServiceTest {
         assertEquals(hotel.getBusiness().getId(), business.getId());
         assertEquals(hotel.getBusiness().getMember().getRole(), Role.BUSINESS);
         assertEquals(hotel.getBusiness().getHotel(), hotel);
+        assertEquals(hotel.getHotelOptions().size(), 3);
+        assertTrue(hotelNames.contains("Parking_lot"));
+        assertTrue(hotelNames.contains("Breakfast"));
+        assertTrue(hotelNames.contains("Lunch"));
+        assertFalse(hotelNames.contains("AirConditioner"));
     }
 
     @Test
@@ -203,10 +220,11 @@ class HotelServiceTest {
     @DisplayName("호텔 수정")
     public void modifyHotel() {
         Business business = businessRepository.findAll().getFirst();
+        Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
         PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
-                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
+                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
 
         PostHotelResponse postHotelResponse = this.hotelService.create(postHotelRequest);
 
@@ -216,18 +234,26 @@ class HotelServiceTest {
         business.setHotel(hotel);
         this.businessRepository.save(business);
 
-        PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", null, null, null,
-                null, null, null, null, null, null);
+        hotelOptions = new HashSet<>(Set.of("Parking_lot", "Dinner"));
+
+        PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", null, 0123, null,
+                null, null, null, null, null, hotelOptions);
 
         PutHotelResponse res1 = this.hotelService.modify(hotel.getId(), req1);
 
         hotel = this.hotelRepository.findById(res1.hotelId()).get();
 
+        Set<String> hotelOptionNames = hotel.getHotelOptions().stream()
+                        .map(HotelOption::getName)
+                                .collect(Collectors.toSet());
+
         assertEquals(hotel.getId(), hotelId);
-        assertEquals(hotel.getStreetAddress(),"서울시");
-        assertEquals(hotel.getCheckInTime(), LocalTime.of(12, 0));
-        assertEquals(hotel.getHotelName(), "수정된 호텔1");
-        assertEquals(hotel.getHotelEmail(), "moHotel@naver.com");
+        assertEquals(hotel.getStreetAddress(), postHotelRequest.streetAddress());
+        assertEquals(hotel.getZipCode(), req1.zipCode());
+        assertEquals(hotel.getCheckInTime(), postHotelRequest.checkInTime());
+        assertEquals(hotel.getHotelName(), req1.hotelName());
+        assertEquals(hotel.getHotelEmail(), req1.hotelEmail());
+        assertEquals(hotelOptionNames, hotelOptions);
     }
 
     @Test

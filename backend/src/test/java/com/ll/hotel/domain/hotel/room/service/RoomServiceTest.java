@@ -8,12 +8,16 @@ import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
+import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
 import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
+import com.ll.hotel.domain.hotel.room.dto.PutRoomRequest;
+import com.ll.hotel.domain.hotel.room.dto.PutRoomResponse;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
+import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import com.ll.hotel.domain.hotel.room.type.RoomStatus;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
@@ -28,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -215,6 +220,49 @@ class RoomServiceTest {
         assertTrue(res.roomOptions().contains("Computer"));
         assertTrue(res.roomOptions().contains("TV"));
         assertFalse(res.roomOptions().contains("AirConditioner"));
+    }
+
+    @Test
+    @DisplayName("객실 수정")
+    public void modifyRoom() {
+        Hotel hotel = this.hotelRepository.findAll().getFirst();
+        Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
+        Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
+
+        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
+
+        this.roomService.create(hotel.getId(), req1);
+
+        Room room = this.roomRepository.findAll().getFirst();
+        Long roomId = room.getId();
+
+        roomOptions = new HashSet<>(Set.of("TV", "AirConditioner"));
+        PutRoomRequest putReq1 = new PutRoomRequest("수정 객실1", 5, null, null, 5, null,
+                "in_booking", null, roomOptions);
+
+        PutRoomResponse res1 = this.roomService.modify(hotel.getId(), roomId, putReq1);
+
+        assertEquals(res1.hotelId(), hotel.getId());
+        assertEquals(res1.roomId(), room.getId());
+        assertEquals(res1.roomName(), room.getRoomName());
+        assertEquals(res1.roomStatus(), RoomStatus.IN_BOOKING.getValue());
+
+        room = this.roomRepository.findById(roomId).get();
+
+        Set<String> roomNames = room.getRoomOptions().stream()
+                .map(RoomOption::getName)
+                .collect(Collectors.toSet());
+
+        assertEquals(room.getRoomName(), putReq1.roomName());
+        assertEquals(room.getRoomNumber(), putReq1.roomNumber());
+        assertEquals(room.getBasePrice(), req1.basePrice());
+        assertEquals(room.getStandardNumber(), req1.standardNumber());
+        assertEquals(room.getMaxNumber(), putReq1.maxNumber());
+        assertEquals(room.getBedTypeNumber(), BedTypeNumber.fromJson(req1.bedTypeNumber()));
+        assertEquals(room.getRoomStatus(), RoomStatus.IN_BOOKING);
+        assertEquals(room.getHotel().getId(), hotel.getId());
+        assertEquals(room.getRoomImages().size(), 0);
+        assertEquals(roomNames, roomOptions);
     }
 
     @Test

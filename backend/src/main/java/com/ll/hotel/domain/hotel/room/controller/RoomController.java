@@ -50,7 +50,7 @@ public class RoomController {
     @GetMapping
     public RsData<List<GetAllRoomResponse>> findAllRooms(@PathVariable long hotelId) {
         return new RsData<>(
-                "200",
+                "200-1",
                 "모든 객실 정보를 정상적으로 불러왔습니다.",
                 this.roomService.findAllRooms(hotelId)
         );
@@ -59,7 +59,7 @@ public class RoomController {
     @GetMapping("/{roomId}")
     public RsData<GetRoomResponse> findRoomDetail(@PathVariable long hotelId, @PathVariable long roomId) {
         return new RsData<>(
-                "200",
+                "200-1",
                 "객실 정보를 정상적으로 불러왔습니다.",
                 this.roomService.findRoomDetail(hotelId, roomId)
         );
@@ -68,7 +68,7 @@ public class RoomController {
     @GetMapping("/{roomId}/room-option")
     public RsData<GetRoomOptionResponse> findRoomOptions(@PathVariable long hotelId, @PathVariable long roomId) {
         return new RsData<>(
-                "200",
+                "200-1",
                 "객실의 옵션 정보를 정상적으로 불러왔습니다.",
                 this.roomService.findRoomOptions(hotelId, roomId)
         );

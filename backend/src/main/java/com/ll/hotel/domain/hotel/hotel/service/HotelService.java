@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,12 +35,27 @@ public class HotelService {
     private final BusinessRepository businessRepository;
 
     /**
-     * HotelImage, hotelOption 등록 추가 필요
+     * HotelImage 등록 추가 필요
      */
     @Transactional
     public PostHotelResponse create(PostHotelRequest postHotelRequest) {
         Business business = this.businessRepository.findById(postHotelRequest.businessId())
                 .orElseThrow(() -> new ServiceException("404-1", "사업자가 존재하지 않습니다."));
+
+        Set<HotelOption> hotelOptions = new HashSet<>();
+
+        for (String name : postHotelRequest.hotelOptions()) {
+            Optional<HotelOption> opHotelOption = this.hotelOptionRepository.findByName(name);
+
+            if (opHotelOption.isEmpty()) {
+                HotelOption hotelOption = HotelOption.builder().name(name).build();
+                hotelOptions.add(hotelOption);
+            } else {
+                hotelOptions.add(opHotelOption.get());
+            }
+        }
+
+        this.hotelOptionRepository.saveAll(hotelOptions);
 
         Hotel hotel = Hotel.builder()
                 .hotelName(postHotelRequest.hotelName())
@@ -53,7 +69,7 @@ public class HotelService {
                 .hotelExplainContent(postHotelRequest.hotelExplainContent())
                 .business(business)
                 // 호텔 이미지 등록 추가 필요
-                // 호텔 옵션 등록 추가 필요
+                .hotelOptions(hotelOptions)
                 .build();
 
         return new PostHotelResponse(this.hotelRepository.save(hotel));
@@ -86,15 +102,15 @@ public class HotelService {
         Hotel hotel = this.hotelRepository.findById(hotelId)
                 .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
 
-        modifyIfPresent(request.hotelName(), hotel::setHotelName);
-        modifyIfPresent(request.hotelEmail(), hotel::setHotelEmail);
-        modifyIfPresent(request.hotelPhoneNumber(), hotel::setHotelPhoneNumber);
-        modifyIfPresent(request.streetAddress(), hotel::setStreetAddress);
-        modifyIfPresent(request.zipCode(), hotel::setZipCode);
-        modifyIfPresent(request.hotelGrade(), hotel::setHotelGrade);
-        modifyIfPresent(request.checkInTime(), hotel::setCheckInTime);
-        modifyIfPresent(request.checkOutTime(), hotel::setCheckOutTime);
-        modifyIfPresent(request.hotelExplainContent(), hotel::setHotelExplainContent);
+        modifyIfPresent(request.hotelName(), hotel::getHotelName, hotel::setHotelName);
+        modifyIfPresent(request.hotelEmail(), hotel::getHotelEmail, hotel::setHotelEmail);
+        modifyIfPresent(request.hotelPhoneNumber(), hotel::getHotelPhoneNumber, hotel::setHotelPhoneNumber);
+        modifyIfPresent(request.streetAddress(), hotel::getStreetAddress, hotel::setStreetAddress);
+        modifyIfPresent(request.zipCode(), hotel::getZipCode, hotel::setZipCode);
+        modifyIfPresent(request.hotelGrade(), hotel::getHotelGrade, hotel::setHotelGrade);
+        modifyIfPresent(request.checkInTime(), hotel::getCheckInTime, hotel::setCheckInTime);
+        modifyIfPresent(request.checkOutTime(), hotel::getCheckOutTime, hotel::setCheckOutTime);
+        modifyIfPresent(request.hotelExplainContent(), hotel::getHotelExplainContent, hotel::setHotelExplainContent);
 
         if (request.hotelStatus() != null) {
             try {
@@ -111,8 +127,8 @@ public class HotelService {
         return new PutHotelResponse(hotel);
     }
 
-    private <T> void modifyIfPresent(T newValue, Consumer<T> setter) {
-        if (newValue != null) {
+    private <T> void modifyIfPresent(T newValue, Supplier<T> getter, Consumer<T> setter) {
+        if (newValue != null && !newValue.equals(getter.get())) {
             setter.accept(newValue);
         }
     }
@@ -124,33 +140,25 @@ public class HotelService {
             return;
         }
 
-        List<HotelOption> options = this.hotelOptionRepository.findByNames(hotel.getId(), optionNames);
+        List<HotelOption> options = this.hotelOptionRepository.findByNameIn(optionNames);
 
-        Set<String> validNames = options.stream()
+        Set<String> curNames = options.stream()
                 .map(HotelOption::getName)
                 .collect(Collectors.toSet());
 
-        Set<String> inValidNames = optionNames.stream()
-                .filter(name -> !validNames.contains(name))
+        Set<HotelOption> newHotelOptions = optionNames.stream()
+                .filter(name -> !curNames.contains(name))
+                .filter(name -> !this.hotelOptionRepository.existsByName(name))
+                .map(name -> HotelOption.builder().name(name).build())
                 .collect(Collectors.toSet());
 
-        if (!inValidNames.isEmpty()) {
-            throw new ServiceException("404-3", "호텔 옵션 정보가 정확하지 않습니다.");
+        if (!newHotelOptions.isEmpty()) {
+            newHotelOptions = new HashSet<>(this.hotelOptionRepository.saveAll(newHotelOptions));
         }
 
-        Set<HotelOption> curOptions = hotel.getHotelOptions();
-        Set<HotelOption> newOptions = new HashSet<>(options);
-
-        Set<HotelOption> toAdd = newOptions.stream()
-                .filter(option -> !curOptions.contains(option))
-                .collect(Collectors.toSet());
-
-        Set<HotelOption> toRemove = curOptions.stream()
-                .filter(option -> !newOptions.contains(option))
-                .collect(Collectors.toSet());
-
-        curOptions.addAll(toAdd);
-        curOptions.removeAll(toRemove);
+        Set<HotelOption> resultHotelOptions = new HashSet<>(options);
+        resultHotelOptions.addAll(newHotelOptions);
+        hotel.setHotelOptions(resultHotelOptions);
     }
 
     @Transactional

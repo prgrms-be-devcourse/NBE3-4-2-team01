@@ -20,8 +20,10 @@ import com.ll.hotel.global.exceptions.ServiceException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,9 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomOptionRepository roomOptionRepository;
 
+    /**
+     * RoomImage 등록 추가 필요
+     */
     @Transactional
     public PostRoomResponse create(long hotelId, PostRoomRequest postRoomRequest) {
         Hotel hotel = this.hotelRepository.findById(hotelId)
@@ -44,10 +49,17 @@ public class RoomService {
         Set<RoomOption> roomOptions = new HashSet<>();
 
         for (String name : postRoomRequest.roomOptions()) {
-            RoomOption roomOption = RoomOption.builder().name(name).build();
-            roomOptions.add(roomOption);
-            this.roomOptionRepository.save(roomOption);
+            Optional<RoomOption> opRoomOption = this.roomOptionRepository.findByName(name);
+
+            if (opRoomOption.isEmpty()) {
+                RoomOption roomOption = RoomOption.builder().name(name).build();
+                roomOptions.add(roomOption);
+            } else {
+                roomOptions.add(opRoomOption.get());
+            }
         }
+
+        this.roomOptionRepository.saveAll(roomOptions);
 
         Room room = Room.builder()
                 .hotel(hotel)
@@ -57,6 +69,7 @@ public class RoomService {
                 .standardNumber(postRoomRequest.standardNumber())
                 .maxNumber(postRoomRequest.maxNumber())
                 .bedTypeNumber(bedTypeNumber)
+                // 객실 이미지 등록 추가 필요
                 .roomOptions(roomOptions)
                 .build();
 
@@ -65,8 +78,9 @@ public class RoomService {
 
     @Transactional
     public void delete(long hotelId, long roomId) {
-        Hotel hotel = this.hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
+        if (!this.hotelRepository.existsById(hotelId)) {
+            throw new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다.");
+        }
 
         Room room = this.roomRepository.findById(roomId)
                 .orElseThrow(() -> new ServiceException("404-2", "객실 정보를 찾을 수 없습니다."));
@@ -77,6 +91,11 @@ public class RoomService {
     @Transactional
     public List<GetAllRoomResponse> findAllRooms(long hotelId) {
         List<Room> rooms = this.roomRepository.findAllRooms(hotelId, ImageType.ROOM);
+
+        if (rooms.isEmpty()) {
+            throw new ServiceException("404-1", "호텔 Id에 해당하는 객실이 존재하지 않습니다.");
+        }
+
         List<GetAllRoomResponse> responses = new ArrayList<>();
 
         for (Room room : rooms) {
@@ -88,40 +107,49 @@ public class RoomService {
 
     @Transactional
     public GetRoomResponse findRoomDetail(long hotelId, long roomId) {
+        if (!this.hotelRepository.existsById(hotelId)) {
+            throw new ServiceException("404-1", "호텔 정보가 존재하지 않습니다.");
+        }
+
         Room room = this.roomRepository.findRoomDetail(hotelId, roomId, ImageType.ROOM)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔, 또는 객실 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new ServiceException("404-2", "객실 정보가 존재하지 않습니다."));
 
         return new GetRoomResponse(room);
     }
 
     @Transactional
     public GetRoomOptionResponse findRoomOptions(long hotelId, long roomId) {
-        Hotel hotel = this.hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보가 존재하지 않습니다."));
+        if (!this.hotelRepository.existsById(hotelId)) {
+            throw new ServiceException("404-1", "호텔 정보가 존재하지 않습니다.");
+        }
 
         Room room = this.roomRepository.findRoomOptionsById(roomId)
-                .orElseThrow(() -> new ServiceException("404-2", "객실, 혹은 객실 옵션 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new ServiceException("404-2", "객실 정보가 존재하지 않습니다."));
 
         return new GetRoomOptionResponse(room);
     }
 
     @Transactional
     public PutRoomResponse modify(long hotelId, long roomId, PutRoomRequest request) {
-        Room room = this.roomRepository.findRoomDetail(hotelId, roomId, ImageType.ROOM)
-                .orElseThrow(() -> new ServiceException("404-1", "객실 정보를 조회할 수 없습니다."));
+        if (!this.hotelRepository.existsById(hotelId)) {
+            throw new ServiceException("404-1", "호텔 정보를 조회할 수 없습니다.");
+        }
 
-        modifyIfPresent(request.roomName(), room::setRoomName);
-        modifyIfPresent(request.roomNumber(), room::setRoomNumber);
-        modifyIfPresent(request.basePrice(), room::setBasePrice);
-        modifyIfPresent(request.standardNumber(), room::setStandardNumber);
-        modifyIfPresent(request.maxNumber(), room::setMaxNumber);
-        modifyIfPresent(request.bedTypeNumber(), room::setBedTypeNumber);
+        Room room = this.roomRepository.findRoomDetail(hotelId, roomId, ImageType.ROOM)
+                .orElseThrow(() -> new ServiceException("404-2", "객실 정보를 조회할 수 없습니다."));
+
+        modifyIfPresent(request.roomName(), room::getRoomName, room::setRoomName);
+        modifyIfPresent(request.roomNumber(), room::getRoomNumber, room::setRoomNumber);
+        modifyIfPresent(request.basePrice(), room::getBasePrice, room::setBasePrice);
+        modifyIfPresent(request.standardNumber(), room::getStandardNumber, room::setStandardNumber);
+        modifyIfPresent(request.maxNumber(), room::getMaxNumber, room::setMaxNumber);
+        modifyIfPresent(request.bedTypeNumber(), room::getBedTypeNumber, room::setBedTypeNumber);
 
         if (request.roomStatus() != null) {
             try {
                 room.setRoomStatus(RoomStatus.valueOf(request.roomStatus().toUpperCase()));
             } catch (Exception e) {
-                throw new ServiceException("404-2", "객실 상태 정보를 정확히 입력해주세요.");
+                throw new ServiceException("404-3", "객실 상태 정보를 정확히 입력해주세요.");
             }
         }
 
@@ -132,8 +160,8 @@ public class RoomService {
         return new PutRoomResponse(room);
     }
 
-    private <T> void modifyIfPresent(T newValue, Consumer<T> setter) {
-        if (newValue != null) {
+    private <T> void modifyIfPresent(T newValue, Supplier<T> getter, Consumer<T> setter) {
+        if (newValue != null && !newValue.equals(getter.get())) {
             setter.accept(newValue);
         }
     }
@@ -141,37 +169,28 @@ public class RoomService {
     @Transactional
     public void modifyOptions(Room room, Set<String> optionNames) {
         if (optionNames == null || optionNames.isEmpty()) {
-            room.getRoomOptions().clear();
+            room.setRoomOptions(new HashSet<>());
             return;
         }
 
-        List<RoomOption> options = this.roomOptionRepository.findByNames(room.getHotel().getId(), room.getId(),
-                optionNames);
+        List<RoomOption> options = this.roomOptionRepository.findByNameIn(optionNames);
 
-        Set<String> validNames = options.stream()
+        Set<String> curNames = options.stream()
                 .map(RoomOption::getName)
                 .collect(Collectors.toSet());
 
-        Set<String> inValidNames = optionNames.stream()
-                .filter(name -> !validNames.contains(name))
+        Set<RoomOption> newRoomOptions = optionNames.stream()
+                .filter(name -> !curNames.contains(name))
+                .filter(name -> !this.roomOptionRepository.existsByName(name))
+                .map(name -> RoomOption.builder().name(name).build())
                 .collect(Collectors.toSet());
 
-        if (!inValidNames.isEmpty()) {
-            throw new ServiceException("404-3", "객실 옵션 정보가 정확하지 않습니다.");
+        if (!newRoomOptions.isEmpty()) {
+            newRoomOptions = new HashSet<>(this.roomOptionRepository.saveAll(newRoomOptions));
         }
 
-        Set<RoomOption> curOptions = room.getRoomOptions();
-        Set<RoomOption> newOptions = new HashSet<>(options);
-
-        Set<RoomOption> toAdd = newOptions.stream()
-                .filter(option -> !curOptions.contains(option))
-                .collect(Collectors.toSet());
-
-        Set<RoomOption> toRemove = curOptions.stream()
-                .filter(option -> !newOptions.contains(option))
-                .collect(Collectors.toSet());
-
-        curOptions.addAll(toAdd);
-        curOptions.removeAll(toRemove);
+        Set<RoomOption> resultRoomOptions = new HashSet<>(options);
+        resultRoomOptions.addAll(newRoomOptions);
+        room.setRoomOptions(resultRoomOptions);
     }
 }
