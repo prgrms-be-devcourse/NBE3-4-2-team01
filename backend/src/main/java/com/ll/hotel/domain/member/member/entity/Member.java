@@ -1,26 +1,13 @@
 package com.ll.hotel.domain.member.member.entity;
 
+import com.ll.hotel.domain.member.member.type.MemberStatus;
+import com.ll.hotel.global.security.oauth2.entity.OAuth;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import com.ll.hotel.domain.member.member.type.MemberStatus;
-import com.ll.hotel.global.security.oauth2.entity.OAuth;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 
 @Entity
@@ -72,25 +59,19 @@ public class Member {
 
     private String provider;
 
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
+    }
+
+    public boolean isBusiness() {
+        return this.role == Role.BUSINESS;
+    }
+
+    public boolean isUser() {
+        return this.role == Role.USER;
+    }
+
     public String getUserRole() {
-        return this.role.name();
+        return this.role.toString();
     }
-
-    @Builder
-    public Member(String memberEmail, String password, String memberName, 
-                 String memberPhoneNumber, LocalDate birthDate, 
-                 LocalDateTime createdAt, LocalDateTime modifiedAt,
-                 Role role, MemberStatus memberStatus, String provider) {
-        this.memberEmail = memberEmail;
-        this.password = password;
-        this.memberName = memberName;
-        this.memberPhoneNumber = memberPhoneNumber;
-        this.birthDate = birthDate;
-        this.createdAt = createdAt;
-        this.modifiedAt = modifiedAt;
-        this.role = role;
-        this.memberStatus = memberStatus;
-        this.provider = provider;
-    }
-
-} 
+}

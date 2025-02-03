@@ -3,14 +3,17 @@ package com.ll.hotel.domain.member.member.controller;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ll.hotel.domain.member.member.dto.MemberDTO;
 import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.domain.member.member.service.RefreshTokenService;
+import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -21,33 +24,34 @@ public class MemberController {
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/join")
-    public RsData<MemberDTO> join(@RequestBody JoinRequest request) {
-        log.debug("Join attempt for email: {}", request.email());
+    public RsData<MemberDTO> join(@RequestBody JoinRequest joinRequest) {
+        log.debug("Join attempt for email: {}", joinRequest.email());
         
-        if (memberService.existsByMemberEmail(request.email())) {
-            log.debug("Email already exists: {}", request.email());
+        if (memberService.existsByMemberEmail(joinRequest.email())) {
+            log.debug("Email already exists: {}", joinRequest.email());
             return new RsData<>("400-1", "이미 존재하는 이메일입니다.", null);
         }
         
         try {
             MemberDTO memberDTO = new MemberDTO(
-                    null,
-                    request.email(),
-                    request.name(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    request.provider()
+                null,
+                joinRequest.email(),
+                joinRequest.name(),
+                joinRequest.phoneNumber(),
+                joinRequest.birthDate(),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                Role.USER,
+                MemberStatus.ACTIVE,
+                joinRequest.provider()
             );
             
-            Member member = memberService.join(memberDTO, request.provider());
+            Member member = memberService.join(memberDTO, joinRequest.provider());
             
-            log.debug("Member joined successfully with email: {}", request.email());
-            
-            MemberDTO responseDTO = new MemberDTO(
+            return new RsData<>(
+                "200-1",
+                "회원가입이 완료되었습니다.",
+                new MemberDTO(
                     member.getMemberId(),
                     member.getMemberEmail(),
                     member.getMemberName(),
@@ -58,12 +62,11 @@ public class MemberController {
                     member.getRole(),
                     member.getMemberStatus(),
                     member.getProvider()
+                )
             );
-            
-            return new RsData<>("200-1", "회원가입이 완료되었습니다.", responseDTO);
         } catch (Exception e) {
             log.error("Error during join process: ", e);
-            return new RsData<>("500-1", "회원가입 처리 중 오류가 발생했습니다.", null);
+            return new RsData<>("400-1", "회원가입에 실패했습니다: " + e.getMessage(), null);
         }
     }
 

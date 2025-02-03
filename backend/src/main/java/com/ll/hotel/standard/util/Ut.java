@@ -2,15 +2,12 @@ package com.ll.hotel.standard.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ll.hotel.global.app.AppConfig;
-import com.ll.hotel.global.security.dto.SecurityUser;
 import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -66,13 +63,5 @@ public class Ut {
 
             return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
         }
-    }
-
-    public static SecurityUser getUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof SecurityUser securityUser) {
-            return securityUser;
-        }
-        return null;
     }
 }

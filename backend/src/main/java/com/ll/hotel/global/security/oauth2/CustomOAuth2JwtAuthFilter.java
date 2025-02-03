@@ -1,18 +1,8 @@
 package com.ll.hotel.global.security.oauth2;
 
 
-import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.member.member.repository.MemberRepository;
-import com.ll.hotel.domain.member.member.service.MemberService;
-import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.global.security.dto.SecurityUser;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,9 +10,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
+import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.domain.member.member.repository.MemberRepository;
+import com.ll.hotel.domain.member.member.service.MemberService;
+import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.security.dto.SecurityUser;
+import static com.ll.hotel.global.security.dto.SecurityUser.of;
 
-import static com.ll.hotel.global.security.dto.SecurityUser.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -55,7 +56,7 @@ public class CustomOAuth2JwtAuthFilter extends OncePerRequestFilter {
                         findMember.getMemberId(),
                         findMember.getMemberName(),
                         findMember.getMemberEmail(),
-                        "ROLE_" + findMember.getUserRole()
+                        "ROLE_" + findMember.getRole()
                 );
 
                 Authentication auth = new UsernamePasswordAuthenticationToken(
