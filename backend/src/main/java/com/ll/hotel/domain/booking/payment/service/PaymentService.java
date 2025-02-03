@@ -23,9 +23,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PaymentService {
     private final PaymentRepository paymentRepository;
-    @Value("${spring.portone.impKey}")
+    @Value("${api-keys.portone.impKey}")
     private String impKey;
-    @Value("${spring.portone.impSecret}")
+    @Value("${api-keys.portone.impSecret}")
     private String impSecret;
 
     // 결제 정보 저장

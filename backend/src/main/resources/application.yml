@@ -2,6 +2,10 @@ spring:
   application:
     name: hotel
 
+  # API keys
+  profiles:
+    include: api-keys
+
   # h2
   h2:
     console:

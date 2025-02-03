@@ -23,9 +23,9 @@ public class PaymentController {
      * portone api 호출에 필요한 keys
      * application.yml에 저장된 값을 가져옴
      */
-    @Value("${spring.portone.apiId}")
+    @Value("${api-keys.portone.apiId}")
     private String apiId;
-    @Value("${spring.portone.channel-key}")
+    @Value("${api-keys.portone.channel-key}")
     private String channelKey;
 
     // 상점 uid 및 api key 발급
