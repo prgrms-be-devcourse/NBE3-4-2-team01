@@ -45,92 +45,21 @@ public class Ut {
         }
     }
 
-
-    public GeneratedToken generateToken(String email, String role) {
-        String refreshToken = generateRefreshToken(email, role);
-        String accessToken = generateAccessToken(email, role);
-
-        // Redis 사용, 토큰 저장
-        tokenService.saveTokenInfo(email, refreshToken, accessToken);
-        return new GeneratedToken(accessToken, refreshToken);
-    }
-
-    public String generateRefreshToken(String email, String role) {
-        long refreshPeriod = jwtProperties.getRefreshTokenExpiration();
-
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("role", role);
-        Date now = new Date();
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + refreshPeriod))
-                .signWith(baseInit.getSecretKey())
-                .compact();
-    }
-
-
-    public String generateAccessToken(String email, String role) {
-        long tokenPeriod = jwtProperties.getAccessTokenExpiration();
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("role", role);
-
-        Date now = new Date();
-        return
-                Jwts.builder()
-                        .setClaims(claims)
-                        .setIssuedAt(now)
-                        .setExpiration(new Date(now.getTime() + tokenPeriod))
-                        .signWith(baseInit.getSecretKey())
-                        .compact();
-
-    }
-
-
-    public boolean verifyToken(String token) {
-        try {
-            // Bearer 접두사 제거
-            token = token.replace("Bearer ", "");
-
-            log.debug("Verifying token: {}", token);
-
-            Jws<Claims> claims = Jwts.parserBuilder()
-                    .setSigningKey(baseInit.getSecretKey())
-                    .build()
-                    .parseClaimsJws(token);
-
-            Date expiration = claims.getBody().getExpiration();
+    public static class jwt {
+        public static String toString(CustomOAuth2JwtProperties jwtProperties, Map<String, Object> claims) {
+            SecretKey secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
             Date now = new Date();
 
-            log.debug("Token expiration: {}, Current time: {}", expiration, now);
+            String tokenType = (String) claims.getOrDefault("type", "access");
+            long expiration = tokenType.equals("refresh")
+                    ? jwtProperties.getRefreshTokenExpiration()
+                    : jwtProperties.getAccessTokenExpiration(); // 토큰을 타입으로 구분하여 만료 시간 설정
 
-            return expiration.after(now);
-        } catch (Exception e) {
-            log.error("Token verification failed: {}", e.getMessage());
-            return false;
+            return Jwts.builder()
+                    .setClaims(claims)
+                    .setIssuedAt(now)
+                    .setExpiration(new Date(now.getTime() + expiration))
+                    .signWith(secretKey)
+                    .compact();
         }
-    }
-
-    // Email 추출
-    public String getUid(String token) {
-        // Bearer 접두사 제거
-        token = token.replace("Bearer ", "");
-        return Jwts.parserBuilder().setSigningKey(baseInit.getSecretKey()).build().parseClaimsJws(token).getBody().getSubject();
-    }
-
-    // Role(권한) 추출
-    public String getRole(String token) {
-        // Bearer 접두사 제거
-        token = token.replace("Bearer ", "");
-        return Jwts.parserBuilder().setSigningKey(baseInit.getSecretKey()).build().parseClaimsJws(token).getBody().get("role", String.class);
-    }
-
-    public static SecurityUserDto getUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof SecurityUserDto securityUserDto) {
-            return securityUserDto;
-        }
-        return null;
-    }
 }
