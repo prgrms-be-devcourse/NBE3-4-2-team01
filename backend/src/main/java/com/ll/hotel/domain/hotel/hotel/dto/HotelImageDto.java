@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.hotel.hotel.dto;
 
-import com.ll.hotel.domain.image.Image;
+import com.ll.hotel.domain.image.entity.Image;
 import jakarta.validation.constraints.NotBlank;
 
 public record HotelImageDto(
@@ -12,7 +12,7 @@ public record HotelImageDto(
     public HotelImageDto(Image image) {
         this(
                 image.getId(),
-                image.getImageUrl()
+                image.getImageUrl() != null ? image.getImageUrl() : "/images/default.jpg"
         );
     }
 }

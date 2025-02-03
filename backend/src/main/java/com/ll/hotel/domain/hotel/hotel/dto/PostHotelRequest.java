@@ -1,5 +1,6 @@
 package com.ll.hotel.domain.hotel.hotel.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -12,9 +13,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.web.multipart.MultipartFile;
 
 public record PostHotelRequest(
+        @NotNull
+        Long businessId,
+
         @NotBlank @Length(min = 2, max = 30)
         String hotelName,
 
@@ -34,15 +37,17 @@ public record PostHotelRequest(
         Integer hotelGrade,
 
         @NotNull
+        @JsonFormat(pattern = "HH:mm")
         LocalTime checkInTime,
 
         @NotNull
+        @JsonFormat(pattern = "HH:mm")
         LocalTime checkOutTime,
 
         @NotBlank
         String hotelExplainContent,
 
-        List<MultipartFile> hotelImages,
+        List<String> hotelImages,
 
         Set<String> hotelOptions
 ) {
