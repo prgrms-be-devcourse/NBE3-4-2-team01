@@ -1,14 +1,11 @@
 package com.ll.hotel.domain.member.admin.dto.response;
 
-import com.ll.hotel.domain.member.member.dto.MemberDto;
+import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
+import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 
 import java.time.LocalDate;
 
@@ -48,10 +45,16 @@ public class AdminBusinessResponse {
             String email,
             String phoneNumber,
             LocalDate birth,
-            MemberStatus status
+            MemberStatus memberStatus,
+
+            Long hotelId,
+            String hotelName,
+            String streetAddress,
+            HotelStatus hotelStatus
     ) {
         public static Detail from(Business business) {
             Member owner = business.getMember();
+            Hotel hotel = business.getHotel();
             return new Detail(
                     business.getId(),
                     business.getBusinessRegistrationNumber(),
@@ -61,7 +64,11 @@ public class AdminBusinessResponse {
                     owner.getMemberEmail(),
                     owner.getMemberPhoneNumber(),
                     owner.getBirthDate(),
-                    owner.getMemberStatus()
+                    owner.getMemberStatus(),
+                    (hotel != null) ? hotel.getId() : null,
+                    (hotel != null) ? hotel.getHotelName() : null,
+                    (hotel != null) ? hotel.getStreetAddress() : null,
+                    (hotel != null) ? hotel.getHotelStatus() : null
             );
         }
     }
