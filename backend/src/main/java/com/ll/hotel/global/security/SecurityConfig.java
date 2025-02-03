@@ -1,19 +1,25 @@
 package com.ll.hotel.global.security;
 
-import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthenticationSuccessHandler;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2FailureHandler;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2UserService;
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import com.ll.hotel.global.exceptions.JwtExceptionFilter;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthenticationSuccessHandler;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthorizationRequestRepository;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2FailureHandler;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtAuthFilter;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2UserService;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -22,12 +28,23 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final CustomOAuth2FailureHandler oAuth2AuthenticationFailureHandler;
+    private final CustomOAuth2AuthorizationRequestRepository oAuth2AuthorizationRequestRepository;
+    private final CustomOAuth2JwtAuthFilter customOAuth2JwtAuthFilter;
+    private final JwtExceptionFilter jwtExceptionFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .addFilterBefore(
+                    jwtExceptionFilter,
+                    UsernamePasswordAuthenticationFilter.class
+                )
+                .addFilterBefore(
+                    customOAuth2JwtAuthFilter,
+                    UsernamePasswordAuthenticationFilter.class
+                )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/login", "/oauth2/**").permitAll()
@@ -42,6 +59,9 @@ public class SecurityConfig {
                 .formLogin(formLogin -> formLogin.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestRepository(oAuth2AuthorizationRequestRepository)
+                        )
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
