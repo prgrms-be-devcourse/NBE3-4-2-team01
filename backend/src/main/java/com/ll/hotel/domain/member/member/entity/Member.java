@@ -72,6 +72,6 @@ public class Member {
     }
 
     public String getUserRole() {
-        return this.role.toString();
+        return this.role.name();
     }
 }
