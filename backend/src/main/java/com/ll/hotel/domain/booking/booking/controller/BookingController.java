@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/bookings/")
+@RequestMapping("/api/bookings")
 @RequiredArgsConstructor
 public class BookingController {
     private final BookingService bookingService;
@@ -29,7 +29,7 @@ public class BookingController {
             @RequestBody @Valid BookingRequest bookingRequest) {
         //Member member = rq.findByActor().get();
         Member member = new Member();
-
+        System.out.println(bookingRequest);
         Booking booking = bookingService.create(member, bookingRequest);
 
         return new RsData<>(
@@ -43,8 +43,8 @@ public class BookingController {
     @GetMapping("/me")
     @Transactional
     public RsData<PageDto<BookingResponse>> getMyBookings(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "5") int pageSize) {
+            @RequestParam(defaultValue = "1", name = "page") int page,
+            @RequestParam(defaultValue = "5", name = "page_size") int pageSize) {
         //Member member = rq.findByActor().get();
         Member member = new Member();
 
@@ -62,9 +62,9 @@ public class BookingController {
     @GetMapping("/hotels/{hotel_id}")
     @Transactional
     public RsData<PageDto<BookingResponse>> getHotelBookings(
-            @PathVariable Long hotelId,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "5") int pageSize) {
+            @PathVariable("hotel_id") Long hotelId,
+            @RequestParam(defaultValue = "1", name = "page") int page,
+            @RequestParam(defaultValue = "5", name = "page_size") int pageSize) {
         return new RsData<>(
                 "200",
                 "호텔 예약 목록 조회에 성공했습니다.",
@@ -76,10 +76,10 @@ public class BookingController {
     }
 
     // 예약 상세 조회
-    @GetMapping("/{book_id}")
+    @GetMapping("/{booking_id}")
     @Transactional
     public RsData<BookingResponse> getBooking(
-            @PathVariable Long bookingId) {
+            @PathVariable("booking_id") Long bookingId) {
         Booking booking = bookingService.findById(bookingId);
 
         return new RsData<>(
@@ -90,16 +90,17 @@ public class BookingController {
     }
 
     // 예약 취소
-    @DeleteMapping("/{book_id}")
+    @DeleteMapping("/{booking_id}")
     @Transactional
-    public RsData<Empty> cancel(
-            @PathVariable Long bookingId) {
+    public RsData<Booking> cancel(
+            @PathVariable("booking_id") Long bookingId) {
         Booking booking = bookingService.findById(bookingId);
         bookingService.cancel(booking);
 
         return new RsData<>(
                 "200",
-                String.format("%s번 예약이 취소되었습니다.", booking.getBookingNumber())
+                String.format("%s번 예약이 취소되었습니다.", booking.getBookingNumber()),
+                booking
         );
     }
 }

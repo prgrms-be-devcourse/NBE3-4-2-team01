@@ -39,7 +39,7 @@ public class Booking extends BaseTime {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    @Column(unique = true)
+    @Column
     private String bookingNumber;
 
     @Enumerated(EnumType.STRING)

@@ -11,6 +11,7 @@ import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
@@ -29,17 +30,25 @@ public class BookingService {
     private final HotelRepository hotelRepository;
     private final PaymentRepository paymentRepository;
 
+    // 테스트용
+    private final MemberRepository memberRepository;
+
     @Transactional
     public Booking create(Member member, BookingRequest bookingRequest) {
         Optional<Room> room = roomRepository.findById(bookingRequest.roomId());
         Optional<Hotel> hotel = hotelRepository.findById(bookingRequest.hotelId());
         Optional<Payment> payment = paymentRepository.findById(bookingRequest.paymentId());
 
+        // 테스트용
+        member = memberRepository.findById(1L).get();
+
         Booking booking = Booking.builder()
                 .room(room.get())
                 .hotel(hotel.get())
                 .member(member)
                 .payment(payment.get())
+                .checkInDate(bookingRequest.checkInDate())
+                .checkOutDate(bookingRequest.checkOutDate())
                 .build();
 
         booking = bookingRepository.save(booking);
