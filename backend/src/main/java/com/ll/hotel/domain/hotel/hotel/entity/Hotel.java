@@ -3,10 +3,9 @@ package com.ll.hotel.domain.hotel.hotel.entity;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.hotel.room.entity.Room;
-import com.ll.hotel.domain.image.Image;
+import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.review.entity.Review;
 import com.ll.hotel.global.jpa.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
@@ -59,10 +58,6 @@ public class Hotel extends BaseTime {
     @Builder.Default
     private List<Room> rooms = new ArrayList<>();
 
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Review> reviews = new ArrayList<>();
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "referenceId")
     @Builder.Default
@@ -76,6 +71,20 @@ public class Hotel extends BaseTime {
 
     @ManyToMany
     Set<Member> favorites;
+
+    @Column(nullable = false)
+    private Double averageRating;
+    @Column(nullable = false)
+    private Long totalReviewRatingSum;
+    @Column(nullable = false)
+    private Long totalReviewCount;
+
+    // 평균 레이팅 업데이트
+    public void updateAverageRating(int countOffset, int ratingOffset) {
+        this.totalReviewCount += countOffset;
+        this.totalReviewRatingSum += ratingOffset;
+        this.averageRating = Math.round(((double)totalReviewRatingSum / totalReviewCount) * 10.0) / 10.0;
+    }
 
     /**
      * 불필요 시 삭제

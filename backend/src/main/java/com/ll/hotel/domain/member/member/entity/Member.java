@@ -1,12 +1,21 @@
 package com.ll.hotel.domain.member.member.entity;
 
 import com.ll.hotel.domain.member.member.type.MemberStatus;
+import com.ll.hotel.global.jpa.entity.BaseTime;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.util.List;
 
 
@@ -17,12 +26,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Table(name = "member")
-public class Member {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(unique = true, nullable = false)
-    private Long memberId;
+public class Member extends BaseTime {
 
     @Column(unique = true, nullable = false)
     private String memberEmail;
@@ -38,13 +42,6 @@ public class Member {
 
     @Column(nullable = false)
     private LocalDate birthDate;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime modifiedAt;
-
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

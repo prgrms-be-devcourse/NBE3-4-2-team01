@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -62,6 +63,12 @@ public class Ut {
             token = token.replace("Bearer ", "").trim();
 
             return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+        }
+    }
+
+    public static class list {
+        public static boolean hasValue(List<?> list) {
+            return list != null && !list.isEmpty();
         }
     }
 }

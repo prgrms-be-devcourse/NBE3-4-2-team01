@@ -74,7 +74,20 @@ logging:
     org.springframework.security: DEBUG
     com.ll.hotel: DEBUG
     org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.orm.jdbc.extract: TRACE
 
 app:
   oauth2:
     authorizedRedirectUris: http://localhost:8080/api/auth/oauth2/callback
+  # S3
+  cloud:
+    aws:
+      s3:
+        bucket: ${BUCKET_NAME}
+      credentials:
+        access-key: ${IAM_ACCESS_KEY}
+        secret-key: ${IAM_SECRET_KEY}
+      region:
+        static: us-east-1
