@@ -4,18 +4,9 @@ import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.jpa.entity.BaseTime;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import java.util.List;
 
 
@@ -55,6 +46,9 @@ public class Member extends BaseTime {
     private List<OAuth> oAuthList;
 
     private String provider;
+
+    @OneToOne
+    private Business business;
 
     public boolean isAdmin() {
         return this.role == Role.ADMIN;
