@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.hotel.hotel.dto;
 
-import com.ll.hotel.domain.image.Image;
+import com.ll.hotel.domain.image.entity.Image;
 import jakarta.validation.constraints.NotBlank;
 
 public record HotelImageDto(
