@@ -1,12 +1,13 @@
 package com.ll.hotel.domain.hotel.room.repository;
 
 import com.ll.hotel.domain.hotel.room.entity.Room;
-import com.ll.hotel.domain.image.ImageType;
-import java.util.List;
-import java.util.Optional;
+import com.ll.hotel.domain.image.type.ImageType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface RoomRepository extends JpaRepository<Room, Long> {
     @Query("""
