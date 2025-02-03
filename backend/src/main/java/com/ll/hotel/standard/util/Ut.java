@@ -1,31 +1,31 @@
 package com.ll.hotel.standard.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ll.hotel.domain.member.member.service.RefreshTokenService;
 import com.ll.hotel.global.app.AppConfig;
-import com.ll.hotel.global.security.dto.GeneratedToken;
-import com.ll.hotel.global.security.dto.SecurityUserDto;
+import com.ll.hotel.global.security.dto.SecurityUser;
 import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.RequiredArgsConstructor;
+import io.jsonwebtoken.security.Keys;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class Ut {
 
-    private final CustomOAuth2JwtProperties jwtProperties;
-    private final RefreshTokenService tokenService;
+    private final SecretKey secretKey;
+
+    public Ut(CustomOAuth2JwtProperties jwtProperties) {
+        this.secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
+    }
 
     public static class str {
         public static boolean isBlank(String str) {
@@ -42,91 +42,36 @@ public class Ut {
         }
     }
 
-
-    public GeneratedToken generateToken(String email, String role) {
-        String refreshToken = generateRefreshToken(email, role);
-        String accessToken = generateAccessToken(email, role);
-
-        // Redis 사용, 토큰 저장
-        tokenService.saveTokenInfo(email, refreshToken, accessToken);
-        return new GeneratedToken(accessToken, refreshToken);
-    }
-
-    public String generateRefreshToken(String email, String role) {
-        long refreshPeriod = jwtProperties.getRefreshTokenExpiration();
-
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("role", role);
-        Date now = new Date();
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + refreshPeriod))
-                .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecret())
-                .compact();
-    }
-
-
-    public String generateAccessToken(String email, String role) {
-        long tokenPeriod = jwtProperties.getAccessTokenExpiration();
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("role", role);
-
-        Date now = new Date();
-        return
-                Jwts.builder()
-                        .setClaims(claims)
-                        .setIssuedAt(now)
-                        .setExpiration(new Date(now.getTime() + tokenPeriod))
-                        .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecret())
-                        .compact();
-
-    }
-
-
-    public boolean verifyToken(String token) {
-        try {
-            // Bearer 접두사 제거
-            token = token.replace("Bearer ", "");
-            
-            log.debug("Verifying token: {}", token);
-            
-            Jws<Claims> claims = Jwts.parserBuilder()
-                    .setSigningKey(jwtProperties.getSecret())
-                    .build()
-                    .parseClaimsJws(token);
-                    
-            Date expiration = claims.getBody().getExpiration();
+    public static class jwt {
+        public static String toString(CustomOAuth2JwtProperties jwtProperties, Map<String, Object> claims) {
+            SecretKey secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
             Date now = new Date();
-            
-            log.debug("Token expiration: {}, Current time: {}", expiration, now);
-            
-            return expiration.after(now);
-        } catch (Exception e) {
-            log.error("Token verification failed: {}", e.getMessage());
-            return false;
+
+            String tokenType = (String) claims.getOrDefault("type", "access");
+            long expiration = tokenType.equals("refresh")
+                    ? jwtProperties.getRefreshTokenExpiration()
+                    : jwtProperties.getAccessTokenExpiration(); // 토큰을 타입으로 구분하여 만료 시간 설정
+
+            return Jwts.builder()
+                    .setClaims(claims)
+                    .setIssuedAt(now)
+                    .setExpiration(new Date(now.getTime() + expiration))
+                    .signWith(secretKey)
+                    .compact();
+        }
+
+        public static Claims getClaims(CustomOAuth2JwtProperties jwtProperties, String token) {
+            SecretKey secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
+            token = token.replace("Bearer ", "").trim();
+
+            return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
         }
     }
 
-    // Email 추출
-    public String getUid(String token) {
-        // Bearer 접두사 제거
-        token = token.replace("Bearer ", "");
-        return Jwts.parserBuilder().setSigningKey(jwtProperties.getSecret()).build().parseClaimsJws(token).getBody().getSubject();
-    }
-
-    // Role(권한) 추출
-    public String getRole(String token) {
-        // Bearer 접두사 제거
-        token = token.replace("Bearer ", "");
-        return Jwts.parserBuilder().setSigningKey(jwtProperties.getSecret()).build().parseClaimsJws(token).getBody().get("role", String.class);
-    }
-
-    public static SecurityUserDto getUser() {
+    public static SecurityUser getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof SecurityUserDto securityUserDto) {
-            return securityUserDto;
+        if (authentication != null && authentication.getPrincipal() instanceof SecurityUser securityUser) {
+            return securityUser;
         }
         return null;
     }

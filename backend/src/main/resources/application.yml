@@ -74,3 +74,7 @@ logging:
     org.springframework.security: DEBUG
     com.ll.hotel: DEBUG
     org.springframework.web: DEBUG
+
+app:
+  oauth2:
+    authorizedRedirectUris: http://localhost:8080/api/auth/oauth2/callback

@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.ll.hotel.domain.member.member.dto.MemberDTO;
@@ -13,6 +12,7 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
+import com.ll.hotel.global.rsData.RsData;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,16 +21,14 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final AuthTokenService authTokenService;
+    private final RefreshTokenService refreshTokenService;
     private static final Logger log = LoggerFactory.getLogger(MemberService.class);
 
-    public Member join(MemberDTO memberDTO, String Password) {
-
-        String encodedPassword = passwordEncoder.encode(Password);
-
+    public Member join(MemberDTO memberDTO, String provider) {
         Member createdMember = Member.builder()
                 .memberEmail(memberDTO.memberEmail())
-                .password(encodedPassword)
+                .password("")
                 .memberName(memberDTO.memberName())
                 .memberPhoneNumber(memberDTO.memberPhoneNumber())
                 .birthDate(memberDTO.birthDate())
@@ -38,10 +36,12 @@ public class MemberService {
                 .modifiedAt(LocalDateTime.now())
                 .role(Role.USER)
                 .memberStatus(MemberStatus.ACTIVE)
+                .provider(provider)
                 .build();
 
         return memberRepository.save(createdMember);
     }
+
     public Optional<Member> findByMemberEmail(String email) {
         return memberRepository.findByMemberEmail(email);
     }
@@ -53,20 +53,19 @@ public class MemberService {
         return exists;
     }
 
-    public boolean authenticate(String email, String password) {
-        Optional<Member> memberOptional = findByMemberEmail(email);
-        
-        if (memberOptional.isEmpty()) {
-            log.debug("Member not found with email: {}", email);
-            return false;
-        }
-        
-        Member member = memberOptional.get();
-        boolean isPasswordMatch = passwordEncoder.matches(password, member.getPassword());
-        
-        log.debug("Password match result for email {}: {}", email, isPasswordMatch);
-        
-        return isPasswordMatch;
+    public boolean verifyToken(String accessToken) {
+        return authTokenService.verifyToken(accessToken);
     }
 
+    public String getEmail(String accessToken) {
+        return authTokenService.getEmail(accessToken);
+    }
+
+    public RsData<String> refreshAccessToken(String refreshToken) {
+        return refreshTokenService.refreshAccessToken(refreshToken);
+    }
+
+    public String generateRefreshToken(String email) {
+        return refreshTokenService.generateRefreshToken(email);
+    }
 }

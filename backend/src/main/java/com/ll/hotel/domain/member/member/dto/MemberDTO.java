@@ -15,5 +15,6 @@ public record MemberDTO(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
         Role role,
-        MemberStatus memberStatus
+        MemberStatus memberStatus,
+        String provider
 ) {}

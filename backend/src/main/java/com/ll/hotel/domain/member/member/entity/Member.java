@@ -70,8 +70,27 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<OAuth> oAuthList;
 
+    private String provider;
+
     public String getUserRole() {
         return this.role.name();
+    }
+
+    @Builder
+    public Member(String memberEmail, String password, String memberName, 
+                 String memberPhoneNumber, LocalDate birthDate, 
+                 LocalDateTime createdAt, LocalDateTime modifiedAt,
+                 Role role, MemberStatus memberStatus, String provider) {
+        this.memberEmail = memberEmail;
+        this.password = password;
+        this.memberName = memberName;
+        this.memberPhoneNumber = memberPhoneNumber;
+        this.birthDate = birthDate;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
+        this.role = role;
+        this.memberStatus = memberStatus;
+        this.provider = provider;
     }
 
 } 

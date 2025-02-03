@@ -1,7 +1,7 @@
 package com.ll.hotel.global.security.oauth2;
 
-import com.ll.hotel.domain.member.member.dto.MemberDTO;
 import com.ll.hotel.domain.member.member.service.MemberService;
+import com.ll.hotel.global.security.dto.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -72,26 +72,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("Required attributes are missing");
         }
 
-        // 회원가입 처리 또는 로그인 처리
-        if (!memberService.existsByMemberEmail(email)) {
-
-            // TODO: OAuth2 사용자의 추가 정보 입력 받기
-            // 아래는 임시로 추가 정보 없이 회원가입 처리, 아마 NPE가 발생할 것 같음, 이게 실행되게 하려면
-            log.debug("새로운 OAuth2 사용자 등록: {}", email);
-            MemberDTO memberDTO = new MemberDTO(
-                null,
-                email,
-                name,
-                null,  // phoneNumber는 나중에 추가 정보 입력 받음
-                null,  // birthDate도 나중에 추가 정보 입력 받음
-                null,
-                null,
-                null,
-                null
-            );
-            memberService.join(memberDTO, ""); // OAuth2 사용자는 비밀번호 불필요
-        }
-
-        return oauth2User;
+        // 회원가입 여부만 확인하고, SecurityUser 객체를 생성하여 반환
+        boolean isNewUser = !memberService.existsByMemberEmail(email);
+        
+        return new SecurityUser(
+            email,
+            name,
+            registrationId,
+            isNewUser,
+            oauth2User.getAttributes(),
+            oauth2User.getAuthorities()
+        );
     }
 }

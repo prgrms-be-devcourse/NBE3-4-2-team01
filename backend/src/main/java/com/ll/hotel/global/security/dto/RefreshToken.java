@@ -4,6 +4,7 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
+import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 
@@ -31,7 +32,7 @@ public class RefreshToken implements Serializable {
     }
 
     public void updateAccessToken(String accessToken) {
-        if (accessToken == null || accessToken.isEmpty()) {
+        if (!StringUtils.hasText(accessToken)) {
             throw new IllegalArgumentException("액세스 토큰은 null 이거나 비어 있을 수 없습니다");
         }
         this.accessToken = accessToken;
