@@ -92,7 +92,7 @@ public class BookingController {
     // 예약 취소
     @DeleteMapping("/{booking_id}")
     @Transactional
-    public RsData<Booking> cancel(
+    public RsData<BookingResponse> cancel(
             @PathVariable("booking_id") Long bookingId) {
         Booking booking = bookingService.findById(bookingId);
         bookingService.cancel(booking);
@@ -100,7 +100,7 @@ public class BookingController {
         return new RsData<>(
                 "200",
                 String.format("%s번 예약이 취소되었습니다.", booking.getBookingNumber()),
-                booking
+                BookingResponse.from(booking)
         );
     }
 }
