@@ -11,7 +11,7 @@ import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.hotel.option.hotelOption.repository.HotelOptionRepository;
-import com.ll.hotel.domain.image.ImageType;
+import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.global.exceptions.ServiceException;

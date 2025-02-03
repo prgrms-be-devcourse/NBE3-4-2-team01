@@ -4,30 +4,21 @@ import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
 import com.ll.hotel.domain.hotel.option.roomOption.repository.RoomOptionRepository;
-import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
-import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.PutRoomRequest;
-import com.ll.hotel.domain.hotel.room.dto.PutRoomResponse;
+import com.ll.hotel.domain.hotel.room.dto.*;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import com.ll.hotel.domain.hotel.room.type.RoomStatus;
-import com.ll.hotel.domain.image.ImageType;
+import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.global.exceptions.ServiceException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
