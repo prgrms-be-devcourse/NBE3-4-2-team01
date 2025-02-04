@@ -25,7 +25,7 @@ public class BookingController {
     @Transactional
     public RsData<BookingResponse> book(
             @RequestBody @Valid BookingRequest bookingRequest) {
-        Member member = rq.getMember();
+        Member member = rq.getActor();
         Booking booking = bookingService.create(member, bookingRequest);
 
         return new RsData<>(
@@ -41,7 +41,7 @@ public class BookingController {
     public RsData<PageDto<BookingResponse>> getMyBookings(
             @RequestParam(defaultValue = "1", name = "page") int page,
             @RequestParam(defaultValue = "5", name = "page_size") int pageSize) {
-        Member member = rq.getMember();
+        Member member = rq.getActor();
 
         return new RsData<>(
                 "200",

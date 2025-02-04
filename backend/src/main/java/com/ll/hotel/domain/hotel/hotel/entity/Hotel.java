@@ -111,17 +111,4 @@ public class Hotel extends BaseTime {
             totalReviewCount = 0L;
         }
     }
-
-    @PrePersist
-    public void prePersist() {
-        if (averageRating == null) {
-            averageRating = 0.0;
-        }
-        if (totalReviewRatingSum == null) {
-            totalReviewRatingSum = 0L;
-        }
-        if (totalReviewCount == null) {
-            totalReviewCount = 0L;
-        }
-    }
 }
