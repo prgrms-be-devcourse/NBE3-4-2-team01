@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
@@ -36,6 +36,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -172,9 +173,10 @@ class HotelServiceTest {
         hotel = this.hotelRepository.findById(res2.hotelId()).get();
         business.setHotel(hotel);
 
-        List<GetAllHotelResponse> list = this.hotelService.findAll();
-        GetAllHotelResponse Allres1 = list.getFirst();
-        GetAllHotelResponse Allres2 = list.getLast();
+        Page<GetHotelResponse> resultPage = this.hotelService.findAll(1, 10, "latest", "asc");
+        List<GetHotelResponse> list = resultPage.getContent();
+        GetHotelResponse Allres1 = list.getFirst();
+        GetHotelResponse Allres2 = list.getLast();
 
         assertEquals(Allres1.hotelId(), res1.hotelId());
         assertEquals(Allres2.hotelId(), res2.hotelId());
@@ -182,6 +184,67 @@ class HotelServiceTest {
         assertEquals(Allres2.hotelName(), "호텔2");
         assertEquals(Allres1.streetAddress(), "서울시");
         assertEquals(Allres2.streetAddress(), "부산시");
+        assertEquals(Allres1.hotelStatus(), HotelStatus.PENDING.getValue());
+        assertEquals(Allres2.hotelStatus(), HotelStatus.PENDING.getValue());
+    }
+
+    @Test
+    @DisplayName("호텔 전체 목록 조회 - filterDirection 값을 입력하지 않았을 경우")
+    public void findAllHotelsWithoutFilterDirection() {
+        Business business = this.businessRepository.findAll().getFirst();
+
+        PostHotelRequest req1 = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+                "010-1234-1234", "서울시", 0123,
+                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
+
+        PostHotelResponse res1 = this.hotelService.create(req1);
+
+        Hotel hotel = this.hotelRepository.findById(res1.hotelId()).get();
+
+        business.setHotel(hotel);
+        this.businessRepository.save(business);
+
+        Member member = Member.builder()
+                .memberEmail("business@naver.com")
+                .password("456")
+                .memberName("b2")
+                .memberPhoneNumber("010-1111-1111")
+                .birthDate(LocalDate.of(2000, 1, 1))
+                .role(Role.BUSINESS)
+                .memberStatus(MemberStatus.ACTIVE)
+                .build();
+
+        business = Business.builder()
+                .businessRegistrationNumber("1111111111")
+                .approvalStatus(BusinessApprovalStatus.APPROVED)
+                .member(member)
+                .build();
+
+        member.setBusiness(business);
+
+        this.memberRepository.save(member);
+        this.businessRepository.save(business);
+
+        PostHotelRequest req2 = new PostHotelRequest(business.getId(), "호텔2", "sin@naver.com",
+                "010-1111-1111", "부산시", 1111,
+                5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
+
+        PostHotelResponse res2 = this.hotelService.create(req2);
+
+        hotel = this.hotelRepository.findById(res2.hotelId()).get();
+        business.setHotel(hotel);
+
+        Page<GetHotelResponse> resultPage = this.hotelService.findAll(1, 10, "latest", null);
+        List<GetHotelResponse> list = resultPage.getContent();
+        GetHotelResponse Allres1 = list.getFirst();
+        GetHotelResponse Allres2 = list.getLast();
+
+        assertEquals(Allres1.hotelId(), res2.hotelId());
+        assertEquals(Allres2.hotelId(), res1.hotelId());
+        assertEquals(Allres1.hotelName(), "호텔2");
+        assertEquals(Allres2.hotelName(), "호텔1");
+        assertEquals(Allres1.streetAddress(), "부산시");
+        assertEquals(Allres2.streetAddress(), "서울시");
         assertEquals(Allres1.hotelStatus(), HotelStatus.PENDING.getValue());
         assertEquals(Allres2.hotelStatus(), HotelStatus.PENDING.getValue());
     }
