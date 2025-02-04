@@ -82,7 +82,7 @@ public class AdminBusinessControllerTest {
     void findAllPagedTest1() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/businesses")
+                        get("/api/admin/businesses")
                 )
                 .andDo(print());
 
@@ -99,7 +99,7 @@ public class AdminBusinessControllerTest {
     void findAllPagedTest2() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/businesses?page=20")
+                        get("/api/admin/businesses?page=20")
                 )
                 .andDo(print());
 
@@ -114,7 +114,7 @@ public class AdminBusinessControllerTest {
     void getByIdTest1() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/businesses/{id}", testBusinessId)
+                        get("/api/admin/businesses/{id}", testBusinessId)
                 )
                 .andDo(print());
 
@@ -131,7 +131,7 @@ public class AdminBusinessControllerTest {
     void getByIdTest2() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/businesses/25")
+                        get("/api/admin/businesses/25")
                 )
                 .andDo(print());
 
@@ -146,7 +146,7 @@ public class AdminBusinessControllerTest {
     void approveTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        patch("/admin/businesses/{id}", testBusinessId)
+                        patch("/api/admin/businesses/{id}", testBusinessId)
                                 .content("""
                                         {
                                             "businessApprovalStatus": "APPROVED"
