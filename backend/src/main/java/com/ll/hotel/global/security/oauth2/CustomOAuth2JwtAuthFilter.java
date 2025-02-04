@@ -57,25 +57,24 @@ public class CustomOAuth2JwtAuthFilter extends OncePerRequestFilter implements O
         String token = bearerToken.substring(7);
 
         try {
-            if (memberService.verifyToken(token)) {
-                String email = memberService.getEmail(token);
-                Member findMember = memberRepository.findByMemberEmail(email)
-                        .orElseThrow(() -> new ServiceException("404-1", "해당 이메일의 회원이 존재하지 않습니다."));
+            String email = memberService.extractEmailIfValid(token);
 
-                SecurityUser userDto = of(
-                        findMember.getId(),
-                        findMember.getMemberName(),
-                        findMember.getMemberEmail(),
-                        "ROLE_" + findMember.getRole()
-                );
+            Member findMember = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new ServiceException("404-1", "해당 회원이 존재하지 않습니다."));
 
-                Authentication auth = new UsernamePasswordAuthenticationToken(
-                        userDto,
-                        null,
-                        userDto.getAuthorities()
-                );
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            }
+            SecurityUser userDto = of(
+                findMember.getId(),
+                findMember.getMemberName(),
+                findMember.getMemberEmail(),
+                "ROLE_" + findMember.getRole()
+            );
+
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                userDto,
+                null,
+                userDto.getAuthorities()
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
         } catch (Exception e) {
             log.error("JWT Token Processing Error: {}", e.getMessage());
             throw new ServiceException("401-1", "유효하지 않은 토큰입니다.");
