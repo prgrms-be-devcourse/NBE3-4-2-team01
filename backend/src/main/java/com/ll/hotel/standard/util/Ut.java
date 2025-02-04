@@ -9,9 +9,9 @@ import io.jsonwebtoken.security.Keys;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 
@@ -63,6 +63,23 @@ public class Ut {
             token = token.replace("Bearer ", "").trim();
 
             return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+        }
+    }
+  
+    public static class random {
+        private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        private static final SecureRandom RANDOM = new SecureRandom();
+
+        public static String generateUID(int length) {
+            StringBuilder uid = new StringBuilder(length);
+
+            for (int i = 0; i < length; i++) {
+                int randomIndex = RANDOM.nextInt(CHARACTERS.length());
+                uid.append(CHARACTERS.charAt(randomIndex));
+            }
+
+            return uid.toString();
+
         }
     }
 

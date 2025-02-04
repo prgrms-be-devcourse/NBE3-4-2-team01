@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,20 +41,11 @@ public class HotelService {
         Business business = this.businessRepository.findById(postHotelRequest.businessId())
                 .orElseThrow(() -> new ServiceException("404-1", "사업자가 존재하지 않습니다."));
 
-        Set<HotelOption> hotelOptions = new HashSet<>();
+        Set<HotelOption> hotelOptions = this.hotelOptionRepository.findByNameIn(postHotelRequest.hotelOptions());
 
-        for (String name : postHotelRequest.hotelOptions()) {
-            Optional<HotelOption> opHotelOption = this.hotelOptionRepository.findByName(name);
-
-            if (opHotelOption.isEmpty()) {
-                HotelOption hotelOption = HotelOption.builder().name(name).build();
-                hotelOptions.add(hotelOption);
-            } else {
-                hotelOptions.add(opHotelOption.get());
-            }
+        if (hotelOptions.size() != postHotelRequest.hotelOptions().size()) {
+            throw new ServiceException("404-2", "사용할 수 없는 호텔 옵션이 존재합니다.");
         }
-
-        this.hotelOptionRepository.saveAll(hotelOptions);
 
         Hotel hotel = Hotel.builder()
                 .hotelName(postHotelRequest.hotelName())
@@ -140,25 +130,13 @@ public class HotelService {
             return;
         }
 
-        List<HotelOption> options = this.hotelOptionRepository.findByNameIn(optionNames);
+        Set<HotelOption> options = this.hotelOptionRepository.findByNameIn(optionNames);
 
-        Set<String> curNames = options.stream()
-                .map(HotelOption::getName)
-                .collect(Collectors.toSet());
-
-        Set<HotelOption> newHotelOptions = optionNames.stream()
-                .filter(name -> !curNames.contains(name))
-                .filter(name -> !this.hotelOptionRepository.existsByName(name))
-                .map(name -> HotelOption.builder().name(name).build())
-                .collect(Collectors.toSet());
-
-        if (!newHotelOptions.isEmpty()) {
-            newHotelOptions = new HashSet<>(this.hotelOptionRepository.saveAll(newHotelOptions));
+        if (options.size() != optionNames.size()) {
+            throw new ServiceException("404-3", "사용할 수 없는 호텔 옵션이 존재합니다.");
         }
 
-        Set<HotelOption> resultHotelOptions = new HashSet<>(options);
-        resultHotelOptions.addAll(newHotelOptions);
-        hotel.setHotelOptions(resultHotelOptions);
+        hotel.setHotelOptions(options);
     }
 
     @Transactional

@@ -1,4 +1,12 @@
 package com.ll.hotel.domain.booking.booking.dto;
 
-public class BookingRequest {
+import java.time.LocalDate;
+
+public record BookingRequest(
+        Long roomId,
+        Long hotelId,
+        Long paymentId,
+        LocalDate checkInDate,
+        LocalDate checkOutDate
+) {
 }
