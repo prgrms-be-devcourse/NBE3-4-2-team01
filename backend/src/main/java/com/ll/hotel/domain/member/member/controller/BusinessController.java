@@ -5,6 +5,7 @@ import com.ll.hotel.domain.member.member.dto.response.BusinessResponse;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.service.BusinessService;
+import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class BusinessController {
     private final BusinessService businessService;
+    private final Rq rq;
 
     @PostMapping("/register")
-    public RsData<BusinessResponse> register(@RequestBody @Valid BusinessRequest businessRequest,
-                                             @AuthenticationPrincipal MemberDetail memberDetail) {
+    public RsData<BusinessResponse> register(@RequestBody @Valid BusinessRequest businessRequest) {
 
-        Member member = memberDetail.getMember();
+        Member member =rq.getActor();
         Business business = businessService.register(businessRequest, member);
 
         return new RsData<>(
