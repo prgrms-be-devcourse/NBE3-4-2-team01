@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
+import com.ll.hotel.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,21 @@ public class PaymentService {
     private String impKey;
     @Value("${api-keys.portone.impSecret}")
     private String impSecret;
+
+    public String generateMerchantUid() {
+        int genCount = 10;
+        int uidLength = 10;
+
+        //10번 이내애 중복되지 않는 merchantUid를 생성해야 함, 그렇지 않으면 예외 처리
+        while (genCount-- > 0) {
+            String merchantUid = Ut.random.generateUID(uidLength);
+            if (!paymentRepository.existsByMerchantUid(merchantUid)) {
+                return merchantUid;
+            }
+        }
+
+        throw new ServiceException("400", "merchantUid 생성에 실패했습니다.");
+    }
 
     // 결제 정보 저장
     @Transactional

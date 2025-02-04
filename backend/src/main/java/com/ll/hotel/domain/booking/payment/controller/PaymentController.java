@@ -6,7 +6,6 @@ import com.ll.hotel.domain.booking.payment.dto.UidResponse;
 import com.ll.hotel.domain.booking.payment.entity.Payment;
 import com.ll.hotel.domain.booking.payment.service.PaymentService;
 import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.standard.util.Ut;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +30,7 @@ public class PaymentController {
     // 상점 uid 및 api key 발급
     @GetMapping("/uid")
     public RsData<UidResponse> getUid() {
-        String merchantUid = Ut.random.generateUID(10);
+        String merchantUid = paymentService.generateMerchantUid();
         return new RsData<>(
                 "201",
                 "Uid 발급에 성공했습니다.",
@@ -59,7 +58,7 @@ public class PaymentController {
         Payment payment = paymentService.findById(paymentId);
         return new RsData<>(
                 "200",
-                "결제 정보를 조회했습니다.",
+                "결제 정보 조회에 성공했습니다.",
                 PaymentResponse.from(payment)
         );
     }
@@ -71,7 +70,7 @@ public class PaymentController {
         Payment payment = paymentService.softDelete(paymentId);
         return new RsData<>(
                 "200",
-                "환불에 성공했습니다.",
+                "결제 취소에 성공했습니다.",
                 PaymentResponse.from(payment)
         );
     }
