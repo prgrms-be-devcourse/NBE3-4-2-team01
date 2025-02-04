@@ -1,10 +1,8 @@
 package com.ll.hotel.domain.member.admin.controller;
 
-import com.ll.hotel.config.TestSecurityConfig;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
-import com.ll.hotel.domain.member.admin.dto.request.AdminHotelRequest;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
@@ -18,8 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -38,8 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@Import(TestSecurityConfig.class)
 @Transactional
+@WithMockUser(username = "admin", roles = {"ADMIN"})
 public class AdminHotelControllerTest {
 
     @Autowired
