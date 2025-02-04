@@ -33,11 +33,11 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
             i.imageUrl
         )
         FROM Image i
-        WHERE i.referenceId IN :reviewIds
+        WHERE i.referenceId IN :referenceIds
         AND i.imageType = :imageType
     """)
-    List<ImageDto> findImageUrlsByReviewIdsAndImageType(
-            @Param("reviewIds") List<Long> reviewIds,
+    List<ImageDto> findImageUrlsByReferenceIdsAndImageType(
+            @Param("referenceIds") List<Long> referenceIds,
             @Param("imageType") ImageType imageType
     );
 }

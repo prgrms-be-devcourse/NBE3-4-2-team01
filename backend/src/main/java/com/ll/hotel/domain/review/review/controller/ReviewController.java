@@ -12,6 +12,7 @@ import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +40,7 @@ public class ReviewController {
             @PathVariable("bookingId") Long bookingId,
             @RequestParam("hotelId") Long hotelId,
             @RequestParam("roomId") Long roomId,
-            @RequestBody PostReviewRequest postReviewRequest) {
+            @RequestBody @Valid PostReviewRequest postReviewRequest) {
         // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
         if (actor == null) {
@@ -86,7 +87,7 @@ public class ReviewController {
     @Operation(summary = "리뷰 수정")
     public RsData<PresignedUrlsResponse> updateReview(
             @PathVariable("reviewId") long reviewId,
-            @RequestBody UpdateReviewRequest updateReviewRequest
+            @RequestBody @Valid UpdateReviewRequest updateReviewRequest
     ) {
         // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
