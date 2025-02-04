@@ -2,6 +2,7 @@ package com.ll.hotel.domain.hotel.hotel.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelResponse;
@@ -13,7 +14,9 @@ import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
+import com.ll.hotel.domain.hotel.option.hotelOption.dto.request.HotelOptionRequest;
 import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
+import com.ll.hotel.domain.hotel.option.hotelOption.service.HotelOptionService;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
@@ -21,6 +24,7 @@ import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
+import com.ll.hotel.global.exceptions.ServiceException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
@@ -43,6 +47,9 @@ class HotelServiceTest {
     private HotelService hotelService;
 
     @Autowired
+    private HotelOptionService hotelOptionService;
+
+    @Autowired
     private HotelRepository hotelRepository;
 
     @Autowired
@@ -60,6 +67,10 @@ class HotelServiceTest {
     @DisplayName("호텔 생성")
     public void createHotel() {
         Business business = this.businessRepository.findAll().getFirst();
+
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Parking_lot"));
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Breakfast"));
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Lunch"));
 
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
@@ -91,6 +102,28 @@ class HotelServiceTest {
         assertTrue(hotelNames.contains("Breakfast"));
         assertTrue(hotelNames.contains("Lunch"));
         assertFalse(hotelNames.contains("AirConditioner"));
+    }
+
+    @Test
+    @DisplayName("호텔 생성 실패 - 존재하지 않는 호텔 옵션")
+    public void createHotelInvalidHotelOptions() {
+        Business business = businessRepository.findAll().getFirst();
+
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Parking_lot"));
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Breakfast"));
+
+        Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
+
+        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+                "010-1234-1234", "서울시", 0123,
+                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
+
+        ServiceException error = assertThrows(ServiceException.class, () -> {
+            this.hotelService.create(postHotelRequest);
+        });
+
+        assertEquals(404, error.getRsData().getStatusCode());
+        assertEquals("사용할 수 없는 호텔 옵션이 존재합니다.", error.getRsData().getMsg());
     }
 
     @Test
@@ -220,6 +253,10 @@ class HotelServiceTest {
     @DisplayName("호텔 수정")
     public void modifyHotel() {
         Business business = businessRepository.findAll().getFirst();
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Parking_lot"));
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Breakfast"));
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Lunch"));
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Dinner"));
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
         PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
@@ -239,13 +276,13 @@ class HotelServiceTest {
         PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", null, 0123, null,
                 null, null, null, null, null, hotelOptions);
 
-        PutHotelResponse res1 = this.hotelService.modify(hotel.getId(), req1);
+        PutHotelResponse res1 = this.hotelService.modify(hotelId, req1);
 
         hotel = this.hotelRepository.findById(res1.hotelId()).get();
 
         Set<String> hotelOptionNames = hotel.getHotelOptions().stream()
-                        .map(HotelOption::getName)
-                                .collect(Collectors.toSet());
+                .map(HotelOption::getName)
+                .collect(Collectors.toSet());
 
         assertEquals(hotel.getId(), hotelId);
         assertEquals(hotel.getStreetAddress(), postHotelRequest.streetAddress());
@@ -254,6 +291,40 @@ class HotelServiceTest {
         assertEquals(hotel.getHotelName(), req1.hotelName());
         assertEquals(hotel.getHotelEmail(), req1.hotelEmail());
         assertEquals(hotelOptionNames, hotelOptions);
+    }
+
+    @Test
+    @DisplayName("호텔 수정 실패 - 존재하지 않는 호텔 옵션")
+    public void modifyHotelInvalidHotelOptions() {
+        Business business = businessRepository.findAll().getFirst();
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Parking_lot"));
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Breakfast"));
+        this.hotelOptionService.add(new HotelOptionRequest.Details("Lunch"));
+        Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
+
+        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+                "010-1234-1234", "서울시", 0123,
+                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
+
+        PostHotelResponse postHotelResponse = this.hotelService.create(postHotelRequest);
+
+        Hotel hotel = this.hotelRepository.findById(postHotelResponse.hotelId()).get();
+
+        long hotelId = hotel.getId();
+        business.setHotel(hotel);
+        this.businessRepository.save(business);
+
+        hotelOptions = new HashSet<>(Set.of("Parking_lot", "Dinner"));
+
+        PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", null, 0123, null,
+                null, null, null, null, null, hotelOptions);
+
+        ServiceException error = assertThrows(ServiceException.class, () -> {
+            this.hotelService.modify(hotelId, req1);
+        });
+
+        assertEquals(404, error.getRsData().getStatusCode());
+        assertEquals("사용할 수 없는 호텔 옵션이 존재합니다.", error.getRsData().getMsg());
     }
 
     @Test
