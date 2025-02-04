@@ -2,18 +2,13 @@ package com.ll.hotel.domain.member.member.entity;
 
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.jpa.entity.BaseTime;
+import com.ll.hotel.global.security.oauth2.entity.OAuth;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDate;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.List;
+
 
 @Entity
 @Getter
@@ -25,13 +20,13 @@ import lombok.Setter;
 public class Member extends BaseTime {
 
     @Column(unique = true, nullable = false)
-    private String memberEmail; // 실제 로그인 ID
+    private String memberEmail;
 
     @Column(nullable = false)
-    private String password; // 민감한 정보에 접두사를 붙여야 할지 고민
+    private String password;
 
     @Column(nullable = false)
-    private String memberName; // 유저 닉네임
+    private String memberName;
 
     @Column(nullable = false)
     private String memberPhoneNumber;
@@ -47,8 +42,25 @@ public class Member extends BaseTime {
     @Column(nullable = false)
     private MemberStatus memberStatus;
 
-    @OneToOne(mappedBy = "member")
+    @OneToMany(mappedBy = "member")
+    private List<OAuth> oAuthList;
+
+    private String provider;
+
+    @OneToOne
     private Business business;
+
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
+    }
+
+    public boolean isBusiness() {
+        return this.role == Role.BUSINESS;
+    }
+
+    public boolean isUser() {
+        return this.role == Role.USER;
+    }
 
     public String getUserRole() {
         return this.role.name();

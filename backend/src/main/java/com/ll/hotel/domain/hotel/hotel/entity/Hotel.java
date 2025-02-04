@@ -93,6 +93,20 @@ public class Hotel extends BaseTime {
     private void preRemove() {
         if (this.business != null) {
             this.business.setHotel(null);
+            this.business.setHotel(null);
+        }
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (averageRating == null) {
+            averageRating = 0.0;
+        }
+        if (totalReviewRatingSum == null) {
+            totalReviewRatingSum = 0L;
+        }
+        if (totalReviewCount == null) {
+            totalReviewCount = 0L;
         }
     }
 
