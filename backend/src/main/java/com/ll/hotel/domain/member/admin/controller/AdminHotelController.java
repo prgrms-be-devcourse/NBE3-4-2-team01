@@ -6,6 +6,7 @@ import com.ll.hotel.domain.member.admin.dto.response.AdminHotelResponse;
 import com.ll.hotel.domain.member.admin.service.AdminHotelService;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.standard.page.dto.PageDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,8 @@ public class AdminHotelController {
     private final AdminHotelService adminHotelService;
 
     @GetMapping
-    public RsData<Page<AdminHotelResponse.Summary>> getAll(
+    public RsData<PageDto<AdminHotelResponse.Summary>> getAll(
+
             @RequestParam(value = "page", defaultValue = "0") int page) {
 
         Page<AdminHotelResponse.Summary> pagedHotelSummaries = adminHotelService.findAllPaged(page)
@@ -31,7 +33,7 @@ public class AdminHotelController {
         return new RsData<>(
                 "200",
                 "모든 호텔 정보가 조회되었습니다.",
-                pagedHotelSummaries
+                new PageDto<>(pagedHotelSummaries)
         );
     }
 
