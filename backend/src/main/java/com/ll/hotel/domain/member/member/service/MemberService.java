@@ -11,6 +11,7 @@ import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import com.ll.hotel.global.security.oauth2.repository.OAuthRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public class MemberService {
     private static final String LOGOUT_PREFIX = "LOGOUT:";
 
     @Transactional
-    public Member join(JoinRequest joinRequest) {
+    public Member join(@Valid JoinRequest joinRequest) {
         log.debug("Starting join process for email: {}", joinRequest.email());
         
         if (memberRepository.existsByMemberEmail(joinRequest.email())) {
