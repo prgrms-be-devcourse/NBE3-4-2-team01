@@ -24,7 +24,7 @@ public class RoomOptionController {
 
         return new RsData<>(
                 "201",
-                "'항목이 추가되었습니다.",
+                "항목이 추가되었습니다.",
                 RoomOptionDto.toDto(roomOption)
         );
     }
