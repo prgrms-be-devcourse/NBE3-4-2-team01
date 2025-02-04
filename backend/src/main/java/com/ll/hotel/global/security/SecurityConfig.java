@@ -1,12 +1,19 @@
 package com.ll.hotel.global.security;
 
+
+import com.ll.hotel.domain.member.member.repository.MemberRepository;
+import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.exceptions.JwtExceptionFilter;
-import com.ll.hotel.global.security.oauth2.*;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthenticationSuccessHandler;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2FailureHandler;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtAuthFilter;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -22,49 +29,55 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final CustomOAuth2FailureHandler oAuth2AuthenticationFailureHandler;
-    private final CustomOAuth2AuthorizationRequestRepository oAuth2AuthorizationRequestRepository;
-    private final CustomOAuth2JwtAuthFilter customOAuth2JwtAuthFilter;
-    private final JwtExceptionFilter jwtExceptionFilter;
+    private final MemberService memberService;
+    private final MemberRepository memberRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .addFilterBefore(
-                    jwtExceptionFilter,
-                    UsernamePasswordAuthenticationFilter.class
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions
+                                .sameOrigin()
+                        )
                 )
-                .addFilterBefore(
-                    customOAuth2JwtAuthFilter,
-                    UsernamePasswordAuthenticationFilter.class
-                )
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/users/**").permitAll()
-                        .requestMatchers("/login", "/oauth2/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/admin/login").permitAll()
+                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+                        .requestMatchers(
+                                "/",
+                                "/error",
+                                "/favicon.ico",
+                                "/h2-console/**",
+                                "/api/auth/**",
+                                "/api/users/join",
+                                "/api/users/login",
+                                "/api/users/refresh",
+                                "/api/hotels/**",
+                                "/api/reviews/hotels/**",
+                                "/oauth2/authorization/**",
+                                "/login/oauth2/code/**",
+                                "/api/*/oauth2/callback"
+                        ).permitAll()
+                        
+                        // 관리자 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/hotels/**").permitAll()
-                        .requestMatchers("/api/favorites/**").authenticated()
+                        
+                        // 비즈니스 회원 전용
+                        .requestMatchers("/api/businesses/**").hasRole("BUSINESS")
+                        
                         .anyRequest().authenticated()
                 )
-                .headers(headers -> headers
-                        .frameOptions(frameOptions -> frameOptions.disable())
-                )
-                .formLogin(formLogin -> formLogin.disable())
-                .httpBasic(httpBasic -> httpBasic.disable())
-                .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(endpoint -> endpoint
-                                .authorizationRequestRepository(oAuth2AuthorizationRequestRepository)
-                        )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2Login(oauth2Login -> oauth2Login
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
                         .successHandler(oAuth2AuthenticationSuccessHandler)
                         .failureHandler(oAuth2AuthenticationFailureHandler)
-                );
+                )
+                .addFilterBefore(new JwtExceptionFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new CustomOAuth2JwtAuthFilter(memberService, memberRepository), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
