@@ -1,17 +1,18 @@
 package com.ll.hotel.domain.hotel.hotel.repository;
 
+import com.ll.hotel.domain.hotel.hotel.dto.HotelWithImageDto;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.image.type.ImageType;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-import java.util.Optional;
-
 public interface HotelRepository extends JpaRepository<Hotel, Long> {
     @Query("""
-            SELECT h, i
+            SELECT new com.ll.hotel.domain.hotel.hotel.dto.HotelWithImageDto(h, i)
             FROM Hotel h
             LEFT JOIN h.hotelImages i
             ON i.referenceId = h.id
@@ -24,7 +25,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             )
             OR i is NULL
             """)
-    List<Hotel> findAllHotels(@Param("imageType") ImageType imageType);
+    Page<HotelWithImageDto> findAllHotels(@Param("imageType") ImageType imageType, PageRequest pageRequest);
 
     @Query("""
             SELECT h

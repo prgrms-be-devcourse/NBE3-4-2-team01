@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.hotel.hotel.service;
 
-import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
@@ -15,14 +15,18 @@ import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,15 +70,35 @@ public class HotelService {
     }
 
     @Transactional
-    public List<GetAllHotelResponse> findAll() {
-        List<Hotel> hotels = this.hotelRepository.findAllHotels(ImageType.HOTEL);
-        List<GetAllHotelResponse> responses = new ArrayList<>();
+    public Page<GetHotelResponse> findAll(int page, int pageSize, String filterName, String filterDirection) {
+        Map<String, String> sortFieldMapping = Map.of(
+                "latest", "createdAt",
+                "averageRating", "averageRating",
+                "reviewCount", "totalReviewCount"
+        );
 
-        for (Hotel hotel : hotels) {
-            responses.add(new GetAllHotelResponse(hotel));
+        Map<String, Direction> defaultDirectionMapping = Map.of(
+                "latest", Sort.Direction.ASC
+        );
+
+        String sortField = sortFieldMapping.getOrDefault(filterName, "createdAt");
+
+        Sort.Direction direction;
+        if (filterDirection == null) {
+            direction = defaultDirectionMapping.getOrDefault(filterName, Direction.DESC);
+        } else {
+            try {
+                direction = Sort.Direction.valueOf(filterDirection.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new ServiceException("400-1", "정렬 방향은 ASC 또는 DESC만 가능합니다.");
+            }
         }
 
-        return responses;
+        Sort sort = Sort.by(direction, sortField);
+        PageRequest pageRequest = PageRequest.of(page - 1, pageSize, sort);
+
+        return this.hotelRepository.findAllHotels(ImageType.HOTEL, pageRequest)
+                .map(GetHotelResponse::new);
     }
 
     @Transactional

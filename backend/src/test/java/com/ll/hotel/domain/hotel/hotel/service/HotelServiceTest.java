@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
@@ -36,6 +36,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -172,9 +173,10 @@ class HotelServiceTest {
         hotel = this.hotelRepository.findById(res2.hotelId()).get();
         business.setHotel(hotel);
 
-        List<GetAllHotelResponse> list = this.hotelService.findAll();
-        GetAllHotelResponse Allres1 = list.getFirst();
-        GetAllHotelResponse Allres2 = list.getLast();
+        Page<GetHotelResponse> resultPage = this.hotelService.findAll(1, 10, "latest", null);
+        List<GetHotelResponse> list = resultPage.getContent();
+        GetHotelResponse Allres1 = list.getFirst();
+        GetHotelResponse Allres2 = list.getLast();
 
         assertEquals(Allres1.hotelId(), res1.hotelId());
         assertEquals(Allres2.hotelId(), res2.hotelId());

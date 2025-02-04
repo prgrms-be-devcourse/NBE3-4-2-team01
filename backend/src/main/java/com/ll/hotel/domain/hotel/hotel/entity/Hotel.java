@@ -74,8 +74,10 @@ public class Hotel extends BaseTime {
 
     @Column(nullable = false)
     private Double averageRating;
+
     @Column(nullable = false)
     private Long totalReviewRatingSum;
+
     @Column(nullable = false)
     private Long totalReviewCount;
 
