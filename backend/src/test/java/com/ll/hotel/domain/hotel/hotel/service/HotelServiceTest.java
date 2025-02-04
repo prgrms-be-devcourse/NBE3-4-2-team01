@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
@@ -269,13 +269,12 @@ class HotelServiceTest {
         business.setHotel(hotel);
         this.businessRepository.save(business);
 
-        HotelDto dto = this.hotelService.findHotelDetail(hotel.getId());
+        GetHotelDetailResponse detRes1 = this.hotelService.findHotelDetail(hotel.getId());
 
-        assertEquals(res1.hotelId(), dto.hotelId());
-        assertEquals("호텔1", dto.hotelName());
-        assertEquals(LocalTime.of(12, 0), dto.checkInTime());
-        assertEquals(dto.hotelImages().size(), 0);
-        assertEquals(dto.hotelOptions().size(), 0);
+        assertEquals(res1.hotelId(), detRes1.hotelDto().hotelId());
+        assertEquals("호텔1", detRes1.hotelDto().hotelName());
+        assertEquals(LocalTime.of(12, 0), detRes1.hotelDto().checkInTime());
+        assertEquals(detRes1.hotelDto().hotelOptions().size(), 0);
 
         Member member = Member.builder()
                 .memberEmail("business@naver.com")
@@ -308,13 +307,12 @@ class HotelServiceTest {
         business.setHotel(hotel);
         this.businessRepository.save(business);
 
-        dto = this.hotelService.findHotelDetail(hotel.getId());
+        detRes1 = this.hotelService.findHotelDetail(hotel.getId());
 
-        assertEquals(res2.hotelId(), dto.hotelId());
-        assertEquals("호텔2", dto.hotelName());
-        assertEquals(LocalTime.of(14, 0), dto.checkInTime());
-        assertEquals(dto.hotelImages().size(), 0);
-        assertEquals(dto.hotelOptions().size(), 0);
+        assertEquals(res2.hotelId(), detRes1.hotelDto().hotelId());
+        assertEquals("호텔2", detRes1.hotelDto().hotelName());
+        assertEquals(LocalTime.of(14, 0), detRes1.hotelDto().checkInTime());
+        assertEquals(detRes1.hotelDto().hotelOptions().size(), 0);
     }
 
     @Test
@@ -343,7 +341,7 @@ class HotelServiceTest {
         hotelOptions = new HashSet<>(Set.of("Parking_lot", "Dinner"));
 
         PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", null, 0123, null,
-                null, null, null, null, null, hotelOptions);
+                null, null, null, null, null, null, hotelOptions);
 
         PutHotelResponse res1 = this.hotelService.modify(hotelId, actor, req1);
 
@@ -387,7 +385,7 @@ class HotelServiceTest {
         hotelOptions = new HashSet<>(Set.of("Parking_lot", "Dinner"));
 
         PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", null, 0123, null,
-                null, null, null, null, null, hotelOptions);
+                null, null, null, null, null, null, hotelOptions);
 
         ServiceException error = assertThrows(ServiceException.class, () -> {
             this.hotelService.modify(hotelId, actor, req1);

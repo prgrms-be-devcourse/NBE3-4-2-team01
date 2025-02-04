@@ -47,12 +47,12 @@ public record PostHotelRequest(
         @NotBlank
         String hotelExplainContent,
 
-        List<String> hotelImages,
+        List<String> imageExtensions,
 
         Set<String> hotelOptions
 ) {
     public PostHotelRequest {
-        hotelImages = hotelImages == null ? new ArrayList<>() : hotelImages;
+        imageExtensions = imageExtensions == null ? new ArrayList<>() : imageExtensions;
         hotelOptions = hotelOptions == null ? new HashSet<>() : hotelOptions;
     }
 }

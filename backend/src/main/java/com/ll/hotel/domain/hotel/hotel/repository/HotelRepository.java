@@ -14,7 +14,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     @Query("""
             SELECT new com.ll.hotel.domain.hotel.hotel.dto.HotelWithImageDto(h, i)
             FROM Hotel h
-            LEFT JOIN h.hotelImages i
+            LEFT JOIN Image i
             ON i.referenceId = h.id
             AND i.imageType = :imageType
             WHERE i.uploadedAt = (
@@ -30,10 +30,8 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     @Query("""
             SELECT h
             FROM Hotel h
-            LEFT JOIN FETCH h.hotelImages i
             WHERE h.id = :hotelId
-            AND (i IS NULL
-            OR (i.referenceId = :hotelId AND i.imageType = :imageType))
+            AND h.hotelStatus <> 'UNAVAILABLE'
             """)
-    Optional<Hotel> findHotelDetail(@Param("hotelId") long hotelId, @Param("imageType") ImageType imageType);
+    Optional<Hotel> findHotelDetail(@Param("hotelId") long hotelId);
 }

@@ -1,12 +1,13 @@
 package com.ll.hotel.domain.hotel.hotel.controller;
 
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
+import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rq.Rq;
@@ -15,6 +16,7 @@ import com.ll.hotel.standard.base.Empty;
 import com.ll.hotel.standard.page.dto.PageDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +38,7 @@ public class HotelController {
 
     @PostMapping
     public RsData<PostHotelResponse> create(@RequestBody @Valid PostHotelRequest postHotelRequest) {
-        Member actor = rq.getActor();
+        Member actor = this.rq.getActor();
 
         if (actor == null) {
             throw new ServiceException("401-1", "로그인 해주세요.");
@@ -50,6 +52,28 @@ public class HotelController {
                 "201-1",
                 "호텔을 정상적으로 등록하였습니다.",
                 this.hotelService.create(actor, postHotelRequest)
+        );
+    }
+
+    @PostMapping("/{hotelId}/urls")
+    public RsData<Empty> saveImageUrls(@PathVariable long hotelId,
+                                       @RequestBody List<String> urls
+    ) {
+        Member actor = this.rq.getActor();
+
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인 해주세요.");
+        }
+
+        if (!actor.isBusiness()) {
+            throw new ServiceException("403-1", "사업가만 호텔을 등록할 수 있습니다.");
+        }
+
+        this.hotelService.saveImages(ImageType.HOTEL, hotelId, urls);
+
+        return new RsData<>(
+                "201-1",
+                "호텔 이미지 저장에 성공하였습니다."
         );
     }
 
@@ -69,7 +93,7 @@ public class HotelController {
     }
 
     @GetMapping("/{hotelId}")
-    public RsData<HotelDto> findHotelDetail(@PathVariable long hotelId) {
+    public RsData<GetHotelDetailResponse> findHotelDetail(@PathVariable long hotelId) {
         return new RsData<>(
                 "200-1",
                 "호텔 정보를 정상적으로 불러왔습니다.",
@@ -81,7 +105,7 @@ public class HotelController {
     public RsData<PutHotelResponse> modifyHotel(@PathVariable long hotelId,
                                                 @RequestBody @Valid PutHotelRequest request
     ) {
-        Member actor = rq.getActor();
+        Member actor = this.rq.getActor();
 
         if (actor == null) {
             throw new ServiceException("401-1", "로그인 해주세요.");
@@ -100,7 +124,7 @@ public class HotelController {
 
     @DeleteMapping("/{hotelId}")
     public RsData<Empty> deleteHotel(@PathVariable Long hotelId) {
-        Member actor = rq.getActor();
+        Member actor = this.rq.getActor();
 
         if (actor == null) {
             throw new ServiceException("401-1", "로그인 해주세요.");
