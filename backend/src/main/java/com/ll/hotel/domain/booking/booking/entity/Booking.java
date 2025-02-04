@@ -56,4 +56,8 @@ public class Booking extends BaseTime {
     public boolean isReservedBy(Member member) {
         return this.member.equals(member);
     }
+
+    public boolean isOwnedBy(Member member) {
+        return this.member.isBusiness() && member.getBusiness().equals(hotel.getBusiness());
+    }
 }

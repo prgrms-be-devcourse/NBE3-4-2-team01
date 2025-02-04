@@ -8,7 +8,6 @@ import com.ll.hotel.domain.booking.payment.entity.Payment;
 import com.ll.hotel.domain.booking.payment.repository.PaymentRepository;
 import com.ll.hotel.domain.booking.payment.type.PaymentStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
-
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -36,6 +35,7 @@ public class PaymentService {
         return paymentRepository.count();
     }
 
+    // Uid 생성
     public String generateMerchantUid() {
         int genCount = 10;
         int uidLength = 10;
@@ -64,12 +64,9 @@ public class PaymentService {
     public Payment create(BookingRequest bookingRequest) {
         PaymentRequest paymentRequest;
 
+        // bookingRequest에서 paymentRequest를 추출
         try {
-            paymentRequest = new PaymentRequest(
-                    bookingRequest.merchantUid(),
-                    bookingRequest.amount(),
-                    bookingRequest.paidAtTimestamp()
-            );
+            paymentRequest = PaymentRequest.from(bookingRequest);
         } catch (Exception e) {
             throw new ServiceException("500-1", CREATE_ERROR_MESSAGE);
         }
@@ -112,54 +109,72 @@ public class PaymentService {
 
     @Transactional
     public Payment softDelete(Payment payment) {
+        // 이미 취소되었을 경우
         if (payment.getPaymentStatus() == PaymentStatus.CANCELLED) {
             throw new ServiceException("400", "이미 취소된 결제입니다.");
         }
 
         WebClient webClient = WebClient.create("https://api.iamport.kr");
         String accessToken = getAccessToken(webClient);
-        ResponseEntity<Void> response = cancelPayment(webClient, accessToken, payment.getMerchantUid());
 
-        if (response.getStatusCode().is2xxSuccessful()) {
-            payment.setPaymentStatus(PaymentStatus.CANCELLED);
-            return paymentRepository.save(payment);
-        } else {
-            throw new ServiceException(
-                    response.getStatusCode().toString(),
-                    "결제 취소에 실패했습니다."
-            );
-        }
+        return cancelPayment(webClient, accessToken, payment);
     }
 
     // access token 발급
     public String getAccessToken(WebClient webClient) {
-        ResponseEntity<TokenResponse> tokenResponse = webClient.post()
-                .uri("/users/getToken")
-                .header("Content-Type", "application/json")
-                .bodyValue(new TokenRequest(impKey, impSecret))
-                .retrieve()
-                .toEntity(TokenResponse.class)
-                .block();
+        try {
+            ResponseEntity<TokenResponse> tokenResponse = webClient.post()
+                    .uri("/users/getToken")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(new TokenRequest(impKey, impSecret))
+                    .retrieve()
+                    .toEntity(TokenResponse.class)
+                    .block();
 
-        if (tokenResponse.getStatusCode().is2xxSuccessful()) {
-            return tokenResponse.getBody().response().accessToken();
-        } else {
-            throw new ServiceException(
-                    tokenResponse.getStatusCode().toString(),
-                    "토큰 발급에 실패했습니다."
-            );
+            if (tokenResponse.getStatusCode().is2xxSuccessful()) {
+                return tokenResponse.getBody().response().accessToken();
+            } else {
+                throw new ServiceException(
+                        tokenResponse.getStatusCode().toString(),
+                        "토큰 발급 권한이 없습니다. 관리자에게 문의하세요."
+                );
+            }
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServiceException("500-1", "토큰 발급 중 오류가 발생했습니다. 관리자에게 문의하세요.");
         }
     }
 
-    // 결제 취소 api 호출
-    public ResponseEntity<Void> cancelPayment(WebClient webClient, String accessToken, String merchantUid) {
-        return webClient.post()
-                .uri("/payments/cancel")
-                .header("Authorization", "Bearer " + accessToken)
-                .bodyValue(Map.of("merchant_uid", merchantUid))
-                .retrieve()
-                .toEntity(Void.class) // 본문 무시
-                .block();
+    // 결제 취소
+    @Transactional
+    public Payment cancelPayment(WebClient webClient, String accessToken, Payment payment) {
+        try {
+            // 취소 api 호출
+            String merchantUid = payment.getMerchantUid();
+            ResponseEntity<Void> response = webClient.post()
+                    .uri("/payments/cancel")
+                    .header("Authorization", "Bearer " + accessToken)
+                    .bodyValue(Map.of("merchant_uid", merchantUid))
+                    .retrieve()
+                    .toEntity(Void.class) // 본문 무시
+                    .block();
+
+            // 취소 상태 변경
+            if (response.getStatusCode().is2xxSuccessful()) {
+                payment.setPaymentStatus(PaymentStatus.CANCELLED);
+                return paymentRepository.save(payment);
+            } else {
+                throw new ServiceException(
+                        response.getStatusCode().toString(),
+                        "결제 취소 권한이 없습니다. 관리자에게 문의하세요."
+                );
+            }
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServiceException("500-2", "결제 취소 중 오류가 발생했습니다. 관리자에게 문의하세요.");
+        }
     }
 
     public Payment findById(Long paymentId) {

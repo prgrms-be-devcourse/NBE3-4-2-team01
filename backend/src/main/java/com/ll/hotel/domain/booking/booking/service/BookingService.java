@@ -18,7 +18,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.IllegalFormatException;
 import java.util.Optional;
 
@@ -33,7 +32,7 @@ public class BookingService {
 
     /*
      * 예약, 결제 정보 저장
-     * 결제 -> 예약 저장 순으로 진행됨
+     * 결제 -> 예약 저장 순으로 진행
      * 결제 오류 코드는 500-1, 500-2, 500-3 (PaymentService 코드 참고)
      * 예약 오류 코드는 500-4, 500-5, 500-6
      * 코드 500-4: room, hotel 검색 에러
@@ -70,14 +69,32 @@ public class BookingService {
         }
     }
 
+    /*
+     * 예약, 결제 취소
+     * 결제 -> 예약 취소 순으로 진행
+     */
+    public Booking cancel(Long bookingId) {
+        return cancel(findById(bookingId));
+    }
+
     @Transactional
-    public void cancel(Booking booking) {
+    public Booking cancel(Booking booking) {
+        // 이미 예약 및 결제가 취소되었을 경우
         if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
             throw new ServiceException("400", "이미 취소된 예약입니다.");
         }
 
-        booking.setBookingStatus(BookingStatus.CANCELLED);
-        bookingRepository.save(booking);
+        // 결제 취소 시도
+        Payment payment = booking.getPayment();
+        paymentService.softDelete(payment);
+
+        // 예약 취소 시도
+        try {
+            booking.setBookingStatus(BookingStatus.CANCELLED);
+            return bookingRepository.save(booking);
+        } catch (Exception e) {
+            throw new ServiceException("500-3", "예약이 정상적으로 취소되지 않았습니다. 관리자에게 문의하세요.");
+        }
     }
 
     public Booking findById(Long id) {
@@ -93,5 +110,10 @@ public class BookingService {
     public Page<Booking> findByHotelId(Long hotelId, int page, int pageSize) {
         PageRequest pageRequest = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Order.desc("id")));
         return bookingRepository.findByHotelId(hotelId, pageRequest);
+    }
+
+    public Page<Booking> findAll(int page, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Order.desc("id")));
+        return bookingRepository.findAll(pageRequest);
     }
 }
