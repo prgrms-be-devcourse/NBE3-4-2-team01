@@ -2,9 +2,12 @@ package com.ll.hotel.domain.review.review.controller;
 
 import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
+import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.review.review.dto.*;
 import com.ll.hotel.domain.review.review.service.ReviewService;
 import com.ll.hotel.global.aws.s3.S3Service;
+import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,22 +31,23 @@ public class ReviewController {
     private final ImageService imageService;
     private final ReviewService reviewService;
     private final S3Service s3Service;
+    private final Rq rq;
 
     @PostMapping("/{bookingId}")
     @Operation(summary = "리뷰 생성")
     public RsData<PresignedUrlsResponse> createReview(
             @PathVariable("bookingId") Long bookingId,
-            @RequestParam("hotelId") Long hotelId, // 임시
-            @RequestParam("roomId") Long roomId, // 임시
-            @RequestParam("memberId") Long memberId, // 임시
+            @RequestParam("hotelId") Long hotelId,
+            @RequestParam("roomId") Long roomId,
             @RequestBody PostReviewRequest postReviewRequest) {
         // 인증 체크 (로그인된 사용자인가?)
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 생성 가능합니다.");
+        }
 
-        // 권한 체크 (예약자가 맞는가?)
-
-
-        // 리뷰 생성
-        long reviewId = reviewService.createReview(hotelId, roomId, memberId, bookingId,
+        // 리뷰 생성 (+권한 체크)
+        long reviewId = reviewService.createReview(hotelId, roomId, actor.getId(), bookingId,
                 postReviewRequest.content(), postReviewRequest.rating());
 
         // 리뷰 사진 저장
@@ -63,6 +67,16 @@ public class ReviewController {
             @PathVariable("reviewId") long reviewId,
             @RequestBody List<String> urls) {
 
+        // 인증 체크 (로그인된 사용자인가?)
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 생성 가능합니다.");
+        }
+
+        // 권한 체크 (리뷰 작성자인가?)
+        if (!reviewService.getReview(reviewId).isWrittenBy(actor)) {
+            throw new ServiceException("403-1", "리뷰 작성자만 사진 등록이 가능합니다.");
+        }
 
         imageService.saveImages(ImageType.REVIEW, reviewId, urls);
         return RsData.OK;
@@ -75,11 +89,13 @@ public class ReviewController {
             @RequestBody UpdateReviewRequest updateReviewRequest
     ) {
         // 인증 체크 (로그인된 사용자인가?)
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 수정 가능합니다.");
+        }
 
-        // 권한 체크 (예약자가 맞는가?)
-
-        // content, rating 수정
-        reviewService.updateReviewContentAndRating(reviewId, updateReviewRequest.content(), updateReviewRequest.rating());
+        // content, rating 수정 (+권한 체크)
+        reviewService.updateReviewContentAndRating(actor, reviewId, updateReviewRequest.content(), updateReviewRequest.rating());
 
         List<String> deleteImageUrls = Optional.ofNullable(updateReviewRequest.deleteImageUrls())
                 .orElse(Collections.emptyList());
@@ -108,11 +124,13 @@ public class ReviewController {
             @PathVariable("reviewId") long reviewId
     ) {
         // 인증 체크 (로그인된 사용자인가?)
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 삭제 가능합니다.");
+        }
 
-        // 권한 체크 (예약자가 맞는가?)
-
-        // 리뷰 상태를 DELETED 로 변경
-        reviewService.deleteReview(reviewId);
+        // 리뷰 상태를 DELETED 로 변경 (+권한 체크)
+        reviewService.deleteReview(actor, reviewId);
         // DB 의 사진 URL 정보 삭제
         long imageCount = imageService.deleteImages(ImageType.REVIEW, reviewId);
         // S3 의 사진 삭제
@@ -129,29 +147,36 @@ public class ReviewController {
             @PathVariable("reviewId") long reviewId
     ) {
         // 인증 체크 (로그인된 사용자인가?)
-
-        // 권한 체크 (예약자가 맞는가?)
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 수정 가능합니다.");
+        }
 
         return new RsData<>(
                 "200-1",
                 "리뷰 조회 성공",
-                reviewService.getReviewResponse(reviewId)
+                reviewService.getReviewResponse(actor, reviewId) // (+권한 체크)
         );
     }
 
     @GetMapping("/me")
     @Operation(summary = "내 리뷰 목록 조회")
-    public RsData<List<MyReviewResponse>> getMyReviews(
-            @RequestParam("memberId") Long memberId // 임시
-    ) {
+    public RsData<List<MyReviewResponse>> getMyReviews() {
         // 인증 체크 (로그인된 사용자인가?)
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 목록 조회 가능합니다.");
+        }
 
-        // 권한 체크 (예약자가 맞는가?)
+        // 권한 체크
+        if (!actor.isUser()) {
+            throw new ServiceException("403-1", "관리자, 사업자는 리뷰 목록 조회가 불가능합니다.");
+        }
 
         return new RsData<>(
                 "200-1",
                 "나의 리뷰 목록 생성",
-                reviewService.getMyReviewResponses(memberId)
+                reviewService.getMyReviewResponses(actor.getId())
         );
     }
 
@@ -160,9 +185,6 @@ public class ReviewController {
     public RsData<List<HotelReviewResponse>> getHotelReviews(
             @PathVariable("hotelId") long hotelId
     ) {
-        // 인증 체크 (로그인된 사용자인가?)
-
-        // 권한 체크 (호텔 관리자가 맞는가?)
 
         return new RsData<>(
                 "200-1",

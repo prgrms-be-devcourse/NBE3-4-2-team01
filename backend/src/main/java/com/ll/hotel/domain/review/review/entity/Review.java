@@ -59,4 +59,8 @@ public class Review extends BaseTime {
         this.rating = rating;
         this.reviewStatus = reviewStatus;
     }
+
+    public boolean isWrittenBy(Member member) {
+        return this.member.equals(member);
+    }
 }
