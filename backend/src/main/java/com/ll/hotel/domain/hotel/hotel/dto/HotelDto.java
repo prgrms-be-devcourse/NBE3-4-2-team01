@@ -44,8 +44,6 @@ public record HotelDto(
         @NotBlank
         String hotelStatus,
 
-        List<HotelImageDto> hotelImages,
-
         List<GetAllRoomResponse> rooms,
 
         Set<String> hotelOptions
@@ -65,12 +63,9 @@ public record HotelDto(
                 hotel.getCheckOutTime(),
                 hotel.getHotelExplainContent(),
                 hotel.getHotelStatus().getValue(),
-                hotel.getHotelImages().stream()
-                        .map(HotelImageDto::new)
-                        .collect(Collectors.toList()),
                 hotel.getRooms().stream()
                         .map(GetAllRoomResponse::new)
-                        .collect(Collectors.toList()),
+                        .toList(),
                 hotel.getHotelOptions() != null
                         ? hotel.getHotelOptions().stream()
                         .map(HotelOption::getName)
