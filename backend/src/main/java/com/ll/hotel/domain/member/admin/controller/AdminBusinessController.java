@@ -6,6 +6,7 @@ import com.ll.hotel.domain.member.admin.service.AdminBusinessService;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.standard.page.dto.PageDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,7 @@ public class AdminBusinessController {
     private final AdminBusinessService adminBusinessService;
 
     @GetMapping
-    public RsData<Page<AdminBusinessResponse.Summary>> getAll(
+    public RsData<PageDto<AdminBusinessResponse.Summary>> getAll(
             @RequestParam(value = "page", defaultValue = "0") int page) {
 
         Page<AdminBusinessResponse.Summary> pagedBusinessSummaries = adminBusinessService.findAllPaged(page)
@@ -31,7 +32,7 @@ public class AdminBusinessController {
         return new RsData<>(
                 "200",
                 "모든 사업자 정보가 조회되었습니다.",
-                pagedBusinessSummaries
+                new PageDto<>(pagedBusinessSummaries)
         );
     }
 
