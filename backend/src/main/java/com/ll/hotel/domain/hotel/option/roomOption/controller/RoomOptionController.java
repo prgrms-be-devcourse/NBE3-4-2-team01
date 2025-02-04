@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/room-amenities")
+@RequestMapping("/admin/room-options")
 @RequiredArgsConstructor
 public class RoomOptionController {
     private final RoomOptionService roomOptionService;
