@@ -9,6 +9,7 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,7 @@ public class FavoriteService {
     private final Rq rq;
 
     @Transactional
-    public void addFavorite(FavoriteReqBody favoriteReqBody) {
+    public void addFavorite(@Valid FavoriteReqBody favoriteReqBody) {
         hotelRepository.findById(favoriteReqBody.hotelId())
             .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 호텔입니다."));
 
@@ -52,7 +53,7 @@ public class FavoriteService {
     }
 
     @Transactional
-    public RsData<String> deleteFavorite(FavoriteReqBody request) {
+    public RsData<String> deleteFavorite(@Valid FavoriteReqBody request) {
         Member actor = rq.getActor();
         if (actor == null) {
             throw new ServiceException("401-1", "로그인이 필요합니다.");
