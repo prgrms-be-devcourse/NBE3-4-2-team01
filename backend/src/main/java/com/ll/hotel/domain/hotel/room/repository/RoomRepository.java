@@ -39,12 +39,4 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             """)
     Optional<Room> findRoomDetail(@Param("hotelId") long hotelId, @Param("roomId") long roomId,
                                   @Param("imageType") ImageType imageType);
-
-    @Query("""
-            SELECT r
-            FROM Room r
-            LEFT JOIN FETCH r.roomOptions
-            WHERE r.id = :roomId
-            """)
-    Optional<Room> findRoomOptionsById(@Param("roomId") long roomId);
 }

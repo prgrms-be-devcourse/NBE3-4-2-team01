@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.hotel.hotel.service;
 
-import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
@@ -15,15 +15,17 @@ import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,20 +44,11 @@ public class HotelService {
         Business business = this.businessRepository.findById(postHotelRequest.businessId())
                 .orElseThrow(() -> new ServiceException("404-1", "사업자가 존재하지 않습니다."));
 
-        Set<HotelOption> hotelOptions = new HashSet<>();
+        Set<HotelOption> hotelOptions = this.hotelOptionRepository.findByNameIn(postHotelRequest.hotelOptions());
 
-        for (String name : postHotelRequest.hotelOptions()) {
-            Optional<HotelOption> opHotelOption = this.hotelOptionRepository.findByName(name);
-
-            if (opHotelOption.isEmpty()) {
-                HotelOption hotelOption = HotelOption.builder().name(name).build();
-                hotelOptions.add(hotelOption);
-            } else {
-                hotelOptions.add(opHotelOption.get());
-            }
+        if (hotelOptions.size() != postHotelRequest.hotelOptions().size()) {
+            throw new ServiceException("404-2", "사용할 수 없는 호텔 옵션이 존재합니다.");
         }
-
-        this.hotelOptionRepository.saveAll(hotelOptions);
 
         Hotel hotel = Hotel.builder()
                 .hotelName(postHotelRequest.hotelName())
@@ -76,15 +69,31 @@ public class HotelService {
     }
 
     @Transactional
-    public List<GetAllHotelResponse> findAll() {
-        List<Hotel> hotels = this.hotelRepository.findAllHotels(ImageType.HOTEL);
-        List<GetAllHotelResponse> responses = new ArrayList<>();
+    public Page<GetHotelResponse> findAll(int page, int pageSize, String filterName, String filterDirection) {
+        Map<String, String> sortFieldMapping = Map.of(
+                "latest", "createdAt",
+                "averageRating", "averageRating",
+                "reviewCount", "totalReviewCount"
+        );
 
-        for (Hotel hotel : hotels) {
-            responses.add(new GetAllHotelResponse(hotel));
+        String sortField = sortFieldMapping.getOrDefault(filterName, "createdAt");
+
+        Sort.Direction direction;
+        if (filterDirection == null) {
+            direction = Direction.DESC;
+        } else {
+            try {
+                direction = Sort.Direction.valueOf(filterDirection.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new ServiceException("400-1", "정렬 방향은 ASC 또는 DESC만 가능합니다.");
+            }
         }
 
-        return responses;
+        Sort sort = Sort.by(direction, sortField);
+        PageRequest pageRequest = PageRequest.of(page - 1, pageSize, sort);
+
+        return this.hotelRepository.findAllHotels(ImageType.HOTEL, pageRequest)
+                .map(GetHotelResponse::new);
     }
 
     @Transactional
@@ -140,25 +149,13 @@ public class HotelService {
             return;
         }
 
-        List<HotelOption> options = this.hotelOptionRepository.findByNameIn(optionNames);
+        Set<HotelOption> options = this.hotelOptionRepository.findByNameIn(optionNames);
 
-        Set<String> curNames = options.stream()
-                .map(HotelOption::getName)
-                .collect(Collectors.toSet());
-
-        Set<HotelOption> newHotelOptions = optionNames.stream()
-                .filter(name -> !curNames.contains(name))
-                .filter(name -> !this.hotelOptionRepository.existsByName(name))
-                .map(name -> HotelOption.builder().name(name).build())
-                .collect(Collectors.toSet());
-
-        if (!newHotelOptions.isEmpty()) {
-            newHotelOptions = new HashSet<>(this.hotelOptionRepository.saveAll(newHotelOptions));
+        if (options.size() != optionNames.size()) {
+            throw new ServiceException("404-3", "사용할 수 없는 호텔 옵션이 존재합니다.");
         }
 
-        Set<HotelOption> resultHotelOptions = new HashSet<>(options);
-        resultHotelOptions.addAll(newHotelOptions);
-        hotel.setHotelOptions(resultHotelOptions);
+        hotel.setHotelOptions(options);
     }
 
     @Transactional

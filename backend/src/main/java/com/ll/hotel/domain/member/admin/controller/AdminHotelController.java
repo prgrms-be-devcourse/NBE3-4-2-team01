@@ -20,6 +20,7 @@ public class AdminHotelController {
 
     @GetMapping
     public RsData<PageDto<AdminHotelResponse.Summary>> getAll(
+
             @RequestParam(value = "page", defaultValue = "0") int page) {
 
         Page<AdminHotelResponse.Summary> pagedHotelSummaries = adminHotelService.findAllPaged(page)
