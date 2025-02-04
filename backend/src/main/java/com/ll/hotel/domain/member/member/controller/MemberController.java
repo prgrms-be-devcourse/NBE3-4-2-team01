@@ -29,7 +29,18 @@ public class MemberController {
         
         if (memberService.existsByMemberEmail(joinRequest.email())) {
             log.debug("Email already exists: {}", joinRequest.email());
-            return new RsData<>("400-1", "이미 존재하는 이메일입니다.", null);
+            return new RsData<>("400-1", "이미 존재하는 이메일입니다.", new MemberDTO(
+                null,
+                joinRequest.email(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ));
         }
         
         try {

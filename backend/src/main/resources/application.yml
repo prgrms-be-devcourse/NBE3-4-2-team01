@@ -1,4 +1,13 @@
 spring:
+  cloud:
+    aws:
+      s3:
+        bucket: temp
+      credentials:
+        access-key: test-access-key
+        secret-key: test-secret-key
+      region:
+        static: us-east-1
   application:
     name: hotel
   profiles:
@@ -81,13 +90,3 @@ logging:
 app:
   oauth2:
     authorizedRedirectUris: http://localhost:8080/api/auth/oauth2/callback
-  # S3
-  cloud:
-    aws:
-      s3:
-        bucket: ${BUCKET_NAME}
-      credentials:
-        access-key: ${IAM_ACCESS_KEY}
-        secret-key: ${IAM_SECRET_KEY}
-      region:
-        static: us-east-1
