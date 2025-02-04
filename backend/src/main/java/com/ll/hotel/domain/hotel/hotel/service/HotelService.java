@@ -16,7 +16,6 @@ import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -77,15 +76,11 @@ public class HotelService {
                 "reviewCount", "totalReviewCount"
         );
 
-        Map<String, Direction> defaultDirectionMapping = Map.of(
-                "latest", Sort.Direction.ASC
-        );
-
         String sortField = sortFieldMapping.getOrDefault(filterName, "createdAt");
 
         Sort.Direction direction;
         if (filterDirection == null) {
-            direction = defaultDirectionMapping.getOrDefault(filterName, Direction.DESC);
+            direction = Direction.DESC;
         } else {
             try {
                 direction = Sort.Direction.valueOf(filterDirection.toUpperCase());
