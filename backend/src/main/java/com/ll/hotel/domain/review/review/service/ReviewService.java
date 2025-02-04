@@ -119,7 +119,7 @@ public class ReviewService {
                 .map(dto -> dto.reviewDto().reviewId())
                 .toList();
 
-        Map<Long, List<String>> reviewImageUrls = imageRepository.findImageUrlsByReviewIdsAndImageType(
+        Map<Long, List<String>> reviewImageUrls = imageRepository.findImageUrlsByReferenceIdsAndImageType(
                         reviewIds, ImageType.REVIEW)
                 .stream()
                 .collect(Collectors.groupingBy(
@@ -142,7 +142,7 @@ public class ReviewService {
                 .map(dto -> dto.reviewDto().reviewId())
                 .toList();
 
-        Map<Long, List<String>> reviewImageUrls = imageRepository.findImageUrlsByReviewIdsAndImageType(
+        Map<Long, List<String>> reviewImageUrls = imageRepository.findImageUrlsByReferenceIdsAndImageType(
                         reviewIds, ImageType.REVIEW)
                 .stream()
                 .collect(Collectors.groupingBy(
