@@ -11,6 +11,12 @@ import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import com.ll.hotel.domain.hotel.room.type.RoomStatus;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.global.exceptions.ServiceException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,20 +43,12 @@ public class RoomService {
                 .orElseThrow(() -> new ServiceException("404-1", "호텔의 정보가 존재하지 않습니다."));
 
         BedTypeNumber bedTypeNumber = BedTypeNumber.fromJson(postRoomRequest.bedTypeNumber());
-        Set<RoomOption> roomOptions = new HashSet<>();
 
-        for (String name : postRoomRequest.roomOptions()) {
-            Optional<RoomOption> opRoomOption = this.roomOptionRepository.findByName(name);
+        Set<RoomOption> roomOptions = this.roomOptionRepository.findByNameIn(postRoomRequest.roomOptions());
 
-            if (opRoomOption.isEmpty()) {
-                RoomOption roomOption = RoomOption.builder().name(name).build();
-                roomOptions.add(roomOption);
-            } else {
-                roomOptions.add(opRoomOption.get());
-            }
+        if (roomOptions.size() != postRoomRequest.roomOptions().size()) {
+            throw new ServiceException("404-2", "사용할 수 없는 객실 옵션이 존재합니다.");
         }
-
-        this.roomOptionRepository.saveAll(roomOptions);
 
         Room room = Room.builder()
                 .hotel(hotel)
@@ -114,7 +112,7 @@ public class RoomService {
             throw new ServiceException("404-1", "호텔 정보가 존재하지 않습니다.");
         }
 
-        Room room = this.roomRepository.findRoomOptionsById(roomId)
+        Room room = this.roomRepository.findById(roomId)
                 .orElseThrow(() -> new ServiceException("404-2", "객실 정보가 존재하지 않습니다."));
 
         return new GetRoomOptionResponse(room);
@@ -164,24 +162,12 @@ public class RoomService {
             return;
         }
 
-        List<RoomOption> options = this.roomOptionRepository.findByNameIn(optionNames);
+        Set<RoomOption> options = this.roomOptionRepository.findByNameIn(optionNames);
 
-        Set<String> curNames = options.stream()
-                .map(RoomOption::getName)
-                .collect(Collectors.toSet());
-
-        Set<RoomOption> newRoomOptions = optionNames.stream()
-                .filter(name -> !curNames.contains(name))
-                .filter(name -> !this.roomOptionRepository.existsByName(name))
-                .map(name -> RoomOption.builder().name(name).build())
-                .collect(Collectors.toSet());
-
-        if (!newRoomOptions.isEmpty()) {
-            newRoomOptions = new HashSet<>(this.roomOptionRepository.saveAll(newRoomOptions));
+        if (options.size() != optionNames.size()) {
+            throw new ServiceException("404-4", "사용할 수 없는 객실 옵션이 존재합니다.");
         }
 
-        Set<RoomOption> resultRoomOptions = new HashSet<>(options);
-        resultRoomOptions.addAll(newRoomOptions);
-        room.setRoomOptions(resultRoomOptions);
+        room.setRoomOptions(options);
     }
 }
