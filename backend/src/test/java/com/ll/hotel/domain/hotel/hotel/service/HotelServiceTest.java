@@ -271,10 +271,10 @@ class HotelServiceTest {
 
         GetHotelDetailResponse detRes1 = this.hotelService.findHotelDetail(hotel.getId());
 
-        assertEquals(res1.hotelId(), detRes1.hotelDto().hotelId());
-        assertEquals("호텔1", detRes1.hotelDto().hotelName());
-        assertEquals(LocalTime.of(12, 0), detRes1.hotelDto().checkInTime());
-        assertEquals(detRes1.hotelDto().hotelOptions().size(), 0);
+        assertEquals(res1.hotelId(), detRes1.hotelDetailDto().hotelId());
+        assertEquals("호텔1", detRes1.hotelDetailDto().hotelName());
+        assertEquals(LocalTime.of(12, 0), detRes1.hotelDetailDto().checkInTime());
+        assertEquals(detRes1.hotelDetailDto().hotelOptions().size(), 0);
 
         Member member = Member.builder()
                 .memberEmail("business@naver.com")
@@ -309,10 +309,10 @@ class HotelServiceTest {
 
         detRes1 = this.hotelService.findHotelDetail(hotel.getId());
 
-        assertEquals(res2.hotelId(), detRes1.hotelDto().hotelId());
-        assertEquals("호텔2", detRes1.hotelDto().hotelName());
-        assertEquals(LocalTime.of(14, 0), detRes1.hotelDto().checkInTime());
-        assertEquals(detRes1.hotelDto().hotelOptions().size(), 0);
+        assertEquals(res2.hotelId(), detRes1.hotelDetailDto().hotelId());
+        assertEquals("호텔2", detRes1.hotelDetailDto().hotelName());
+        assertEquals(LocalTime.of(14, 0), detRes1.hotelDetailDto().checkInTime());
+        assertEquals(detRes1.hotelDetailDto().hotelOptions().size(), 0);
     }
 
     @Test

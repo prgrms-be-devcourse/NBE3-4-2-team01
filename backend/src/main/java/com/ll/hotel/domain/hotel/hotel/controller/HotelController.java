@@ -66,7 +66,7 @@ public class HotelController {
         }
 
         if (!actor.isBusiness()) {
-            throw new ServiceException("403-1", "사업가만 호텔을 등록할 수 있습니다.");
+            throw new ServiceException("403-1", "사업가만 호텔 사진을 등록할 수 있습니다.");
         }
 
         this.hotelService.saveImages(ImageType.HOTEL, hotelId, urls);
@@ -86,7 +86,7 @@ public class HotelController {
     ) {
         return new RsData<>(
                 "200-1",
-                "호텔 리스트를 정상적으로 조회했습니다.",
+                "모든 호텔 정보를 정상적으로 조회했습니다.",
                 new PageDto<>(
                         this.hotelService.findAll(page, pageSize, filterName, filterDirection))
         );
@@ -96,7 +96,7 @@ public class HotelController {
     public RsData<GetHotelDetailResponse> findHotelDetail(@PathVariable long hotelId) {
         return new RsData<>(
                 "200-1",
-                "호텔 정보를 정상적으로 불러왔습니다.",
+                "호텔 정보를 정상적으로 조회했습니다.",
                 this.hotelService.findHotelDetail(hotelId)
         );
     }

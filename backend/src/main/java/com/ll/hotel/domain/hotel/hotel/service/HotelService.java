@@ -2,7 +2,7 @@ package com.ll.hotel.domain.hotel.hotel.service;
 
 import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
+import com.ll.hotel.domain.hotel.hotel.dto.HotelDetailDto;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
@@ -12,6 +12,8 @@ import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.hotel.option.hotelOption.repository.HotelOptionRepository;
+import com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto;
+import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
@@ -44,6 +46,7 @@ public class HotelService {
     private final S3Service s3Service;
     private final HotelRepository hotelRepository;
     private final HotelOptionRepository hotelOptionRepository;
+    private final RoomRepository roomRepository;
     private final BusinessRepository businessRepository;
 
     @Transactional
@@ -113,12 +116,14 @@ public class HotelService {
         Hotel hotel = this.hotelRepository.findHotelDetail(hotelId)
                 .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
 
-        List<String> imageUrls = this.imageService.findImagesById(ImageType.HOTEL, hotelId)
-                .stream()
+        List<String> imageUrls = this.imageService.findImagesById(ImageType.HOTEL, hotelId).stream()
                 .map(Image::getImageUrl)
                 .toList();
 
-        return new GetHotelDetailResponse(new HotelDto(hotel), imageUrls);
+        List<RoomWithImageDto> roomDtos = this.roomRepository.findAllRooms(hotelId, ImageType.ROOM);
+
+
+        return new GetHotelDetailResponse(new HotelDetailDto(hotel, roomDtos), imageUrls);
     }
 
     @Transactional

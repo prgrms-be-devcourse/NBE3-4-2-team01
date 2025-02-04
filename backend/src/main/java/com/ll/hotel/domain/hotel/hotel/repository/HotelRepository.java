@@ -17,7 +17,8 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             LEFT JOIN Image i
             ON i.referenceId = h.id
             AND i.imageType = :imageType
-            WHERE i.uploadedAt = (
+            WHERE h.hotelStatus <> 'UNAVAILABLE'
+            AND i.uploadedAt = (
                 SELECT MIN(i2.uploadedAt)
                 FROM Image i2
                 WHERE i2.referenceId = h.id

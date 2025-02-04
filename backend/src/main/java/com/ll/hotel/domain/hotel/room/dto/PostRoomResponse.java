@@ -1,6 +1,7 @@
 package com.ll.hotel.domain.hotel.room.dto;
 
 import com.ll.hotel.domain.hotel.room.entity.Room;
+import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import lombok.NonNull;
@@ -23,9 +24,11 @@ public record PostRoomResponse(
         Integer maxNumber,
 
         @NonNull
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        PresignedUrlsResponse urlsResponse
 ) {
-    public PostRoomResponse(Room room) {
+    public PostRoomResponse(Room room, PresignedUrlsResponse response) {
         this(
                 room.getId(),
                 room.getHotel().getId(),
@@ -33,7 +36,8 @@ public record PostRoomResponse(
                 room.getBasePrice(),
                 room.getStandardNumber(),
                 room.getMaxNumber(),
-                room.getCreatedAt()
+                room.getCreatedAt(),
+                response
         );
     }
 }

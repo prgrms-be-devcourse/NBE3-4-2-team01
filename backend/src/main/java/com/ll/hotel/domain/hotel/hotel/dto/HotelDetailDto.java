@@ -2,7 +2,8 @@ package com.ll.hotel.domain.hotel.hotel.dto;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
-import com.ll.hotel.domain.hotel.room.entity.Room;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
+import com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalTime;
 import java.util.HashSet;
@@ -11,7 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 
-public record HotelDto(
+public record HotelDetailDto(
         long hotelId,
 
         @NotBlank
@@ -44,13 +45,11 @@ public record HotelDto(
         @NotBlank
         String hotelStatus,
 
-        List<Room> rooms,
+        List<GetRoomResponse> rooms,
 
         Set<String> hotelOptions
-
-        // 호텔 Favorite
 ) {
-    public HotelDto(Hotel hotel) {
+    public HotelDetailDto(Hotel hotel, List<RoomWithImageDto> dtos) {
         this(
                 hotel.getId(),
                 hotel.getHotelName(),
@@ -63,9 +62,11 @@ public record HotelDto(
                 hotel.getCheckOutTime(),
                 hotel.getHotelExplainContent(),
                 hotel.getHotelStatus().getValue(),
-                hotel.getRooms(),
+                dtos.stream()
+                        .map(GetRoomResponse::new)
+                        .toList(),
                 hotel.getHotelOptions() != null
-                        ? hotel.getHotelOptions().stream()
+                ? hotel.getHotelOptions().stream()
                         .map(HotelOption::getName)
                         .collect(Collectors.toSet())
                         : new HashSet<>()
