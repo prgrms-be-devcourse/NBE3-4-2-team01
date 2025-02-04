@@ -52,4 +52,8 @@ public class Booking extends BaseTime {
 
     @Column
     private LocalDate checkOutDate;
+
+    public boolean isReservedBy(Member member) {
+        return this.member.equals(member);
+    }
 }

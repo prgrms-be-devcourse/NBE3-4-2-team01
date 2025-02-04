@@ -1,8 +1,11 @@
 package com.ll.hotel.domain.review.comment.controller;
 
+import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.review.comment.dto.ReviewCommentContentRequest;
 import com.ll.hotel.domain.review.comment.dto.ReviewCommentDto;
 import com.ll.hotel.domain.review.comment.service.ReviewCommentService;
+import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "ReviewCommentController")
 public class ReviewCommentController {
     private final ReviewCommentService reviewCommentService;
+    private final Rq rq;
 
     @PostMapping("")
     @Operation(summary = "리뷰 답변 생성")
@@ -24,10 +28,12 @@ public class ReviewCommentController {
             @RequestBody ReviewCommentContentRequest contentRequest
     ) {
         // 인증 로직 (로그인 여부 체크)
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인한 사용자만 답변 생성 가능합니다.");
+        }
 
-        // 권한 로직 (해당 리뷰의 호텔 관리자인지 체크)
-
-        reviewCommentService.createReviewComment(reviewId, contentRequest.content());
+        reviewCommentService.createReviewComment(actor, reviewId, contentRequest.content());
         return RsData.OK; // 201 vs 200
     }
 
@@ -53,10 +59,12 @@ public class ReviewCommentController {
             @RequestBody ReviewCommentContentRequest contentRequest
     ) {
         // 인증 로직 (로그인 여부 체크)
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인한 사용자만 답변 수정 가능합니다.");
+        }
 
-        // 권한 로직 (작성자인지 체크)
-
-        reviewCommentService.updateReviewComment(commentId, contentRequest.content());
+        reviewCommentService.updateReviewComment(actor, commentId, contentRequest.content());
         return RsData.OK;
     }
 
@@ -67,10 +75,12 @@ public class ReviewCommentController {
             @PathVariable("commentId") long commentId
     ) {
         // 인증 로직 (로그인 여부 체크)
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인한 사용자만 답변 삭제 가능합니다.");
+        }
 
-        // 권한 로직 (작성자인지 체크)
-
-        reviewCommentService.deleteReviewComment(commentId);
+        reviewCommentService.deleteReviewComment(actor, commentId);
         return RsData.OK;
     }
 }
