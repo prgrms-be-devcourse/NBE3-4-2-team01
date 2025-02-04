@@ -88,6 +88,10 @@ public class Hotel extends BaseTime {
         this.averageRating = Math.round(((double)totalReviewRatingSum / totalReviewCount) * 10.0) / 10.0;
     }
 
+    public boolean isOwnedBy(Member member) {
+        return this.business != null && this.business.getMember().equals(member);
+    }
+
     /**
      * 불필요 시 삭제
      */
