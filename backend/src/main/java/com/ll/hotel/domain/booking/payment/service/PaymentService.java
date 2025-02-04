@@ -1,5 +1,6 @@
 package com.ll.hotel.domain.booking.payment.service;
 
+import com.ll.hotel.domain.booking.booking.dto.BookingRequest;
 import com.ll.hotel.domain.booking.payment.dto.PaymentRequest;
 import com.ll.hotel.domain.booking.payment.dto.TokenRequest;
 import com.ll.hotel.domain.booking.payment.dto.TokenResponse;
@@ -7,6 +8,8 @@ import com.ll.hotel.domain.booking.payment.entity.Payment;
 import com.ll.hotel.domain.booking.payment.repository.PaymentRepository;
 import com.ll.hotel.domain.booking.payment.type.PaymentStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
+
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -22,6 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
+    private final String CREATE_ERROR_MESSAGE = "결제 정보 저장에 실패했습니다. 관리자에게 문의하세요.";
     private final PaymentRepository paymentRepository;
     @Value("${api-keys.portone.impKey}")
     private String impKey;
@@ -47,22 +51,53 @@ public class PaymentService {
         throw new ServiceException("400", "merchantUid 생성에 실패했습니다.");
     }
 
-    // 결제 정보 저장
+    /*
+     * 결제 정보 저장
+     * BookingService에서 호출하여 예약 정보 저장과 동시에 발생하도록 함
+     * 결제 오류 코드는 500-1, 500-2, 500-3
+     * 예약 오류 코드는 500-4, 500-5, 500-6 (BookingService 코드 참고)
+     * 코드 500-1: paymentRequest 생성 중 에러
+     * 코드 500-2: DateTime 관련 에러
+     * 코드 500-3: 결제 생성 및 저장 중 에러
+     */
+    @Transactional
+    public Payment create(BookingRequest bookingRequest) {
+        PaymentRequest paymentRequest;
+
+        try {
+            paymentRequest = new PaymentRequest(
+                    bookingRequest.merchantUid(),
+                    bookingRequest.amount(),
+                    bookingRequest.paidAtTimestamp()
+            );
+        } catch (Exception e) {
+            throw new ServiceException("500-1", CREATE_ERROR_MESSAGE);
+        }
+
+        return create(paymentRequest);
+    }
+
     @Transactional
     public Payment create(PaymentRequest paymentRequest) {
-        // Unix Timestamp를 LocalDateTime으로 변환
-        LocalDateTime paidAt = LocalDateTime.ofInstant(
-                Instant.ofEpochSecond(paymentRequest.paidAtTimestamp()),
-                ZoneId.systemDefault()
-        );
+        try {
+            // Unix Timestamp를 LocalDateTime으로 변환
+            LocalDateTime paidAt = LocalDateTime.ofInstant(
+                    Instant.ofEpochSecond(paymentRequest.paidAtTimestamp()),
+                    ZoneId.systemDefault()
+            );
 
-        Payment payment = Payment.builder()
-                .merchantUid(paymentRequest.merchantUid())
-                .amount(paymentRequest.amount())
-                .paidAt(paidAt)
-                .build();
+            Payment payment = Payment.builder()
+                    .merchantUid(paymentRequest.merchantUid())
+                    .amount(paymentRequest.amount())
+                    .paidAt(paidAt)
+                    .build();
 
-        return paymentRepository.save(payment);
+            return paymentRepository.save(payment);
+        } catch (DateTimeException e) {
+            throw new ServiceException("500-2", CREATE_ERROR_MESSAGE);
+        } catch (Exception e) {
+            throw new ServiceException("500-3", CREATE_ERROR_MESSAGE);
+        }
     }
 
     /*
@@ -71,10 +106,12 @@ public class PaymentService {
      * portone api를 통해 결제는 취소하지만 row는 삭제하지 않음 (soft delete)
      * paymentStatus를 CANCELLED로 변경하여 취소로 처리
      */
-    @Transactional
     public Payment softDelete(Long paymentId) {
-        Payment payment = findById(paymentId);
+        return softDelete(findById(paymentId));
+    }
 
+    @Transactional
+    public Payment softDelete(Payment payment) {
         if (payment.getPaymentStatus() == PaymentStatus.CANCELLED) {
             throw new ServiceException("400", "이미 취소된 결제입니다.");
         }
@@ -89,7 +126,8 @@ public class PaymentService {
         } else {
             throw new ServiceException(
                     response.getStatusCode().toString(),
-                    "결제 취소에 실패했습니다.");
+                    "결제 취소에 실패했습니다."
+            );
         }
     }
 

@@ -5,13 +5,12 @@ import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.booking.booking.repository.BookingRepository;
 import com.ll.hotel.domain.booking.booking.type.BookingStatus;
 import com.ll.hotel.domain.booking.payment.entity.Payment;
-import com.ll.hotel.domain.booking.payment.repository.PaymentRepository;
+import com.ll.hotel.domain.booking.payment.service.PaymentService;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,42 +18,59 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.IllegalFormatException;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BookingService {
+    private final String CREATE_ERROR_MESSAGE = "예약 정보 저장에 실패했습니다. 관리자에게 문의하세요.";
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
-    private final PaymentRepository paymentRepository;
+    private final PaymentService paymentService;
 
-    // 테스트용
-    private final MemberRepository memberRepository;
-
+    /*
+     * 예약, 결제 정보 저장
+     * 결제 -> 예약 저장 순으로 진행됨
+     * 결제 오류 코드는 500-1, 500-2, 500-3 (PaymentService 코드 참고)
+     * 예약 오류 코드는 500-4, 500-5, 500-6
+     * 코드 500-4: room, hotel 검색 에러
+     * 코드 500-5: 예약 번호 생성 에러
+     * 코드 500-6: 예약 생성 및 저장 중 에러
+     */
     @Transactional
     public Booking create(Member member, BookingRequest bookingRequest) {
-        Optional<Room> room = roomRepository.findById(bookingRequest.roomId());
-        Optional<Hotel> hotel = hotelRepository.findById(bookingRequest.hotelId());
-        Optional<Payment> payment = paymentRepository.findById(bookingRequest.paymentId());
+        // 결제 정보 저장
+        Payment payment = paymentService.create(bookingRequest);
 
-        // 테스트용
-        member = memberRepository.findById(1L).get();
+        // 예약 정보 저장
+        try {
+            Optional<Room> room = roomRepository.findById(bookingRequest.roomId());
+            Optional<Hotel> hotel = hotelRepository.findById(bookingRequest.hotelId());
+            Booking booking = Booking.builder()
+                    .room(room.get())
+                    .hotel(hotel.get())
+                    .member(member)
+                    .payment(payment)
+                    .checkInDate(bookingRequest.checkInDate())
+                    .checkOutDate(bookingRequest.checkOutDate())
+                    .build();
 
-        Booking booking = Booking.builder()
-                .room(room.get())
-                .hotel(hotel.get())
-                .member(member)
-                .payment(payment.get())
-                .checkInDate(bookingRequest.checkInDate())
-                .checkOutDate(bookingRequest.checkOutDate())
-                .build();
-
-        booking = bookingRepository.save(booking);
-        booking.setBookingNumber(String.format("B%08d", booking.getId()));
-        return bookingRepository.save(booking);
+            booking = bookingRepository.save(booking);
+            booking.setBookingNumber(String.format("B%08d", booking.getId())); // ID 기반으로 예약 번호 생성
+            return bookingRepository.save(booking);
+        } catch (ServiceException e) {
+            throw new ServiceException("500-4", CREATE_ERROR_MESSAGE);
+        } catch (IllegalFormatException e) {
+            throw new ServiceException("500-5", CREATE_ERROR_MESSAGE);
+        } catch (Exception e) {
+            throw new ServiceException("500-6", CREATE_ERROR_MESSAGE);
+        }
     }
 
+    @Transactional
     public void cancel(Booking booking) {
         if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
             throw new ServiceException("400", "이미 취소된 예약입니다.");

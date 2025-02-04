@@ -7,6 +7,11 @@ public record BookingRequest(
         Long hotelId,
         Long paymentId,
         LocalDate checkInDate,
-        LocalDate checkOutDate
+        LocalDate checkOutDate,
+
+        // PaymentRequest 생성에 필요
+        String merchantUid,
+        int amount,
+        Long paidAtTimestamp
 ) {
 }

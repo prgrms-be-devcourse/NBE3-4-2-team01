@@ -20,7 +20,7 @@ public class BookingController {
     private final BookingService bookingService;
     private final Rq rq;
 
-    // 예약
+    // 예약 및 결제
     @PostMapping
     @Transactional
     public RsData<BookingResponse> book(
@@ -30,7 +30,7 @@ public class BookingController {
 
         return new RsData<>(
                 "201",
-                String.format("%s번 예약이 완료되었습니다.", booking.getBookingNumber()),
+                "예약 및 결제에 성공하였습니다.",
                 BookingResponse.from(booking)
         );
     }
@@ -89,12 +89,14 @@ public class BookingController {
     @Transactional
     public RsData<BookingResponse> cancel(
             @PathVariable("booking_id") Long bookingId) {
+        Member member = rq.getActor();
         Booking booking = bookingService.findById(bookingId);
+
         bookingService.cancel(booking);
 
         return new RsData<>(
                 "200",
-                String.format("%s번 예약이 취소되었습니다.", booking.getBookingNumber()),
+                "예약 및 결제가 취소되었습니다.",
                 BookingResponse.from(booking)
         );
     }
