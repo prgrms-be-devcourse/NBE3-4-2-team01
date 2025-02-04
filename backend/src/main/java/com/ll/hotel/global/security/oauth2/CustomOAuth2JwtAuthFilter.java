@@ -43,6 +43,11 @@ public class CustomOAuth2JwtAuthFilter extends OncePerRequestFilter implements O
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String bearerToken = request.getHeader("Authorization");
+        String requestURI = request.getRequestURI();
+
+        if (requestURI.contains("/oauth2/callback")) {
+            bearerToken = request.getParameter("accessToken");
+        }
 
         if (!StringUtils.hasText(bearerToken) || !bearerToken.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -55,7 +60,7 @@ public class CustomOAuth2JwtAuthFilter extends OncePerRequestFilter implements O
             if (memberService.verifyToken(token)) {
                 String email = memberService.getEmail(token);
                 Member findMember = memberRepository.findByMemberEmail(email)
-                        .orElseThrow(() -> new ServiceException("MEMBER_NOT_FOUND", "해당 이메일의 회원이 존재하지 않습니다."));
+                        .orElseThrow(() -> new ServiceException("404-1", "해당 이메일의 회원이 존재하지 않습니다."));
 
                 SecurityUser userDto = of(
                         findMember.getId(),
@@ -73,7 +78,7 @@ public class CustomOAuth2JwtAuthFilter extends OncePerRequestFilter implements O
             }
         } catch (Exception e) {
             log.error("JWT Token Processing Error: {}", e.getMessage());
-            throw new ServiceException("TOKEN_INVALID", "유효하지 않은 토큰입니다.");
+            throw new ServiceException("401-1", "유효하지 않은 토큰입니다.");
         }
 
         filterChain.doFilter(request, response);
@@ -81,6 +86,8 @@ public class CustomOAuth2JwtAuthFilter extends OncePerRequestFilter implements O
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        return request.getRequestURI().contains("api/users/refresh");
+        String requestURI = request.getRequestURI();
+        return requestURI.contains("api/users/refresh") || 
+               (requestURI.contains("/oauth2/callback") && request.getParameter("accessToken") == null);
     }
 }
