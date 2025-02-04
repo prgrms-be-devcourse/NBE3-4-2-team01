@@ -108,8 +108,7 @@ public class HotelService {
 
     @Transactional
     public PutHotelResponse modify(long hotelId, Member actor, PutHotelRequest request) {
-        Hotel hotel = this.hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
+        Hotel hotel = this.getHotel(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
@@ -129,7 +128,7 @@ public class HotelService {
             try {
                 hotel.setHotelStatus(HotelStatus.valueOf(request.hotelStatus().toUpperCase()));
             } catch (Exception e) {
-                throw new ServiceException("404-3", "호텔 상태 정보를 정확히 입력해주세요.");
+                throw new ServiceException("404-2", "호텔 상태 정보를 정확히 입력해주세요.");
             }
         }
 
@@ -156,7 +155,7 @@ public class HotelService {
         Set<HotelOption> options = this.hotelOptionRepository.findByNameIn(optionNames);
 
         if (options.size() != optionNames.size()) {
-            throw new ServiceException("404-4", "사용할 수 없는 호텔 옵션이 존재합니다.");
+            throw new ServiceException("404-3", "사용할 수 없는 호텔 옵션이 존재합니다.");
         }
 
         hotel.setHotelOptions(options);
@@ -164,13 +163,17 @@ public class HotelService {
 
     @Transactional
     public void delete(Long hotelId, Member actor) {
-        Hotel hotel = this.hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
+        Hotel hotel = this.getHotel(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
         }
 
         hotel.setHotelStatus(HotelStatus.UNAVAILABLE);
+    }
+
+    public Hotel getHotel(Long hotelId) {
+        return this.hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
     }
 }
