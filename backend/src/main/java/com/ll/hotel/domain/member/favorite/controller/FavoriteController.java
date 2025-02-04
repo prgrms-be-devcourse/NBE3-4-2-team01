@@ -8,6 +8,7 @@ import com.ll.hotel.domain.member.favorite.entity.Favorite;
 import com.ll.hotel.domain.member.favorite.service.FavoriteService;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class FavoriteController {
     private final HotelRepository hotelRepository;
 
     @PostMapping("/id")
-    public RsData<Void> addFavorite(@RequestBody FavoriteReqBody favoriteReqBody) {
+    public RsData<Void> addFavorite(@Valid @RequestBody FavoriteReqBody favoriteReqBody) {
         try {
             favoriteService.addFavorite(favoriteReqBody);
             return new RsData<>("200-1", "즐겨찾기가 추가되었습니다.");
@@ -34,7 +35,7 @@ public class FavoriteController {
     }
 
     @DeleteMapping({"/id"})
-    public RsData<String> deleteFavorite(@RequestBody FavoriteReqBody request) {
+    public RsData<String> deleteFavorite(@Valid @RequestBody FavoriteReqBody request) {
         return favoriteService.deleteFavorite(request);
     }
 
