@@ -39,16 +39,13 @@ public class Booking extends BaseTime {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    @Column(unique = true)
+    @Column
     private String bookingNumber;
 
     @Enumerated(EnumType.STRING)
     @Column
     @Builder.Default
     private BookingStatus bookingStatus = BookingStatus.CONFIRMED;
-
-    @Column
-    private int paymentPrice;
 
     @Column
     private LocalDate checkInDate;

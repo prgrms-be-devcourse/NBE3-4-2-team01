@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ll.hotel.global.app.AppConfig;
 import lombok.SneakyThrows;
 
+import java.security.SecureRandom;
 import java.util.List;
 
 public class Ut {
@@ -19,6 +20,22 @@ public class Ut {
         @SneakyThrows
         public static String toString(Object obj) {
             return om.writeValueAsString(obj);
+        }
+    }
+
+    public static class random {
+        private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        private static final SecureRandom RANDOM = new SecureRandom();
+
+        public static String generateUID(int length) {
+            StringBuilder uid = new StringBuilder(length);
+
+            for (int i = 0; i < length; i++) {
+                int randomIndex = RANDOM.nextInt(CHARACTERS.length());
+                uid.append(CHARACTERS.charAt(randomIndex));
+            }
+
+            return uid.toString();
         }
     }
 
