@@ -1,19 +1,19 @@
 package com.ll.hotel.domain.member.member.controller;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ll.hotel.domain.member.member.dto.JoinRequest;
 import com.ll.hotel.domain.member.member.dto.MemberDTO;
+import com.ll.hotel.domain.member.member.dto.MemberResponse;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.domain.member.member.service.RefreshTokenService;
-import com.ll.hotel.domain.member.member.type.MemberStatus;
+import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.security.dto.SecurityUser;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -24,60 +24,32 @@ public class MemberController {
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/join")
-    public RsData<MemberDTO> join(@RequestBody JoinRequest joinRequest) {
+    public RsData<MemberResponse> join(@RequestBody @Valid JoinRequest joinRequest, 
+                                     @AuthenticationPrincipal SecurityUser securityUser) {
         log.debug("Join attempt for email: {}", joinRequest.email());
-        
-        if (memberService.existsByMemberEmail(joinRequest.email())) {
-            log.debug("Email already exists: {}", joinRequest.email());
-            return new RsData<>("400-1", "이미 존재하는 이메일입니다.", new MemberDTO(
-                null,
-                joinRequest.email(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-            ));
-        }
-        
         try {
-            MemberDTO memberDTO = new MemberDTO(
-                null,
-                joinRequest.email(),
-                joinRequest.name(),
-                joinRequest.phoneNumber(),
-                joinRequest.birthDate(),
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                Role.USER,
-                MemberStatus.ACTIVE,
-                joinRequest.provider()
-            );
+            if (securityUser != null && securityUser.getOauthId() != null) {
+                log.debug("SecurityUser OAuth 정보 - provider: {}, oauthId: {}", 
+                         securityUser.getProvider(), securityUser.getOauthId());
+                         
+                joinRequest = new JoinRequest(
+                    joinRequest.email(),
+                    joinRequest.name(),
+                    joinRequest.phoneNumber(),
+                    joinRequest.birthDate(),
+                    securityUser.getProvider(),
+                    securityUser.getOauthId()
+                );
+            }
             
-            Member member = memberService.join(memberDTO, joinRequest.provider());
-            
-            return new RsData<>(
-                "200-1",
-                "회원가입이 완료되었습니다.",
-                new MemberDTO(
-                    member.getId(),
-                    member.getMemberEmail(),
-                    member.getMemberName(),
-                    member.getMemberPhoneNumber(),
-                    member.getBirthDate(),
-                    member.getCreatedAt(),
-                    member.getModifiedAt(),
-                    member.getRole(),
-                    member.getMemberStatus(),
-                    member.getProvider()
-                )
+            Member member = memberService.join(joinRequest);
+            MemberResponse response = new MemberResponse(
+                MemberDTO.from(member),
+                member.getMemberEmail()
             );
-        } catch (Exception e) {
-            log.error("Error during join process: ", e);
-            return new RsData<>("400-1", "회원가입에 실패했습니다: " + e.getMessage(), null);
+            return new RsData<>("200", "회원가입이 완료되었습니다.", response);
+        } catch (ServiceException e) {
+            return new RsData<>("400-1", e.getMessage(), new MemberResponse(null, null));
         }
     }
 
@@ -112,13 +84,3 @@ public class MemberController {
         return memberService.refreshAccessToken(token);
     }
 }
-
-
-record JoinRequest(
-    String email,
-    String name,
-    String phoneNumber,
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    LocalDate birthDate,
-    String provider
-) {}
