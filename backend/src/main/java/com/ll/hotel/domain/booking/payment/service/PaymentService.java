@@ -28,6 +28,10 @@ public class PaymentService {
     @Value("${api-keys.portone.impSecret}")
     private String impSecret;
 
+    public long count() {
+        return paymentRepository.count();
+    }
+
     public String generateMerchantUid() {
         int genCount = 10;
         int uidLength = 10;
