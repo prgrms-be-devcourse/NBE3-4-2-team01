@@ -127,4 +127,14 @@ public class MemberService {
     public String getEmailFromToken(String token) {
         return authTokenService.getEmail(token);
     }
+
+    public String extractEmailIfValid(String token) {
+        if (isLoggedOut(token)) {
+            throw new ServiceException("401-1", "로그아웃된 토큰입니다.");
+        }
+        if (!verifyToken(token)) {
+            throw new ServiceException("401-2", "유효하지 않은 토큰입니다.");
+        }
+        return getEmailFromToken(token);
+    }
 }
