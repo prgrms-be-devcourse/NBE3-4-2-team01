@@ -13,11 +13,11 @@ import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.hotel.option.hotelOption.repository.HotelOptionRepository;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Business;
+import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -40,8 +40,8 @@ public class HotelService {
      * HotelImage 등록 추가 필요
      */
     @Transactional
-    public PostHotelResponse create(PostHotelRequest postHotelRequest) {
-        Business business = this.businessRepository.findById(postHotelRequest.businessId())
+    public PostHotelResponse create(Member actor, PostHotelRequest postHotelRequest) {
+        Business business = this.businessRepository.findByMember(actor)
                 .orElseThrow(() -> new ServiceException("404-1", "사업자가 존재하지 않습니다."));
 
         Set<HotelOption> hotelOptions = this.hotelOptionRepository.findByNameIn(postHotelRequest.hotelOptions());
@@ -107,9 +107,13 @@ public class HotelService {
     private final HotelOptionRepository hotelOptionRepository;
 
     @Transactional
-    public PutHotelResponse modify(long hotelId, PutHotelRequest request) {
+    public PutHotelResponse modify(long hotelId, Member actor, PutHotelRequest request) {
         Hotel hotel = this.hotelRepository.findById(hotelId)
                 .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
+
+        if (!hotel.isOwnedBy(actor)) {
+            throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
+        }
 
         modifyIfPresent(request.hotelName(), hotel::getHotelName, hotel::setHotelName);
         modifyIfPresent(request.hotelEmail(), hotel::getHotelEmail, hotel::setHotelEmail);
@@ -125,7 +129,7 @@ public class HotelService {
             try {
                 hotel.setHotelStatus(HotelStatus.valueOf(request.hotelStatus().toUpperCase()));
             } catch (Exception e) {
-                throw new ServiceException("404-2", "호텔 상태 정보를 정확히 입력해주세요.");
+                throw new ServiceException("404-3", "호텔 상태 정보를 정확히 입력해주세요.");
             }
         }
 
@@ -152,20 +156,21 @@ public class HotelService {
         Set<HotelOption> options = this.hotelOptionRepository.findByNameIn(optionNames);
 
         if (options.size() != optionNames.size()) {
-            throw new ServiceException("404-3", "사용할 수 없는 호텔 옵션이 존재합니다.");
+            throw new ServiceException("404-4", "사용할 수 없는 호텔 옵션이 존재합니다.");
         }
 
         hotel.setHotelOptions(options);
     }
 
     @Transactional
-    public void delete(Long hotelId) {
-        Optional<Hotel> opHotel = this.hotelRepository.findById(hotelId);
+    public void delete(Long hotelId, Member actor) {
+        Hotel hotel = this.hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
 
-        if (opHotel.isEmpty()) {
-            throw new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다.");
+        if (!hotel.isOwnedBy(actor)) {
+            throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
         }
 
-        opHotel.get().setHotelStatus(HotelStatus.UNAVAILABLE);
+        hotel.setHotelStatus(HotelStatus.UNAVAILABLE);
     }
 }
