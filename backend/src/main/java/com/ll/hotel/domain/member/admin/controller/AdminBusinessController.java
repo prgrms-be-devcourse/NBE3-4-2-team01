@@ -13,7 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin/businesses")
+@RequestMapping("/api/admin/businesses")
 @RequiredArgsConstructor
 public class AdminBusinessController {
     private final AdminBusinessService adminBusinessService;

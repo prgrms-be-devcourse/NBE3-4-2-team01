@@ -13,7 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin/hotels")
+@RequestMapping("/api/admin/hotels")
 @RequiredArgsConstructor
 public class AdminHotelController {
     private final AdminHotelService adminHotelService;
