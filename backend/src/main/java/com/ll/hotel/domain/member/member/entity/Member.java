@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -23,9 +24,6 @@ public class Member extends BaseTime {
     private String memberEmail;
 
     @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)
     private String memberName;
 
     @Column(nullable = false)
@@ -33,6 +31,9 @@ public class Member extends BaseTime {
 
     @Column(nullable = false)
     private LocalDate birthDate;
+
+    @Column(name = "password", nullable = true)
+    private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -42,10 +43,8 @@ public class Member extends BaseTime {
     @Column(nullable = false)
     private MemberStatus memberStatus;
 
-    @OneToMany(mappedBy = "member")
-    private List<OAuth> oAuthList;
-
-    private String provider;
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<OAuth> oauths = new ArrayList<>();
 
     @OneToOne
     private Business business;
@@ -64,5 +63,9 @@ public class Member extends BaseTime {
 
     public String getUserRole() {
         return this.role.name();
+    }
+
+    public OAuth getFirstOAuth() {
+        return this.oauths.isEmpty() ? null : this.oauths.get(0);
     }
 }

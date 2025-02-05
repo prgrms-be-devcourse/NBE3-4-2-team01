@@ -78,6 +78,7 @@ class RoomServiceTest {
     @Test
     @DisplayName("객실 생성")
     public void createRoom() {
+        Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 
         this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
@@ -89,7 +90,7 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), req1);
+        this.roomService.create(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
@@ -111,7 +112,7 @@ class RoomServiceTest {
         bedTypeNumber = Map.of("DOUBLE", 4, "QUEEN", 1);
         PostRoomRequest req2 = new PostRoomRequest("객실2", 2, 500000, 3, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), req2);
+        this.roomService.create(hotel.getId(), actor, req2);
 
         room = this.roomRepository.findById(roomId + 1).get();
 
@@ -127,6 +128,7 @@ class RoomServiceTest {
     @Test
     @DisplayName("객실 생성 실패 - 존재하지 않는 객실 옵션")
     public void createRoomInvalidRoomOptions() {
+        Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 
         Set<String> roomOptions = new HashSet<>(Set.of("TV", "AirConditioner"));
@@ -136,7 +138,7 @@ class RoomServiceTest {
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
         ServiceException error = assertThrows(ServiceException.class, () -> {
-            this.roomService.create(hotel.getId(), req1);
+            this.roomService.create(hotel.getId(), actor, req1);
         });
 
         assertEquals(404, error.getRsData().getStatusCode());
@@ -146,12 +148,13 @@ class RoomServiceTest {
     @Test
     @DisplayName("객실 전체 조회")
     public void findAllRooms() {
+        Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), req1);
+        this.roomService.create(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
@@ -159,7 +162,7 @@ class RoomServiceTest {
         bedTypeNumber = Map.of("DOUBLE", 4, "QUEEN", 1);
         PostRoomRequest req2 = new PostRoomRequest("객실2", 2, 500000, 3, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), req2);
+        this.roomService.create(hotel.getId(), actor, req2);
 
         List<GetAllRoomResponse> rooms = this.roomService.findAllRooms(hotel.getId());
         GetAllRoomResponse res = rooms.get(0);
@@ -187,12 +190,13 @@ class RoomServiceTest {
     @Test
     @DisplayName("특정 객실 조회")
     public void findRoom() {
+        Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), req1);
+        this.roomService.create(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
@@ -200,7 +204,7 @@ class RoomServiceTest {
         bedTypeNumber = Map.of("DOUBLE", 4, "QUEEN", 1);
         PostRoomRequest req2 = new PostRoomRequest("객실2", 2, 500000, 3, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), req2);
+        this.roomService.create(hotel.getId(), actor, req2);
 
         GetRoomResponse res = this.roomService.findRoomDetail(hotel.getId(), roomId);
 
@@ -238,6 +242,7 @@ class RoomServiceTest {
     @Test
     @DisplayName("객실 옵션 조회")
     public void findRoomOptions() {
+        Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 
         this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
@@ -249,7 +254,7 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), req1);
+        this.roomService.create(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
@@ -267,6 +272,7 @@ class RoomServiceTest {
     @Test
     @DisplayName("객실 수정")
     public void modifyRoom() {
+        Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 
         this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
@@ -279,7 +285,7 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), req1);
+        this.roomService.create(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
@@ -288,7 +294,7 @@ class RoomServiceTest {
         PutRoomRequest putReq1 = new PutRoomRequest("수정 객실1", 5, null, null, 5, null,
                 "in_booking", null, roomOptions);
 
-        PutRoomResponse res1 = this.roomService.modify(hotel.getId(), roomId, putReq1);
+        PutRoomResponse res1 = this.roomService.modify(hotel.getId(), roomId, actor, putReq1);
 
         assertEquals(res1.hotelId(), hotel.getId());
         assertEquals(res1.roomId(), room.getId());
@@ -316,6 +322,7 @@ class RoomServiceTest {
     @Test
     @DisplayName("객실 수정 실패 - 존재하지 않는 객실 옵션")
     public void modifyRoomInvalidRoomOption() {
+        Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 
         this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
@@ -327,7 +334,7 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), req1);
+        this.roomService.create(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
@@ -337,7 +344,7 @@ class RoomServiceTest {
                 "in_booking", null, roomOptions);
 
         ServiceException error = assertThrows(ServiceException.class, () -> {
-            this.roomService.modify(hotel.getId(), roomId, putReq1);
+            this.roomService.modify(hotel.getId(), roomId, actor, putReq1);
         });
 
         assertEquals(404, error.getRsData().getStatusCode());
@@ -347,6 +354,7 @@ class RoomServiceTest {
     @Test
     @DisplayName("객실 삭제")
     public void deleteRoom() {
+        Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 
         this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
@@ -358,12 +366,12 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), req1);
+        this.roomService.create(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
 
-        this.roomService.delete(hotel.getId(), roomId);
+        this.roomService.delete(hotel.getId(), roomId, actor);
 
         assertEquals(RoomStatus.UNAVAILABLE, room.getRoomStatus());
     }
@@ -394,7 +402,7 @@ class RoomServiceTest {
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
-        this.hotelService.create(postHotelRequest);
+        this.hotelService.create(member, postHotelRequest);
 
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 

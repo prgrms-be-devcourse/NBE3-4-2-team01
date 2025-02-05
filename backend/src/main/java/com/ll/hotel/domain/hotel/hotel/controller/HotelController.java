@@ -7,6 +7,9 @@ import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
+import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
 import com.ll.hotel.standard.page.dto.PageDto;
@@ -29,13 +32,24 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "HotelController", description = "호텔 컨트롤러")
 public class HotelController {
     private final HotelService hotelService;
+    private final Rq rq;
 
     @PostMapping
     public RsData<PostHotelResponse> create(@RequestBody @Valid PostHotelRequest postHotelRequest) {
+        Member actor = rq.getActor();
+
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인 해주세요.");
+        }
+
+        if (!actor.isBusiness()) {
+            throw new ServiceException("403-1", "사업가만 호텔을 등록할 수 있습니다.");
+        }
+
         return new RsData<>(
                 "201-1",
                 "호텔을 정상적으로 등록하였습니다.",
-                this.hotelService.create(postHotelRequest)
+                this.hotelService.create(actor, postHotelRequest)
         );
     }
 
@@ -65,17 +79,38 @@ public class HotelController {
 
     @PutMapping("/{hotelId}")
     public RsData<PutHotelResponse> modifyHotel(@PathVariable long hotelId,
-                                                @RequestBody @Valid PutHotelRequest request) {
+                                                @RequestBody @Valid PutHotelRequest request
+    ) {
+        Member actor = rq.getActor();
+
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인 해주세요.");
+        }
+
+        if (!actor.isBusiness()) {
+            throw new ServiceException("403-1", "사업가만 호텔을 수정할 수 있습니다.");
+        }
+
         return new RsData<>(
                 "200-1",
                 "호텔 정보 수정에 성공하였습니다.",
-                this.hotelService.modify(hotelId, request)
+                this.hotelService.modify(hotelId, actor, request)
         );
     }
 
     @DeleteMapping("/{hotelId}")
     public RsData<Empty> deleteHotel(@PathVariable Long hotelId) {
-        this.hotelService.delete(hotelId);
+        Member actor = rq.getActor();
+
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인 해주세요.");
+        }
+
+        if (!actor.isBusiness()) {
+            throw new ServiceException("403-1", "사업가만 호텔을 삭제할 수 있습니다.");
+        }
+
+        this.hotelService.delete(hotelId, actor);
 
         return new RsData<>(
                 "200-1",

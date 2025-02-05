@@ -1,25 +1,28 @@
 package com.ll.hotel.domain.hotel.room.controller;
 
+import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
-import com.ll.hotel.domain.hotel.room.service.RoomService;
-import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.standard.base.Empty;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.PutRoomRequest;
 import com.ll.hotel.domain.hotel.room.dto.PutRoomResponse;
+import com.ll.hotel.domain.hotel.room.service.RoomService;
+import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.rq.Rq;
+import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.standard.base.Empty;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
-import java.util.List;
-import org.springframework.web.bind.annotation.GetMapping;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,20 +32,42 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "RoomController", description = "객실 컨트롤러")
 public class RoomController {
     private final RoomService roomService;
+    private final Rq rq;
 
     @PostMapping
     public RsData<PostRoomResponse> roomCreate(@PathVariable long hotelId,
-                                               @RequestBody @Valid PostRoomRequest postRoomRequest) {
+                                               @RequestBody @Valid PostRoomRequest postRoomRequest)
+    {
+        Member actor = rq.getActor();
+
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인 해주세요.");
+        }
+
+        if (!actor.isBusiness()) {
+            throw new ServiceException("403-1", "사업가만 객실을 등록할 수 있습니다.");
+        }
+
         return new RsData<>(
                 "201-1",
                 "객실을 추가하였습니다.",
-                this.roomService.create(hotelId, postRoomRequest)
+                this.roomService.create(hotelId, actor, postRoomRequest)
         );
     }
 
     @DeleteMapping("/{roomId}")
     public RsData<Empty> deleteRoom(@PathVariable long hotelId, @PathVariable long roomId) {
-        this.roomService.delete(hotelId, roomId);
+        Member actor = rq.getActor();
+
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인 해주세요.");
+        }
+
+        if (!actor.isBusiness()) {
+            throw new ServiceException("403-1", "사업가만 객실을 삭제할 수 있습니다.");
+        }
+
+        this.roomService.delete(hotelId, roomId, actor);
 
         return RsData.OK;
     }
@@ -77,10 +102,21 @@ public class RoomController {
     @PutMapping("{roomId}")
     public RsData<PutRoomResponse> modify(@PathVariable long hotelId,
                                           @PathVariable long roomId,
-                                          @RequestBody PutRoomRequest request) {
+                                          @RequestBody PutRoomRequest request)
+    {
+        Member actor = rq.getActor();
+
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인 해주세요.");
+        }
+
+        if (!actor.isBusiness()) {
+            throw new ServiceException("403-1", "사업가만 객실을 수정할 수 있습니다.");
+        }
+
         return new RsData<>(
                 "200-1",
                 "객실 정보를 수정했습니다.",
-                this.roomService.modify(hotelId, roomId, request));
+                this.roomService.modify(hotelId, roomId, actor, request));
     }
 }
