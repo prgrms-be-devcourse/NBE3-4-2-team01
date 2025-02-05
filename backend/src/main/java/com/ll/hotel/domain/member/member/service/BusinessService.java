@@ -9,7 +9,7 @@ import com.ll.hotel.domain.member.member.type.BusinessApiProperties;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +40,8 @@ public class BusinessService {
         Business business = Business
                 .builder()
                 .businessRegistrationNumber(registrationInfo.businessRegistrationNumber())
+                .startDate(registrationInfo.startDate())
+                .ownerName(registrationInfo.ownerName())
                 .approvalStatus(status)
                 .member(member)
                 .hotel(null)
