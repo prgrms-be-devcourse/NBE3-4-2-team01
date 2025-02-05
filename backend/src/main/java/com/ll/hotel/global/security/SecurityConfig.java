@@ -6,10 +6,6 @@ import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.exceptions.JwtExceptionFilter;
 import com.ll.hotel.global.security.oauth2.*;
 import jakarta.servlet.http.HttpServletResponse;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthenticationSuccessHandler;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2FailureHandler;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtAuthFilter;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +29,7 @@ public class SecurityConfig {
     private final CustomOAuth2FailureHandler oAuth2AuthenticationFailureHandler;
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+    private final CustomOAuth2AuthorizationRequestRepository customOAuth2AuthorizationRequestRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -60,8 +57,6 @@ public class SecurityConfig {
                                 "/login/oauth2/code/**",
                                 "/api/*/oauth2/callback"
                         ).permitAll()
-                        
-                        // 관리자 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/businesses/register").hasAnyRole("USER", "BUSINESS")
                         .requestMatchers("/api/businesses/**").hasRole("BUSINESS")
@@ -95,19 +90,12 @@ public class SecurityConfig {
                             ));
                         })
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(endpoint -> endpoint
-                                .authorizationRequestRepository(oAuth2AuthorizationRequestRepository)
-                        )
-                        
-                        // 비즈니스 회원 전용
-                        .requestMatchers("/api/businesses/**").hasRole("BUSINESS")
-                        
-                        .anyRequest().authenticated()
-                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth2Login -> oauth2Login
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestRepository(customOAuth2AuthorizationRequestRepository)
+                        )
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )

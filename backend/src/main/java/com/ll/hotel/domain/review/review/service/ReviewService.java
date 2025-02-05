@@ -16,11 +16,14 @@ import com.ll.hotel.domain.review.review.type.ReviewStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -112,49 +115,31 @@ public class ReviewService {
     }
 
     // 현재 접속한 유저가 작성한 모든 리뷰 조회 (답변, 이미지 포함)
-    public List<MyReviewResponse> getMyReviewResponses(long memberId) {
-        List<MyReviewWithCommentDto> myReviews = reviewRepository.findReviewsWithCommentByMemberId(memberId);
+    public Page<MyReviewResponse> getMyReviewResponses(long memberId, int page) {
+        int size = 10;
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<MyReviewWithCommentDto> myReviews = reviewRepository.findReviewsWithCommentByMemberId(memberId, pageable);
 
-        List<Long> reviewIds = myReviews.stream()
-                .map(dto -> dto.reviewDto().reviewId())
-                .toList();
-
-        Map<Long, List<String>> reviewImageUrls = imageRepository.findImageUrlsByReferenceIdsAndImageType(
-                        reviewIds, ImageType.REVIEW)
-                .stream()
-                .collect(Collectors.groupingBy(
-                        ImageDto::referenceId, // referenceId로 그룹화
-                        Collectors.mapping(ImageDto::imageUrl, Collectors.toList())));
-
-        return myReviews.stream()
-                .map(myReview -> new MyReviewResponse(
-                        myReview,
-                        reviewImageUrls.getOrDefault(myReview.reviewDto().reviewId(), List.of()) // 이미지 URL 매핑
-                ))
-                .toList();
+        return getReviewsWithImages(
+                myReviews,
+                myReview -> myReview.reviewDto().reviewId(),
+                MyReviewResponse::new,
+                pageable
+        );
     }
 
     // 호텔의 모든 리뷰 조회 (답변, 이미지 포함)
-    public List<HotelReviewResponse> getHotelReviewResponses(long hotelId) {
-        List<HotelReviewWithCommentDto> hotelReviews = reviewRepository.findReviewsWithCommentByHotelId(hotelId);
+    public Page<HotelReviewResponse> getHotelReviewResponses(long hotelId, int page) {
+        int size = 10;
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<HotelReviewWithCommentDto> hotelReviews = reviewRepository.findReviewsWithCommentByHotelId(hotelId, pageable);
 
-        List<Long> reviewIds = hotelReviews.stream()
-                .map(dto -> dto.reviewDto().reviewId())
-                .toList();
-
-        Map<Long, List<String>> reviewImageUrls = imageRepository.findImageUrlsByReferenceIdsAndImageType(
-                        reviewIds, ImageType.REVIEW)
-                .stream()
-                .collect(Collectors.groupingBy(
-                        ImageDto::referenceId, // referenceId로 그룹화
-                        Collectors.mapping(ImageDto::imageUrl, Collectors.toList())));
-
-        return hotelReviews.stream()
-                .map(hotelReview -> new HotelReviewResponse(
-                        hotelReview,
-                        reviewImageUrls.getOrDefault(hotelReview.reviewDto().reviewId(), List.of()) // 이미지 URL 매핑
-                ))
-                .toList();
+        return getReviewsWithImages(
+                hotelReviews,
+                hotelReview -> hotelReview.reviewDto().reviewId(),
+                HotelReviewResponse::new,
+                pageable
+        );
     }
 
     public Review getReview(long reviewId) {
@@ -175,5 +160,28 @@ public class ReviewService {
     // 리뷰 삭제의 평균 리뷰 수정
     private void updateRatingOnReviewDeleted(Hotel hotel, int rating) {
         hotel.updateAverageRating(-1, -rating);
+    }
+
+    // 리뷰 목록을 받아 (리뷰 + 사진) 목록으로 반환
+    private <T, R> Page<R> getReviewsWithImages(Page<T> reviews, Function<T, Long> getReviewId, BiFunction<T, List<String>, R> mapToResponse, Pageable pageable) {
+        // 리뷰 아이디 추출
+        List<Long> reviewIds = reviews.getContent().stream()
+                .map(getReviewId)
+                .toList();
+
+        // 이미지 URL 매핑
+        Map<Long, List<String>> reviewImageUrls = imageRepository.findImageUrlsByReferenceIdsAndImageType(reviewIds, ImageType.REVIEW, pageable)
+                .getContent()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        ImageDto::referenceId,
+                        Collectors.mapping(ImageDto::imageUrl, Collectors.toList())));
+
+        // 응답 객체 생성
+        List<R> responseList = reviews.getContent().stream()
+                .map(review -> mapToResponse.apply(review, reviewImageUrls.getOrDefault(getReviewId.apply(review), List.of())))
+                .toList();
+
+        return new PageImpl<>(responseList, pageable, reviews.getTotalElements());
     }
 }

@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -162,7 +163,9 @@ public class ReviewController {
 
     @GetMapping("/me")
     @Operation(summary = "내 리뷰 목록 조회")
-    public RsData<List<MyReviewResponse>> getMyReviews() {
+    public RsData<Page<MyReviewResponse>> getMyReviews(
+            @RequestParam(value = "page", defaultValue = "0") int page
+    ) {
         // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
         if (actor == null) {
@@ -177,20 +180,21 @@ public class ReviewController {
         return new RsData<>(
                 "200-1",
                 "나의 리뷰 목록 생성",
-                reviewService.getMyReviewResponses(actor.getId())
+                reviewService.getMyReviewResponses(actor.getId(), page)
         );
     }
 
     @GetMapping("/hotels/{hotelId}")
     @Operation(summary = "호텔 리뷰 목록 조회")
-    public RsData<List<HotelReviewResponse>> getHotelReviews(
+    public RsData<Page<HotelReviewResponse>> getHotelReviews(
+            @RequestParam(value = "page", defaultValue = "0") int page,
             @PathVariable("hotelId") long hotelId
     ) {
 
         return new RsData<>(
                 "200-1",
                 "호텔 리뷰 목록 생성",
-                reviewService.getHotelReviewResponses(hotelId)
+                reviewService.getHotelReviewResponses(hotelId, page)
         );
     }
 }
