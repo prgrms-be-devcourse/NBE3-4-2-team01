@@ -23,15 +23,18 @@ public class BusinessController {
     private final Rq rq;
 
     @PostMapping("/register")
-    public RsData<BusinessResponse> register(@RequestBody @Valid BusinessRequest businessRequest) {
+    public RsData<BusinessResponse.ApprovalResult> register(@RequestBody @Valid BusinessRequest.RegistrationInfo registrationInfo) {
 
         Member member =rq.getActor();
-        Business business = businessService.register(businessRequest, member);
+
+        String validationResult = businessService.validateBusiness(registrationInfo);
+
+        Business business = businessService.register(registrationInfo, member, validationResult);
 
         return new RsData<>(
                 "201",
                 "사업자 정보가 등록되었습니다.",
-                BusinessResponse.of(business)
+                BusinessResponse.ApprovalResult.of(business, validationResult)
         );
     }
 }
