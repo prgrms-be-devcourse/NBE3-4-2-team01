@@ -1,12 +1,6 @@
 package com.ll.hotel.domain.hotel.hotel.service;
 
-import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
-import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDetailDto;
-import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
-import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
-import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
-import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.*;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
@@ -20,16 +14,9 @@ import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
-import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
+import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
-import java.net.URL;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +24,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor

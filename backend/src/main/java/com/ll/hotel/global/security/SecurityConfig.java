@@ -68,8 +68,6 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .frameOptions(frameOptions -> frameOptions.disable())
                 )
-                .formLogin(formLogin -> formLogin.disable())
-                .httpBasic(httpBasic -> httpBasic.disable())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setContentType("application/json;charset=UTF-8");
