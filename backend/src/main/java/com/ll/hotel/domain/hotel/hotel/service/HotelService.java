@@ -1,7 +1,8 @@
 package com.ll.hotel.domain.hotel.hotel.service;
 
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
+import com.ll.hotel.domain.hotel.hotel.dto.HotelDetailDto;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
@@ -11,12 +12,20 @@ import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.hotel.option.hotelOption.repository.HotelOptionRepository;
+import com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto;
+import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
+import com.ll.hotel.domain.image.entity.Image;
+import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
+import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
+import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
+import java.net.URL;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -33,12 +42,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class HotelService {
+    private final ImageService imageService;
+    private final S3Service s3Service;
     private final HotelRepository hotelRepository;
+    private final HotelOptionRepository hotelOptionRepository;
+    private final RoomRepository roomRepository;
     private final BusinessRepository businessRepository;
 
-    /**
-     * HotelImage 등록 추가 필요
-     */
     @Transactional
     public PostHotelResponse create(Member actor, PostHotelRequest postHotelRequest) {
         Business business = this.businessRepository.findByMember(actor)
@@ -61,11 +71,16 @@ public class HotelService {
                 .checkOutTime(postHotelRequest.checkOutTime())
                 .hotelExplainContent(postHotelRequest.hotelExplainContent())
                 .business(business)
-                // 호텔 이미지 등록 추가 필요
                 .hotelOptions(hotelOptions)
                 .build();
 
-        return new PostHotelResponse(this.hotelRepository.save(hotel));
+        return new PostHotelResponse(this.hotelRepository.save(hotel),
+                this.saveHotelImages(hotel.getId(), postHotelRequest.imageExtensions()));
+    }
+
+    @Transactional
+    public void saveImages(ImageType imageType, long hotelId, List<String> urls) {
+        this.imageService.saveImages(imageType, hotelId, urls);
     }
 
     @Transactional
@@ -97,14 +112,19 @@ public class HotelService {
     }
 
     @Transactional
-    public HotelDto findHotelDetail(long hotelId) {
-        Hotel hotel = this.hotelRepository.findHotelDetail(hotelId, ImageType.HOTEL)
+    public GetHotelDetailResponse findHotelDetail(long hotelId) {
+        Hotel hotel = this.hotelRepository.findHotelDetail(hotelId)
                 .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
 
-        return new HotelDto(hotel);
-    }
+        List<String> imageUrls = this.imageService.findImagesById(ImageType.HOTEL, hotelId).stream()
+                .map(Image::getImageUrl)
+                .toList();
 
-    private final HotelOptionRepository hotelOptionRepository;
+        List<RoomWithImageDto> roomDtos = this.roomRepository.findAllRooms(hotelId, ImageType.ROOM);
+
+
+        return new GetHotelDetailResponse(new HotelDetailDto(hotel, roomDtos), imageUrls);
+    }
 
     @Transactional
     public PutHotelResponse modify(long hotelId, Member actor, PutHotelRequest request) {
@@ -132,11 +152,14 @@ public class HotelService {
             }
         }
 
-        // 이미지 수정 처리 필요
-
         modifyOptions(hotel, request.hotelOptions());
 
-        return new PutHotelResponse(hotel);
+        List<String> deleteImageUrls = request.deleteImageUrls();
+
+        this.imageService.deleteImagesByIdAndUrls(ImageType.HOTEL, hotelId, deleteImageUrls);
+        this.s3Service.deleteObjectsByUrls(deleteImageUrls);
+
+        return new PutHotelResponse(hotel, this.saveHotelImages(hotelId, request.imageExtensions()));
     }
 
     private <T> void modifyIfPresent(T newValue, Supplier<T> getter, Consumer<T> setter) {
@@ -145,8 +168,7 @@ public class HotelService {
         }
     }
 
-    @Transactional
-    public void modifyOptions(Hotel hotel, Set<String> optionNames) {
+    private void modifyOptions(Hotel hotel, Set<String> optionNames) {
         if (optionNames == null || optionNames.isEmpty()) {
             hotel.setHotelOptions(new HashSet<>());
             return;
@@ -170,6 +192,17 @@ public class HotelService {
         }
 
         hotel.setHotelStatus(HotelStatus.UNAVAILABLE);
+
+        if (this.imageService.deleteImages(ImageType.HOTEL, hotelId) > 0) {
+            this.s3Service.deleteAllObjectsById(ImageType.HOTEL, hotelId);
+        }
+    }
+
+    // 호텔 이미지 저장
+    private PresignedUrlsResponse saveHotelImages(long hotelId, List<String> extensions) {
+        List<URL> urls = this.s3Service.generatePresignedUrls(ImageType.HOTEL, hotelId, extensions);
+
+        return new PresignedUrlsResponse(hotelId, urls);
     }
 
     public Hotel getHotel(Long hotelId) {

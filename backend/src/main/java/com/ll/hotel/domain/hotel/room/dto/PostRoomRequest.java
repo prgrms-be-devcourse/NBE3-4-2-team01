@@ -24,12 +24,12 @@ public record PostRoomRequest(
 
         Map<String, Integer> bedTypeNumber,
 
-        List<String> roomImages,
+        List<String> imageExtensions,
 
         Set<String> roomOptions
 ) {
     public PostRoomRequest {
-        roomImages = roomImages == null ? new ArrayList<>() : roomImages;
+        imageExtensions = imageExtensions == null ? new ArrayList<>() : imageExtensions;
         roomOptions = roomOptions == null ? new HashSet<>() : roomOptions;
         bedTypeNumber = bedTypeNumber == null || bedTypeNumber.isEmpty()
                 ? new HashMap<>()
