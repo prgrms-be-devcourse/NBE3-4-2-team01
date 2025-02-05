@@ -5,6 +5,7 @@ import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.exceptions.JwtExceptionFilter;
 import com.ll.hotel.global.security.oauth2.*;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,6 +65,29 @@ public class SecurityConfig {
                         .requestMatchers("/api/businesses/**").hasRole("BUSINESS")
 
                         .anyRequest().authenticated()
+                )
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.disable())
+                )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write(String.format(
+                                    "{\"resultCode\": \"%d-1\", \"msg\": \"%s\", \"data\": null}",
+                                    HttpServletResponse.SC_UNAUTHORIZED,
+                                    "사용자 인증정보가 올바르지 않습니다."
+                            ));
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write(String.format(
+                                    "{\"resultCode\": \"%d-1\", \"msg\": \"%s\", \"data\": null}",
+                                    HttpServletResponse.SC_FORBIDDEN,
+                                    "접근 권한이 없습니다."
+                            ));
+                        })
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
