@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/hotel-amenities")
+@RequestMapping("/admin/hotel-options")
 @RequiredArgsConstructor
 public class HotelOptionController {
     private final HotelOptionService hotelOptionService;

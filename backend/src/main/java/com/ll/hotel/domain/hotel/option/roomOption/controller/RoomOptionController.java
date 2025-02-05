@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/room-amenities")
+@RequestMapping("/admin/room-options")
 @RequiredArgsConstructor
 public class RoomOptionController {
     private final RoomOptionService roomOptionService;
@@ -24,7 +24,7 @@ public class RoomOptionController {
 
         return new RsData<>(
                 "201",
-                "'항목이 추가되었습니다.",
+                "항목이 추가되었습니다.",
                 RoomOptionDto.toDto(roomOption)
         );
     }
