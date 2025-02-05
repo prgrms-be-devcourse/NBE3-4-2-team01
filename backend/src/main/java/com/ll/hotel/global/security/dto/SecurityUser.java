@@ -17,6 +17,7 @@ public class SecurityUser extends User implements OAuth2User {
     private final String provider;
     private final boolean isNewUser;
     private final Map<String, Object> attributes;
+    private final String oauthId;
 
     // 일반 로그인용 생성자
     public SecurityUser(long id, String username, String email, String role) {
@@ -26,18 +27,20 @@ public class SecurityUser extends User implements OAuth2User {
         this.provider = null;
         this.isNewUser = false;
         this.attributes = null;
+        this.oauthId = null;
     }
 
     // OAuth2 로그인용 생성자
     public SecurityUser(String email, String username, String provider, 
                        boolean isNewUser, Map<String, Object> attributes,
-                       Collection<? extends GrantedAuthority> authorities) {
+                       Collection<? extends GrantedAuthority> authorities, String oauthId) {
         super(username, "", authorities);
         this.id = -1;
         this.email = email;
         this.provider = provider;
         this.isNewUser = isNewUser;
         this.attributes = attributes;
+        this.oauthId = oauthId;
     }
 
     public static SecurityUser of(long id, String username, String email, String role) {

@@ -40,6 +40,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         
         String email;
         String name;
+        String oauthId;
         
         switch (registrationId) {
             case "naver" -> {
@@ -50,29 +51,31 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 }
                 email = (String) response.get("email");
                 name = (String) response.get("name");
-                log.debug("네이버 로그인 정보 - email: {}, name: {}", email, name);
+                oauthId = (String) response.get("id");
+                log.debug("네이버 로그인 정보 - email: {}, name: {}, id: {}", email, name, oauthId);
             }
             case "kakao" -> {
                 Map<String, Object> kakaoAccount = (Map<String, Object>) oauth2User.getAttributes().get("kakao_account");
                 Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
                 email = (String) kakaoAccount.get("email");
                 name = (String) profile.get("nickname");
-                log.debug("카카오 로그인 정보 - email: {}, name: {}", email, name);
+                oauthId = String.valueOf(oauth2User.getAttributes().get("id"));
+                log.debug("카카오 로그인 정보 - email: {}, name: {}, id: {}", email, name, oauthId);
             }
             case "google" -> {
                 email = oauth2User.getAttribute("email");
                 name = oauth2User.getAttribute("name");
-                log.debug("구글 로그인 정보 - email: {}, name: {}", email, name);
+                oauthId = oauth2User.getAttribute("sub");
+                log.debug("구글 로그인 정보 - email: {}, name: {}, id: {}", email, name, oauthId);
             }
             default -> throw new OAuth2AuthenticationException("Unsupported provider: " + registrationId);
         }
 
-        if (email == null || name == null) {
-            log.error("필수 정보(이메일 또는 이름)가 없습니다. Provider: {}", registrationId);
+        if (email == null || name == null || oauthId == null) {
+            log.error("필수 정보가 없습니다. Provider: {}", registrationId);
             throw new OAuth2AuthenticationException("Required attributes are missing");
         }
 
-        // 회원가입 여부만 확인하고, SecurityUser 객체를 생성하여 반환
         boolean isNewUser = !memberService.existsByMemberEmail(email);
         
         return new SecurityUser(
@@ -81,7 +84,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             registrationId,
             isNewUser,
             oauth2User.getAttributes(),
-            oauth2User.getAuthorities()
+            oauth2User.getAuthorities(),
+            oauthId
         );
     }
 }
