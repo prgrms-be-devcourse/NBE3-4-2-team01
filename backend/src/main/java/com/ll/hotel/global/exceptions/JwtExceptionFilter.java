@@ -29,9 +29,12 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
-
-            // 따로 DTO 만들기에는 애매해서, JSON 문자열로 직렬화 처리
-            response.getWriter().write("{\"error\": \"" + e.getMessage() + "\"}");
+            
+            response.getWriter().write(String.format(
+                "{\"resultCode\": \"%d-1\", \"msg\": \"%s\", \"data\": null}", 
+                HttpServletResponse.SC_UNAUTHORIZED,
+                e.getMessage()
+            ));
         }
     }
 }
