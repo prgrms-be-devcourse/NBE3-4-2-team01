@@ -1,4 +1,125 @@
 package com.ll.hotel.domain.hotel.hotel.entity;
 
-public class Hotel {
+import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
+import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
+import com.ll.hotel.domain.hotel.room.entity.Room;
+import com.ll.hotel.domain.member.member.entity.Business;
+import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.global.jpa.entity.BaseTime;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreRemove;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Hotel extends BaseTime {
+    @Column
+    private String hotelName;
+
+    @Column(unique = true)
+    private String hotelEmail;
+
+    @Column
+    private String hotelPhoneNumber;
+
+    @Column
+    private String streetAddress;
+
+    @Column
+    private Integer zipCode;
+
+    @Column
+    private Integer hotelGrade;
+
+    @Column
+    private LocalTime checkInTime;
+
+    @Column
+    private LocalTime checkOutTime;
+
+    @Column(columnDefinition = "TEXT")
+    private String hotelExplainContent;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private HotelStatus hotelStatus = HotelStatus.PENDING;
+
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Room> rooms = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private Business business;
+
+    @ManyToMany
+    Set<HotelOption> hotelOptions;
+
+    @ManyToMany
+    Set<Member> favorites;
+
+    @Column(nullable = false)
+    private Double averageRating;
+
+    @Column(nullable = false)
+    private Long totalReviewRatingSum;
+
+    @Column(nullable = false)
+    private Long totalReviewCount;
+
+    // 평균 레이팅 업데이트
+    public void updateAverageRating(int countOffset, int ratingOffset) {
+        this.totalReviewCount += countOffset;
+        this.totalReviewRatingSum += ratingOffset;
+        this.averageRating = Math.round(((double)totalReviewRatingSum / totalReviewCount) * 10.0) / 10.0;
+    }
+
+    public boolean isOwnedBy(Member member) {
+        return this.business != null && this.business.getMember().equals(member);
+    }
+
+    /**
+     * 불필요 시 삭제
+     */
+    @PreRemove
+    private void preRemove() {
+        if (this.business != null) {
+            this.business.setHotel(null);
+            this.business.setHotel(null);
+        }
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (averageRating == null) {
+            averageRating = 0.0;
+        }
+        if (totalReviewRatingSum == null) {
+            totalReviewRatingSum = 0L;
+        }
+        if (totalReviewCount == null) {
+            totalReviewCount = 0L;
+        }
+    }
 }
