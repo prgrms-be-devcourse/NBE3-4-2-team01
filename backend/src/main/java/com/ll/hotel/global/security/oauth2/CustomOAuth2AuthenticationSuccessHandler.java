@@ -48,8 +48,6 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
             String accessToken = authTokenService.generateToken(securityUser.getEmail()).accessToken();
             String refreshToken = memberService.generateRefreshToken(securityUser.getEmail());
             
-            authTokenService.generateToken(securityUser.getEmail());
-
             String redirectUrl = UriComponentsBuilder.fromUriString(authorizedRedirectUri)
                     .queryParam("accessToken", "Bearer " + accessToken)
                     .queryParam("refreshToken", "Bearer " + refreshToken)
