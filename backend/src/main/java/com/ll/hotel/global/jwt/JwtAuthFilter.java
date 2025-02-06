@@ -58,15 +58,17 @@ public class JwtAuthFilter extends OncePerRequestFilter implements Ordered {
 
         try {
             String email = memberService.extractEmailIfValid(token);
+            log.debug("Extracted email from token: {}", email);
 
-            Member findMember = memberRepository.findByMemberEmail(email)
+            Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new ServiceException("404-1", "해당 회원이 존재하지 않습니다."));
+            log.debug("Found member: {}", member.getMemberEmail());
 
             SecurityUser userDto = of(
-                findMember.getId(),
-                findMember.getMemberName(),
-                findMember.getMemberEmail(),
-                "ROLE_" + findMember.getRole()
+                member.getId(),
+                member.getMemberName(),
+                member.getMemberEmail(),
+                "ROLE_" + member.getRole()
             );
 
             Authentication auth = new UsernamePasswordAuthenticationToken(
