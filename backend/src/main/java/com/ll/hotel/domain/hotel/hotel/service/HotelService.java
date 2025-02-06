@@ -21,6 +21,7 @@ import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
+import com.ll.hotel.global.annotation.BusinessOnly;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.net.URL;
@@ -50,8 +51,9 @@ public class HotelService {
     private final RoomRepository roomRepository;
     private final BusinessRepository businessRepository;
 
+    @BusinessOnly
     @Transactional
-    public PostHotelResponse create(Member actor, PostHotelRequest postHotelRequest) {
+    public PostHotelResponse createHotel(Member actor, PostHotelRequest postHotelRequest) {
         Business business = this.businessRepository.findByMember(actor)
                 .orElseThrow(() -> new ServiceException("404-1", "사업자가 존재하지 않습니다."));
 
@@ -87,13 +89,14 @@ public class HotelService {
         }
     }
 
+    @BusinessOnly
     @Transactional
-    public void saveImages(ImageType imageType, long hotelId, List<String> urls) {
+    public void saveImages(Member actor, ImageType imageType, long hotelId, List<String> urls) {
         this.imageService.saveImages(imageType, hotelId, urls);
     }
 
     @Transactional
-    public Page<GetHotelResponse> findAll(int page, int pageSize, String filterName, String filterDirection) {
+    public Page<GetHotelResponse> findAllHotels(int page, int pageSize, String filterName, String filterDirection) {
         Map<String, String> sortFieldMapping = Map.of(
                 "latest", "createdAt",
                 "averageRating", "averageRating",
@@ -134,9 +137,10 @@ public class HotelService {
         return new GetHotelDetailResponse(new HotelDetailDto(hotel, roomDtos), imageUrls);
     }
 
+    @BusinessOnly
     @Transactional
-    public PutHotelResponse modify(long hotelId, Member actor, PutHotelRequest request) {
-        Hotel hotel = this.getHotel(hotelId);
+    public PutHotelResponse modifyHotel(long hotelId, Member actor, PutHotelRequest request) {
+        Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
@@ -195,9 +199,10 @@ public class HotelService {
         hotel.setHotelOptions(options);
     }
 
+    @BusinessOnly
     @Transactional
-    public void delete(Long hotelId, Member actor) {
-        Hotel hotel = this.getHotel(hotelId);
+    public void deleteHotel(Long hotelId, Member actor) {
+        Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
@@ -217,7 +222,7 @@ public class HotelService {
         return new PresignedUrlsResponse(hotelId, urls);
     }
 
-    public Hotel getHotel(Long hotelId) {
+    private Hotel getHotelById(Long hotelId) {
         return this.hotelRepository.findById(hotelId)
                 .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
     }
