@@ -2,7 +2,7 @@ package com.ll.hotel.standard.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ll.hotel.global.app.AppConfig;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
+import com.ll.hotel.global.jwt.dto.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -16,12 +16,11 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Service
 public class Ut {
 
     private final SecretKey secretKey;
 
-    public Ut(CustomOAuth2JwtProperties jwtProperties) {
+    public Ut(JwtProperties jwtProperties) {
         this.secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
     }
 
@@ -41,7 +40,7 @@ public class Ut {
     }
 
     public static class jwt {
-        public static String toString(CustomOAuth2JwtProperties jwtProperties, Map<String, Object> claims) {
+        public static String toString(JwtProperties jwtProperties, Map<String, Object> claims) {
             SecretKey secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
             Date now = new Date();
 
@@ -58,11 +57,15 @@ public class Ut {
                     .compact();
         }
 
-        public static Claims getClaims(CustomOAuth2JwtProperties jwtProperties, String token) {
+        public static Claims getClaims(JwtProperties jwtProperties, String token) {
             SecretKey secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
             token = token.replace("Bearer ", "").trim();
 
-            return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+            return Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
         }
     }
   

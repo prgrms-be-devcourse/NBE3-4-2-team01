@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.member.member.repository;
 
-import com.ll.hotel.global.security.dto.RefreshToken;
+import com.ll.hotel.global.jwt.dto.RefreshToken;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

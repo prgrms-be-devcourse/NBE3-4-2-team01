@@ -1,4 +1,4 @@
-package com.ll.hotel.global.security.dto;
+package com.ll.hotel.global.jwt.dto;
 
 import jakarta.persistence.Id;
 import lombok.Getter;

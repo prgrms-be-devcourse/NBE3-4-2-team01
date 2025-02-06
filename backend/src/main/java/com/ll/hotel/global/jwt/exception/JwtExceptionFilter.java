@@ -1,5 +1,6 @@
-package com.ll.hotel.global.exceptions;
+package com.ll.hotel.global.jwt.exception;
 
+import com.ll.hotel.global.exceptions.ServiceException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

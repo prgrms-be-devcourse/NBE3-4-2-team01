@@ -1,11 +1,11 @@
-package com.ll.hotel.global.security.oauth2;
+package com.ll.hotel.global.jwt;
 
 
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.global.security.dto.SecurityUser;
+import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,12 +23,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.ll.hotel.global.security.dto.SecurityUser.of;
+import static com.ll.hotel.global.security.oauth2.dto.SecurityUser.of;
 
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class CustomOAuth2JwtAuthFilter extends OncePerRequestFilter implements Ordered {
+public class JwtAuthFilter extends OncePerRequestFilter implements Ordered {
 
     private final MemberService memberService;
     private final MemberRepository memberRepository;
@@ -58,15 +58,17 @@ public class CustomOAuth2JwtAuthFilter extends OncePerRequestFilter implements O
 
         try {
             String email = memberService.extractEmailIfValid(token);
+            log.debug("Extracted email from token: {}", email);
 
-            Member findMember = memberRepository.findByMemberEmail(email)
+            Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new ServiceException("404-1", "해당 회원이 존재하지 않습니다."));
+            log.debug("Found member: {}", member.getMemberEmail());
 
             SecurityUser userDto = of(
-                findMember.getId(),
-                findMember.getMemberName(),
-                findMember.getMemberEmail(),
-                "ROLE_" + findMember.getRole()
+                member.getId(),
+                member.getMemberName(),
+                member.getMemberEmail(),
+                "ROLE_" + member.getRole()
             );
 
             Authentication auth = new UsernamePasswordAuthenticationToken(

@@ -1,8 +1,8 @@
 package com.ll.hotel.domain.member.member.service;
 
 
-import com.ll.hotel.global.security.dto.GeneratedToken;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
+import com.ll.hotel.global.jwt.dto.GeneratedToken;
+import com.ll.hotel.global.jwt.dto.JwtProperties;
 import com.ll.hotel.standard.util.Ut;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class AuthTokenService {
-    private final CustomOAuth2JwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
     private final RefreshTokenService refreshTokenService;
 
     public GeneratedToken generateToken(String email) {
