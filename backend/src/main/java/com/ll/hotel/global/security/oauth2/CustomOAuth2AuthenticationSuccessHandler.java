@@ -4,6 +4,7 @@ package com.ll.hotel.global.security.oauth2;
 import com.ll.hotel.domain.member.member.service.AuthTokenService;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +56,12 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
                     .build()
                     .encode()
                     .toUriString();
+            
+            Cookie refreshTokenCookie = new Cookie("refresh_token", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(true);
+            refreshTokenCookie.setPath("/");
+            response.addCookie(refreshTokenCookie);
             
             response.sendRedirect(redirectUrl);
         }
