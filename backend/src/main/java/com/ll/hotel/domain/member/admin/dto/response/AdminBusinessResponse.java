@@ -30,12 +30,14 @@ public class AdminBusinessResponse {
     public record Summary(
             Long id,
             String businessRegistrationNumber,
+            String ownerName,
             BusinessApprovalStatus approvalStatus
     ) {
         public static Summary from(Business business) {
             return new Summary(
                     business.getId(),
                     business.getBusinessRegistrationNumber(),
+                    business.getOwnerName(),
                     business.getApprovalStatus()
             );
         }
@@ -44,6 +46,7 @@ public class AdminBusinessResponse {
     public record Detail(
             Long businessId,
             String businessRegistrationNumber,
+            String ownerName,
             BusinessApprovalStatus approvalStatus,
 
             Long userId,
@@ -64,6 +67,7 @@ public class AdminBusinessResponse {
             return new Detail(
                     business.getId(),
                     business.getBusinessRegistrationNumber(),
+                    business.getOwnerName(),
                     business.getApprovalStatus(),
                     owner.getId(),
                     owner.getMemberName(),
