@@ -4,40 +4,52 @@ import ReviewList from './ReviewList';
 import { getHotelReviews } from '@/lib/api/ReviewApi';
 import { HotelReviewListResponse } from '@/lib/types/HotelReviewListResponse';
 import { PageDto } from '@/lib/types/PageDto';
+import Pagination from '../Pagination/Pagination';
+
+interface HotelReviewsProps {
+  hotelId: number;
+  page: number;
+  isBusinessUser?: boolean;
+}
 
 // 호텔 리뷰 조회
-const HotelReviews: React.FC<{ hotelId: number }> = ({ hotelId }) => {
+const HotelReviews: React.FC<HotelReviewsProps> = ({ hotelId, page, isBusinessUser=false }) => {
+  const [response, setResponse] = useState<HotelReviewListResponse | null>(null);
+  const [reviewPage, setReviewPage] = useState<PageDto<HotelReviewResponse> | null>(null);
   const [reviews, setReviews] = useState<HotelReviewResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        setIsLoading(true);
-        const response : HotelReviewListResponse = await getHotelReviews(hotelId);
-        const reviewPage : PageDto<HotelReviewResponse> = response.hotelReviewPage;
-        setReviews(reviewPage.items);
-        alert('호텔 리뷰 목록 조회 성공');   
-      } catch (error) {
-        if (error instanceof Error) {
-          alert(error.message);
-        }
-      } finally {
-        setIsLoading(false);
+  const fetchReviews = async () => {
+    try {
+      setIsLoading(true);
+      const response : HotelReviewListResponse = await getHotelReviews(hotelId, page);
+      const reviewPage : PageDto<HotelReviewResponse> = response.hotelReviewPage;
+      setResponse(response);
+      setReviewPage(reviewPage);
+      setReviews(reviewPage.items);
+      alert('호텔 리뷰 목록 조회 성공');
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
       }
-    };
-    
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {  
     fetchReviews();
-  }, [hotelId]);
+  }, [hotelId, page]);
+
 
   if (isLoading) {
     return <div className="text-center">로딩 중...</div>;
   }
 
   return <>
-  // 호텔 평점 표시
-    <ReviewList reviews={reviews} />
-  // 페이징 번호, 이전, 다음 등 클릭 시 새로운 페이지 요청
+    <div>평균 리뷰 점수 : {response?.averageRating}</div>
+    <ReviewList reviews={reviews} isBusinessUser={isBusinessUser} onCommentUpdate={fetchReviews}/>
+    <Pagination currentPage={page} totalPages={reviewPage?.totalPages || 1} basePath={`hotels/${hotelId}/reviews`} />
   </>;
 };
 

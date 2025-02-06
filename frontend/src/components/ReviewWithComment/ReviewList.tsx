@@ -1,7 +1,8 @@
 import React from 'react';
-import ReviewWithComment from './ReviewWithComment';
-import { ReviewResponseType } from './ReviewWithComment';
-import { isHotelReview } from './ReviewWithComment';
+import MyReviewWithComment from './MyReviewWithComment';
+import HotelReviewWithComment from './HotelReviewWithComment';
+import { ReviewResponseType } from './MyReviewWithComment';
+import { isHotelReview } from './MyReviewWithComment';
 import { ReviewDto } from '@/lib/types/ReviewDto';
 
 interface ReviewListProps {
@@ -21,16 +22,22 @@ interface ReviewListProps {
     return (
       <div className="max-w-3xl mx-auto p-4">
         {reviews.map((review) => {
-          const reviewDto : ReviewDto = isHotelReview(review) 
-            ? review.hotelReviewWithCommentDto.reviewDto 
-            : review.myReviewWithCommentDto.reviewDto;
-            
-          return (
-            <ReviewWithComment
-              key={reviewDto.reviewId}
-              review={review}
-            />
-          );
+          let reviewDto : ReviewDto;
+          if(isHotelReview(review)) {
+            reviewDto = review.hotelReviewWithCommentDto.reviewDto;
+            return (
+              <HotelReviewWithComment
+                key={reviewDto.reviewId}
+                review={review}
+              />);
+          } else {
+            reviewDto = review.myReviewWithCommentDto.reviewDto;
+            return (
+              <MyReviewWithComment
+                key={reviewDto.reviewId}
+                review={review}
+              />);
+          }
         })}
       </div>
     );
