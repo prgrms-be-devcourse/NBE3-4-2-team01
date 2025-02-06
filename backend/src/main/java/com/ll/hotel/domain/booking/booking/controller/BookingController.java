@@ -160,4 +160,26 @@ public class BookingController {
                 BookingResponse.from(booking)
         );
     }
+
+    // 예약(숙박) 완료 처리
+    @PostMapping("/{booking_id}")
+    @Transactional
+    public RsData<BookingResponse> complete(
+            @PathVariable("booking_id") Long bookingId) {
+        Member actor = rq.getActor();
+        Booking booking = bookingService.findById(bookingId);
+
+        // 관리자, 호텔 사업자만 완료 처리 가능
+        if (actor == null || !(actor.isAdmin() || booking.isOwnedBy(actor))) {
+            throw new ServiceException("401", "예약 완료 처리 권한이 없습니다.");
+        }
+
+        booking = bookingService.setCompleted(booking);
+
+        return new RsData<>(
+                "200",
+                "예약이 완료 처리되었습니다.",
+                BookingResponse.from(booking)
+        );
+    }
 }

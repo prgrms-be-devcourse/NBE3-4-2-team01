@@ -97,6 +97,21 @@ public class BookingService {
         }
     }
 
+    @Transactional
+    public Booking setCompleted(Booking booking) {
+        if (booking.getBookingStatus() == BookingStatus.COMPLETED) {
+            throw new ServiceException("400", "이미 완료된 예약입니다.");
+        }
+
+        // 예약 완료 처리 시도
+        try {
+            booking.setBookingStatus(BookingStatus.COMPLETED);
+            return booking;
+        } catch (Exception e) {
+            throw new ServiceException("500", "상태 변경에 실패했습니다. 관리자에게 문의하세요.");
+        }
+    }
+
     public Booking findById(Long id) {
         return bookingRepository.findById(id)
                 .orElseThrow(() -> new ServiceException("404", "예약 정보를 찾을 수 없습니다."));
