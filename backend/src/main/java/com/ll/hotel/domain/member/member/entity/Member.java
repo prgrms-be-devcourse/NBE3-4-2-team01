@@ -44,6 +44,7 @@ public class Member extends BaseTime {
     private MemberStatus memberStatus;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<OAuth> oauths = new ArrayList<>();
 
     @OneToOne

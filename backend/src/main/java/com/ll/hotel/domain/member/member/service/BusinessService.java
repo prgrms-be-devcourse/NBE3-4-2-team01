@@ -9,17 +9,30 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class BusinessService {
     private final BusinessRepository businessRepository;
 
     @Transactional
-    public Business register(BusinessRequest businessRequest, Member member) {
+    public Business register(BusinessRequest.RegistrationInfo registrationInfo, Member member, String validationResult) {
+
+        BusinessApprovalStatus status;
+
+        if (validationResult.equals("01")) {
+            status = BusinessApprovalStatus.APPROVED;
+        } else {
+            status = BusinessApprovalStatus.REJECTED;
+        }
+
         Business business = Business
                 .builder()
-                .businessRegistrationNumber(businessRequest.businessRegistrationNumber())
-                .approvalStatus(BusinessApprovalStatus.PENDING)
+                .businessRegistrationNumber(registrationInfo.businessRegistrationNumber())
+                .startDate(registrationInfo.startDate())
+                .ownerName(registrationInfo.ownerName())
+                .approvalStatus(status)
                 .member(member)
                 .hotel(null)
                 .build();

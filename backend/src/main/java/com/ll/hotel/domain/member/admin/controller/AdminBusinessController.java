@@ -49,11 +49,11 @@ public class AdminBusinessController {
     }
 
     @PatchMapping("/{id}")
-    public RsData<AdminBusinessResponse.ApprovalResult> approve(@PathVariable("id") Long id,
+    public RsData<AdminBusinessResponse.ApprovalResult> modify(@PathVariable("id") Long id,
                                                  @RequestBody @Valid AdminBusinessRequest adminBusinessRequest) {
         Business business = adminBusinessService.findById(id);
 
-        adminBusinessService.approve(business, adminBusinessRequest);
+        adminBusinessService.modify(business, adminBusinessRequest);
 
         adminBusinessService.flush();
 

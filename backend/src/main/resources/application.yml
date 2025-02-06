@@ -22,6 +22,7 @@ spring:
     include:
       - secret
       - api-keys
+      - business-api
 
   # h2
   h2:

@@ -67,6 +67,8 @@ public class AdminBusinessControllerTest {
         Business business = Business
                 .builder()
                 .businessRegistrationNumber(String.format("1234567890"))
+                .startDate(LocalDate.now())
+                .ownerName("김사장")
                 .approvalStatus(BusinessApprovalStatus.PENDING)
                 .member(member)
                 .hotel(null)
@@ -160,7 +162,7 @@ public class AdminBusinessControllerTest {
 
         resultActions
                 .andExpect(handler().handlerType(AdminBusinessController.class))
-                .andExpect(handler().methodName("approve"))
+                .andExpect(handler().methodName("modify"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200"))
                 .andExpect(jsonPath("$.msg").value("사업자 승인 정보가 수정되었습니다."));

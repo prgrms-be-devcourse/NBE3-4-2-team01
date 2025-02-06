@@ -57,6 +57,8 @@ class AdminBusinessServiceTest {
             Business business = Business
                     .builder()
                     .businessRegistrationNumber(String.format("123456789%01d", i))
+                    .startDate(LocalDate.now())
+                    .ownerName("김사장")
                     .approvalStatus(BusinessApprovalStatus.PENDING)
                     .member(member)
                     .hotel(null)
@@ -128,25 +130,34 @@ class AdminBusinessServiceTest {
     }
 
     @Test
-    @DisplayName("승인 정보 수정")
-    void approveTest() {
+    @DisplayName("사업자 정보 수정")
+    void modifyTest() {
         // Given
         AdminBusinessRequest adminBusinessRequest = new AdminBusinessRequest(
+                "0123456789",
+                LocalDate.of(2020, 1, 1),
+                null,
                 BusinessApprovalStatus.APPROVED);
 
         // 기존 데이터 준비
         Business existingBusiness = adminBusinessService.findById(testBusinessId);
 
         // When: 승인 요청 실행
-        adminBusinessService.approve(existingBusiness, adminBusinessRequest);
+        adminBusinessService.modify(existingBusiness, adminBusinessRequest);
 
         // Then: 메모리 상의 데이터 검증
         assertThat(existingBusiness).isNotNull();
+        assertThat(existingBusiness.getBusinessRegistrationNumber()).isEqualTo("0123456789");
+        assertThat(existingBusiness.getStartDate()).isEqualTo(LocalDate.of(2020, 1, 1));
+        assertThat(existingBusiness.getOwnerName()).isEqualTo("김사장");
         assertThat(existingBusiness.getApprovalStatus()).isEqualTo(BusinessApprovalStatus.APPROVED);
 
         // Then: DB의 데이터 검증
-        Optional<Business> savedBusiness = businessRepository.findById(existingBusiness.getId());
+        Optional<Business> savedBusiness = businessRepository.findById(testBusinessId);
         assertThat(savedBusiness).isPresent();
-        assertThat(savedBusiness.get().getApprovalStatus()).isEqualTo(BusinessApprovalStatus.APPROVED);
+        assertThat(savedBusiness.get().getBusinessRegistrationNumber()).isEqualTo("0123456789"); // DB에 반영된 값 확인
+        assertThat(savedBusiness.get().getStartDate()).isEqualTo(LocalDate.of(2020, 1, 1));
+        assertThat(savedBusiness.get().getOwnerName()).isEqualTo("김사장");
+        assertThat(savedBusiness.get().getApprovalStatus()).isEqualTo(BusinessApprovalStatus.APPROVED); // DB에 반영된 승인 상태 확인
     }
 }
