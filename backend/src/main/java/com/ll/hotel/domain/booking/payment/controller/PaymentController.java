@@ -45,7 +45,7 @@ public class PaymentController {
 
         String merchantUid = paymentService.generateMerchantUid();
         return new RsData<>(
-                "201",
+                "200",
                 "Uid 발급에 성공했습니다.",
                 new UidResponse(apiId, channelKey, merchantUid)
         );
