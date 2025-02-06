@@ -62,19 +62,7 @@ public class HotelService {
             throw new ServiceException("404-2", "사용할 수 없는 호텔 옵션이 존재합니다.");
         }
 
-        Hotel hotel = Hotel.builder()
-                .hotelName(postHotelRequest.hotelName())
-                .hotelEmail(postHotelRequest.hotelEmail())
-                .hotelPhoneNumber(postHotelRequest.hotelPhoneNumber())
-                .streetAddress(postHotelRequest.streetAddress())
-                .zipCode(postHotelRequest.zipCode())
-                .hotelGrade(postHotelRequest.hotelGrade())
-                .checkInTime(postHotelRequest.checkInTime())
-                .checkOutTime(postHotelRequest.checkOutTime())
-                .hotelExplainContent(postHotelRequest.hotelExplainContent())
-                .business(business)
-                .hotelOptions(hotelOptions)
-                .build();
+        Hotel hotel = Hotel.hotelBuild(postHotelRequest, business, hotelOptions);
 
         try {
             return new PostHotelResponse(this.hotelRepository.save(hotel),

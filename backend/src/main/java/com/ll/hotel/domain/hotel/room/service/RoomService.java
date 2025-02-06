@@ -63,16 +63,7 @@ public class RoomService {
             throw new ServiceException("404-2", "사용할 수 없는 객실 옵션이 존재합니다.");
         }
 
-        Room room = Room.builder()
-                .hotel(hotel)
-                .roomName(postRoomRequest.roomName())
-                .roomNumber(postRoomRequest.roomNumber())
-                .basePrice(postRoomRequest.basePrice())
-                .standardNumber(postRoomRequest.standardNumber())
-                .maxNumber(postRoomRequest.maxNumber())
-                .bedTypeNumber(bedTypeNumber)
-                .roomOptions(roomOptions)
-                .build();
+        Room room = Room.roomBuild(hotel, postRoomRequest, bedTypeNumber, roomOptions);
 
         try {
             return new PostRoomResponse(this.roomRepository.save(room),
