@@ -5,7 +5,7 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.global.security.dto.SecurityUser;
+import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +23,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.ll.hotel.global.security.dto.SecurityUser.of;
+import static com.ll.hotel.global.security.oauth2.dto.SecurityUser.of;
 
 @RequiredArgsConstructor
 @Slf4j

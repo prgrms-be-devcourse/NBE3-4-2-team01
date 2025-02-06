@@ -17,7 +17,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "member")
+@Table(
+    name = "member",
+    indexes = {
+        @Index(name = "idx_member_email", columnList = "memberEmail")
+    }
+)
 public class Member extends BaseTime {
 
     @Column(unique = true, nullable = false)
