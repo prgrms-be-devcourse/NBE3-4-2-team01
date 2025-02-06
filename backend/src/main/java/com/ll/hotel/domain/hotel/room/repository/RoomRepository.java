@@ -36,4 +36,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             AND r.roomStatus <> 'UNAVAILABLE'
             """)
     Optional<Room> findRoomDetail(@Param("hotelId") long hotelId, @Param("roomId") long roomId);
+
+    boolean existsByHotelIdAndRoomNameAndIdNot(long hotelId, String roomName, long roomId);
 }

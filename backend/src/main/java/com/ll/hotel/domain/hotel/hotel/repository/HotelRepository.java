@@ -35,4 +35,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             AND h.hotelStatus <> 'UNAVAILABLE'
             """)
     Optional<Hotel> findHotelDetail(@Param("hotelId") long hotelId);
+
+    boolean existsByHotelEmailAndIdNot(String hotelEmail, long hotelId);
 }

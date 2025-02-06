@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -54,6 +55,10 @@ public class HotelService {
         Business business = this.businessRepository.findByMember(actor)
                 .orElseThrow(() -> new ServiceException("404-1", "사업자가 존재하지 않습니다."));
 
+        if (business.getHotel() != null) {
+            throw new ServiceException("409-1", "한 사업자는 하나의 호텔만 등록할 수 있습니다.");
+        }
+
         Set<HotelOption> hotelOptions = this.hotelOptionRepository.findByNameIn(postHotelRequest.hotelOptions());
 
         if (hotelOptions.size() != postHotelRequest.hotelOptions().size()) {
@@ -74,8 +79,12 @@ public class HotelService {
                 .hotelOptions(hotelOptions)
                 .build();
 
-        return new PostHotelResponse(this.hotelRepository.save(hotel),
-                this.saveHotelImages(hotel.getId(), postHotelRequest.imageExtensions()));
+        try {
+            return new PostHotelResponse(this.hotelRepository.save(hotel),
+                    this.saveHotelImages(hotel.getId(), postHotelRequest.imageExtensions()));
+        } catch (DataIntegrityViolationException e) {
+            throw new ServiceException("409-2", "동일한 이메일의 호텔이 이미 존재합니다.");
+        }
     }
 
     @Transactional
@@ -122,7 +131,6 @@ public class HotelService {
 
         List<RoomWithImageDto> roomDtos = this.roomRepository.findAllRooms(hotelId, ImageType.ROOM);
 
-
         return new GetHotelDetailResponse(new HotelDetailDto(hotel, roomDtos), imageUrls);
     }
 
@@ -132,6 +140,10 @@ public class HotelService {
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
+        }
+
+        if (this.hotelRepository.existsByHotelEmailAndIdNot(request.hotelEmail(), hotelId)) {
+            throw new ServiceException("409-1", "동일한 이름의 방이 이미 호텔에 존재합니다.");
         }
 
         modifyIfPresent(request.hotelName(), hotel::getHotelName, hotel::setHotelName);
