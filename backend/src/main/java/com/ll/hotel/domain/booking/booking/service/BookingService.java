@@ -107,6 +107,12 @@ public class BookingService {
         return bookingRepository.findByMember(member, pageRequest);
     }
 
+    public Page<Booking> findByHotel(Hotel hotel, int page, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Order.desc("id")));
+        return bookingRepository.findByHotel(hotel, pageRequest);
+    }
+
+    // 미사용
     public Page<Booking> findByHotelId(Long hotelId, int page, int pageSize) {
         PageRequest pageRequest = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Order.desc("id")));
         return bookingRepository.findByHotelId(hotelId, pageRequest);
