@@ -2,6 +2,7 @@ package com.ll.hotel.global.security.oauth2;
 
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
+import com.ll.hotel.global.security.oauth2.repository.OAuthRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -17,6 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final MemberService memberService;
+    private final OAuthRepository oAuthRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -76,7 +78,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("Required attributes are missing");
         }
 
-        boolean isNewUser = !memberService.existsByMemberEmail(email);
+        boolean isNewUser = !oAuthRepository.existsByProviderAndOauthId(registrationId, oauthId);
         
         return new SecurityUser(
             email,
