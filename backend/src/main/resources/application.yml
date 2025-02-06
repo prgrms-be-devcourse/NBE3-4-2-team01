@@ -100,3 +100,9 @@ logging:
 app:
   oauth2:
     authorizedRedirectUris: http://localhost:8080/api/auth/oauth2/callback
+
+custom:
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:8080
