@@ -3,9 +3,13 @@ package com.ll.hotel.global.security;
 
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.service.MemberService;
-import com.ll.hotel.global.jwt.exception.JwtExceptionFilter;
 import com.ll.hotel.global.jwt.JwtAuthFilter;
-import com.ll.hotel.global.security.oauth2.*;
+import com.ll.hotel.global.jwt.exception.JwtExceptionFilter;
+import com.ll.hotel.global.security.cors.CorsProperties;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthenticationSuccessHandler;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthorizationRequestRepository;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2FailureHandler;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +35,7 @@ public class SecurityConfig {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
     private final CustomOAuth2AuthorizationRequestRepository customOAuth2AuthorizationRequestRepository;
+    private final CorsProperties corsProperties;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -108,7 +113,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8080"));
+        configuration.setAllowedOrigins(corsProperties.getAllowedOrigins());
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
