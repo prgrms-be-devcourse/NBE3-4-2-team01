@@ -2,6 +2,7 @@ package com.ll.hotel.domain.hotel.hotel.controller;
 
 import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelRevenueResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
@@ -139,6 +140,25 @@ public class HotelController {
         return new RsData<>(
                 "200-1",
                 "호텔 삭제에 성공하였습니다."
+        );
+    }
+
+    @GetMapping("{hotelId}/revenue")
+    public RsData<GetHotelRevenueResponse> findHotelRevenue(@PathVariable long hotelId) {
+        Member actor = this.rq.getActor();
+
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인 해주세요.");
+        }
+
+        if (!actor.isBusiness()) {
+            throw new ServiceException("403-1", "사업가만 호텔 매출을 확인할 수 있습니다.");
+        }
+
+        return new RsData<>(
+                "200-1",
+                "호텔 매출 조회에 성공하였습니다.",
+                this.hotelService.findRevenue(hotelId, actor)
         );
     }
 }
