@@ -11,12 +11,18 @@ import java.time.LocalDate;
 
 public class AdminBusinessResponse {
     public record ApprovalResult(
+            Long businessId,
             String businessRegistrationNumber,
+            LocalDate startDate,
+            String ownerName,
             BusinessApprovalStatus approvalStatus
     ) {
         public static ApprovalResult from(Business business) {
             return new ApprovalResult(
+                    business.getId(),
                     business.getBusinessRegistrationNumber(),
+                    business.getStartDate(),
+                    business.getOwnerName(),
                     business.getApprovalStatus()
             );
         }
