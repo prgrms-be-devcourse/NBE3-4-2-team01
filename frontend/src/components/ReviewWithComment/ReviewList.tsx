@@ -1,7 +1,7 @@
 import React from 'react';
-import ReviewWithComment from './ReviewWithComent';
-import { ReviewResponseType } from './ReviewWithComent';
-import { isHotelReview } from './ReviewWithComent';
+import ReviewWithComment from './ReviewWithComment';
+import { ReviewResponseType } from './ReviewWithComment';
+import { isHotelReview } from './ReviewWithComment';
 import { ReviewDto } from '@/lib/types/ReviewDto';
 
 interface ReviewListProps {

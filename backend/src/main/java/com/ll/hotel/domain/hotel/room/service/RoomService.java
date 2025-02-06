@@ -20,7 +20,7 @@ import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
+import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.net.URL;

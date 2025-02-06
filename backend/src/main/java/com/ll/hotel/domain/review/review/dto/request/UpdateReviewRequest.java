@@ -1,4 +1,4 @@
-package com.ll.hotel.domain.review.review.dto;
+package com.ll.hotel.domain.review.review.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record PostReviewRequest(
+public record UpdateReviewRequest(
         @NotBlank(message = "리뷰 내용은 필수입니다")
         String content,
 
@@ -17,6 +17,9 @@ public record PostReviewRequest(
         Integer rating,
 
         @NotNull(message = "빈 배열이 아닌 Null 값은 불가능합니다")
-        List<String> imageExtensions
+        List<String> deleteImageUrls,
+
+        @NotNull(message = "빈 배열이 아닌 Null 값은 불가능합니다")
+        List<String> newImageExtensions
 ) {
 }

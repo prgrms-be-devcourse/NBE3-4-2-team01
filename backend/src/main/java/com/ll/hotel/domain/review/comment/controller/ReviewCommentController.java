@@ -1,7 +1,7 @@
 package com.ll.hotel.domain.review.comment.controller;
 
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.comment.dto.ReviewCommentContentRequest;
+import com.ll.hotel.domain.review.comment.dto.request.ReviewCommentContentRequest;
 import com.ll.hotel.domain.review.comment.dto.ReviewCommentDto;
 import com.ll.hotel.domain.review.comment.service.ReviewCommentService;
 import com.ll.hotel.global.exceptions.ServiceException;
