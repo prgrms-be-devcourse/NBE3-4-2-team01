@@ -201,7 +201,7 @@ public class ReviewController {
         Page<HotelReviewResponse> hotelReviewPage = reviewService.getHotelReviewResponses(hotelId, page);
         HotelReviewListResponse hotelReviewListResponse = new HotelReviewListResponse(
                 new PageDto<>(hotelReviewPage),
-                hotelService.getHotel(hotelId).getAverageRating());
+                hotelService.getHotelById(hotelId).getAverageRating());
 
         return new RsData<>(
                 "200-1",
