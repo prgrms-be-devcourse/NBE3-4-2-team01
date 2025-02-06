@@ -52,21 +52,19 @@ public class SecurityConfig {
                                 "/api/users/login",
                                 "/api/users/refresh",
                                 "/api/hotels/**",
+                                "/api/bookings/**",
+                                "/api/favorites/**",
+                                "/api/businesses/**",
                                 "/api/reviews/hotels/**",
                                 "/oauth2/authorization/**",
                                 "/login/oauth2/code/**",
                                 "/api/*/oauth2/callback"
                         ).permitAll()
+
+                        // 관리자 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/businesses/register").hasAnyRole("USER", "BUSINESS")
-                        .requestMatchers("/api/businesses/**").hasRole("BUSINESS")
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/hotels/**").permitAll()
-                        .requestMatchers("/api/favorites/**").authenticated()
+
                         .anyRequest().authenticated()
-                )
-                .headers(headers -> headers
-                        .frameOptions(frameOptions -> frameOptions.disable())
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint((request, response, authException) -> {
