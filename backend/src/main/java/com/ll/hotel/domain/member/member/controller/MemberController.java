@@ -8,7 +8,7 @@ import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.domain.member.member.service.RefreshTokenService;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.global.security.dto.SecurityUser;
+import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

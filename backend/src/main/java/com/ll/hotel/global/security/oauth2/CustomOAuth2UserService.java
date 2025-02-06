@@ -1,7 +1,7 @@
 package com.ll.hotel.global.security.oauth2;
 
 import com.ll.hotel.domain.member.member.service.MemberService;
-import com.ll.hotel.global.security.dto.SecurityUser;
+import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

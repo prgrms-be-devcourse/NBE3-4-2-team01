@@ -3,7 +3,8 @@ package com.ll.hotel.global.security;
 
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.service.MemberService;
-import com.ll.hotel.global.exceptions.JwtExceptionFilter;
+import com.ll.hotel.global.jwt.exception.JwtExceptionFilter;
+import com.ll.hotel.global.jwt.JwtAuthFilter;
 import com.ll.hotel.global.security.oauth2.*;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -99,7 +100,7 @@ public class SecurityConfig {
                         .failureHandler(oAuth2AuthenticationFailureHandler)
                 )
                 .addFilterBefore(new JwtExceptionFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new CustomOAuth2JwtAuthFilter(memberService, memberRepository), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthFilter(memberService, memberRepository), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

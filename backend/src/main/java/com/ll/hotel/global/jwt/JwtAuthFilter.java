@@ -1,4 +1,4 @@
-package com.ll.hotel.global.security.oauth2;
+package com.ll.hotel.global.jwt;
 
 
 import com.ll.hotel.domain.member.member.entity.Member;
@@ -28,7 +28,7 @@ import static com.ll.hotel.global.security.oauth2.dto.SecurityUser.of;
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class CustomOAuth2JwtAuthFilter extends OncePerRequestFilter implements Ordered {
+public class JwtAuthFilter extends OncePerRequestFilter implements Ordered {
 
     private final MemberService memberService;
     private final MemberRepository memberRepository;
