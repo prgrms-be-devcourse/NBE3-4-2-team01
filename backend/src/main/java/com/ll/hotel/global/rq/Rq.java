@@ -3,7 +3,7 @@ package com.ll.hotel.global.rq;
 
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
-import com.ll.hotel.global.security.dto.SecurityUser;
+import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,9 +24,7 @@ public class Rq {
             actor = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                     .map(Authentication::getPrincipal)
                     .filter(principal -> principal instanceof SecurityUser)
-                    .map(principal -> (SecurityUser) principal)
-                    .map(securityUser -> memberRepository.findByMemberEmail(securityUser.getEmail())
-                            .orElse(null))
+                    .map(principal -> (SecurityUser) principal).flatMap(securityUser -> memberRepository.findByMemberEmail(securityUser.getEmail()))
                     .orElse(null);
         }
         return actor;
