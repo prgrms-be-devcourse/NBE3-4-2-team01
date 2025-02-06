@@ -14,7 +14,7 @@ const HotelReviewsPage = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-xl font-bold mb-4">호텔 리뷰 목록</h1>
-      <HotelReviews hotelId={hotelId} page={page} />
+      <HotelReviews hotelId={hotelId} page={page} isBusinessUser={true}/>
     </div>
   );
 };

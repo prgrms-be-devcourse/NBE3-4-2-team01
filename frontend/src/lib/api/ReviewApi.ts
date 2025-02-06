@@ -10,9 +10,9 @@ import { UpdateReviewRequest } from "../types/UpdateReviewRequest";
 
 // 리뷰 생성 요청 후 PresignedUrlReponse 응답
 export const postReview = async (
-    bookingId: string, 
-    hotelId: string,
-    roomId: string, 
+    bookingId: number, 
+    hotelId: number,
+    roomId: number, 
     postReviewRequest: PostReviewRequest) : Promise<PresignedUrlsResponse> => {
     
         try{

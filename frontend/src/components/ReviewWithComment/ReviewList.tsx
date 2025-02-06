@@ -7,9 +7,11 @@ import { ReviewDto } from '@/lib/types/ReviewDto';
 
 interface ReviewListProps {
     reviews: ReviewResponseType[];
+    isBusinessUser?: boolean;
+    onCommentUpdate?: () => void;
   }
   
-  const ReviewList: React.FC<ReviewListProps> = ({ reviews }) => {
+  const ReviewList: React.FC<ReviewListProps> = ({ reviews, isBusinessUser=false, onCommentUpdate }) => {
     console.log(reviews);
     if (reviews.length === 0) {
       return (
@@ -29,6 +31,8 @@ interface ReviewListProps {
               <HotelReviewWithComment
                 key={reviewDto.reviewId}
                 review={review}
+                isBusinessUser={isBusinessUser}
+                onCommentUpdate={onCommentUpdate}
               />);
           } else {
             reviewDto = review.myReviewWithCommentDto.reviewDto;
