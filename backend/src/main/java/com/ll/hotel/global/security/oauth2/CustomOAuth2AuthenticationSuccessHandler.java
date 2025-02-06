@@ -1,6 +1,7 @@
 package com.ll.hotel.global.security.oauth2;
 
 
+import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.service.AuthTokenService;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
@@ -33,12 +34,13 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
+        log.debug("OAuth2 login success - provider: {}, oauthId: {}, email: {}", 
+            securityUser.getProvider(), securityUser.getOauthId(), securityUser.getEmail());
         
         if (securityUser.isNewUser()) {
             String redirectUrl = UriComponentsBuilder.fromUriString(authorizedRedirectUri)
-                    .queryParam("email", URLEncoder.encode(securityUser.getEmail(), StandardCharsets.UTF_8))
-                    .queryParam("name", URLEncoder.encode(securityUser.getUsername(), StandardCharsets.UTF_8))
                     .queryParam("provider", URLEncoder.encode(securityUser.getProvider(), StandardCharsets.UTF_8))
+                    .queryParam("oauthId", URLEncoder.encode(securityUser.getOauthId(), StandardCharsets.UTF_8))
                     .queryParam("status", "REGISTER")
                     .build()
                     .encode()
@@ -46,8 +48,14 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
 
             response.sendRedirect(redirectUrl);
         } else {
-            String accessToken = authTokenService.generateToken(securityUser.getEmail()).accessToken();
-            String refreshToken = memberService.generateRefreshToken(securityUser.getEmail());
+            Member member = memberService.findByProviderAndOauthId(
+                securityUser.getProvider(), 
+                securityUser.getOauthId()
+            );
+            String accessToken = authTokenService.generateToken(member.getMemberEmail()).accessToken();
+            String refreshToken = memberService.generateRefreshToken(member.getMemberEmail());
+            log.debug("Generated JWT access token: {}", accessToken);
+            log.debug("Generated JWT refresh token: {}", refreshToken);
             
             String redirectUrl = UriComponentsBuilder.fromUriString(authorizedRedirectUri)
                     .queryParam("accessToken", "Bearer " + accessToken)
