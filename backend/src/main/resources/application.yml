@@ -99,7 +99,7 @@ logging:
 # OAuth2 관련 설정
 app:
   oauth2:
-    authorizedRedirectUris: http://localhost:8080/api/auth/oauth2/callback
+    authorizedRedirectUris: http://localhost:3000/oauth/callback
 
 custom:
   cors:
