@@ -15,6 +15,7 @@ import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import com.ll.hotel.domain.hotel.option.hotelOption.dto.request.HotelOptionRequest;
+import com.ll.hotel.domain.hotel.option.hotelOption.dto.request.HotelOptionRequest.Details;
 import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.hotel.option.hotelOption.service.HotelOptionService;
 import com.ll.hotel.domain.member.member.entity.Business;
@@ -70,9 +71,9 @@ class HotelServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Business business = this.businessRepository.findAll().getFirst();
 
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Parking_lot"));
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Breakfast"));
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Lunch"));
+        this.hotelOptionService.add(new Details("Parking_lot"));
+        this.hotelOptionService.add(new Details("Breakfast"));
+        this.hotelOptionService.add(new Details("Lunch"));
 
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
@@ -80,7 +81,7 @@ class HotelServiceTest {
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
 
-        PostHotelResponse postHotelResponse = this.hotelService.create(actor, postHotelRequest);
+        PostHotelResponse postHotelResponse = this.hotelService.createHotel(actor, postHotelRequest);
 
         Hotel hotel = this.hotelRepository.findById(postHotelResponse.hotelId()).get();
 
@@ -122,7 +123,7 @@ class HotelServiceTest {
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
 
         ServiceException error = assertThrows(ServiceException.class, () -> {
-            this.hotelService.create(actor, postHotelRequest);
+            this.hotelService.createHotel(actor, postHotelRequest);
         });
 
         assertEquals(404, error.getRsData().getStatusCode());
@@ -139,7 +140,7 @@ class HotelServiceTest {
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
-        PostHotelResponse res1 = this.hotelService.create(actor, req1);
+        PostHotelResponse res1 = this.hotelService.createHotel(actor, req1);
 
         Hotel hotel = this.hotelRepository.findById(res1.hotelId()).get();
 
@@ -171,12 +172,12 @@ class HotelServiceTest {
                 "010-1111-1111", "부산시", 1111,
                 5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
 
-        PostHotelResponse res2 = this.hotelService.create(member, req2);
+        PostHotelResponse res2 = this.hotelService.createHotel(member, req2);
 
         hotel = this.hotelRepository.findById(res2.hotelId()).get();
         business.setHotel(hotel);
 
-        Page<GetHotelResponse> resultPage = this.hotelService.findAll(1, 10, "latest", "asc");
+        Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", "asc");
         List<GetHotelResponse> list = resultPage.getContent();
         GetHotelResponse Allres1 = list.getFirst();
         GetHotelResponse Allres2 = list.getLast();
@@ -201,7 +202,7 @@ class HotelServiceTest {
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
-        PostHotelResponse res1 = this.hotelService.create(actor, req1);
+        PostHotelResponse res1 = this.hotelService.createHotel(actor, req1);
 
         Hotel hotel = this.hotelRepository.findById(res1.hotelId()).get();
 
@@ -233,12 +234,12 @@ class HotelServiceTest {
                 "010-1111-1111", "부산시", 1111,
                 5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
 
-        PostHotelResponse res2 = this.hotelService.create(member, req2);
+        PostHotelResponse res2 = this.hotelService.createHotel(member, req2);
 
         hotel = this.hotelRepository.findById(res2.hotelId()).get();
         business.setHotel(hotel);
 
-        Page<GetHotelResponse> resultPage = this.hotelService.findAll(1, 10, "latest", null);
+        Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", null);
         List<GetHotelResponse> list = resultPage.getContent();
         GetHotelResponse Allres1 = list.getFirst();
         GetHotelResponse Allres2 = list.getLast();
@@ -263,7 +264,7 @@ class HotelServiceTest {
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
-        PostHotelResponse res1 = this.hotelService.create(actor, req1);
+        PostHotelResponse res1 = this.hotelService.createHotel(actor, req1);
         Hotel hotel = this.hotelRepository.findById(res1.hotelId()).get();
 
         business.setHotel(hotel);
@@ -301,7 +302,7 @@ class HotelServiceTest {
                 "010-1111-1111", "부산시", 1111,
                 5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
 
-        PostHotelResponse res2 = this.hotelService.create(member, req2);
+        PostHotelResponse res2 = this.hotelService.createHotel(member, req2);
 
         hotel = this.hotelRepository.findById(res2.hotelId()).get();
         business.setHotel(hotel);
@@ -330,7 +331,7 @@ class HotelServiceTest {
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
 
-        PostHotelResponse postHotelResponse = this.hotelService.create(actor, postHotelRequest);
+        PostHotelResponse postHotelResponse = this.hotelService.createHotel(actor, postHotelRequest);
 
         Hotel hotel = this.hotelRepository.findById(postHotelResponse.hotelId()).get();
 
@@ -343,7 +344,7 @@ class HotelServiceTest {
         PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", null, 0123, null,
                 null, null, null, null, null, null, hotelOptions);
 
-        PutHotelResponse res1 = this.hotelService.modify(hotelId, actor, req1);
+        PutHotelResponse res1 = this.hotelService.modifyHotel(hotelId, actor, req1);
 
         hotel = this.hotelRepository.findById(res1.hotelId()).get();
 
@@ -374,7 +375,7 @@ class HotelServiceTest {
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
 
-        PostHotelResponse postHotelResponse = this.hotelService.create(actor, postHotelRequest);
+        PostHotelResponse postHotelResponse = this.hotelService.createHotel(actor, postHotelRequest);
 
         Hotel hotel = this.hotelRepository.findById(postHotelResponse.hotelId()).get();
 
@@ -388,7 +389,7 @@ class HotelServiceTest {
                 null, null, null, null, null, null, hotelOptions);
 
         ServiceException error = assertThrows(ServiceException.class, () -> {
-            this.hotelService.modify(hotelId, actor, req1);
+            this.hotelService.modifyHotel(hotelId, actor, req1);
         });
 
         assertEquals(404, error.getRsData().getStatusCode());
@@ -405,14 +406,14 @@ class HotelServiceTest {
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
-        PostHotelResponse postHotelResponse = this.hotelService.create(actor, postHotelRequest);
+        PostHotelResponse postHotelResponse = this.hotelService.createHotel(actor, postHotelRequest);
 
         Hotel hotel = this.hotelRepository.findById(postHotelResponse.hotelId()).get();
 
         business.setHotel(hotel);
         this.businessRepository.save(business);
 
-        this.hotelService.delete(hotel.getId(), actor);
+        this.hotelService.deleteHotel(hotel.getId(), actor);
 
         assertEquals(HotelStatus.UNAVAILABLE, hotel.getHotelStatus());
     }

@@ -3,6 +3,7 @@ package com.ll.hotel.domain.hotel.room.entity;
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
+import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import com.ll.hotel.domain.hotel.room.type.RoomStatus;
 import com.ll.hotel.global.jpa.entity.BaseTime;
@@ -71,4 +72,18 @@ public class Room extends BaseTime {
 
     @ManyToMany(cascade = CascadeType.PERSIST)
     Set<RoomOption> roomOptions;
+
+    public static Room roomBuild(Hotel hotel, PostRoomRequest request, BedTypeNumber bedTypeNumber,
+                                 Set<RoomOption> roomOptions) {
+        return Room.builder()
+                .hotel(hotel)
+                .roomName(request.roomName())
+                .roomNumber(request.roomNumber())
+                .basePrice(request.basePrice())
+                .standardNumber(request.standardNumber())
+                .maxNumber(request.maxNumber())
+                .bedTypeNumber(bedTypeNumber)
+                .roomOptions(roomOptions)
+                .build();
+    }
 }
