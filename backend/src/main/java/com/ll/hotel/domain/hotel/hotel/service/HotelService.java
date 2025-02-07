@@ -23,9 +23,6 @@ import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import com.ll.hotel.global.annotation.BusinessOnly;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
-import java.net.URL;
-import java.time.LocalDate;
-import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -35,6 +32,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.net.URL;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -206,7 +209,7 @@ public class HotelService {
 
     @Transactional
     public GetHotelRevenueResponse findRevenue(long hotelId, Member actor) {
-        Hotel hotel = getHotel(hotelId);
+        Hotel hotel = getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
