@@ -2,6 +2,7 @@ package com.ll.hotel.domain.member.member.entity;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
+import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.jpa.entity.BaseTime;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import jakarta.persistence.*;
@@ -49,6 +50,7 @@ public class Member extends BaseTime {
     private MemberStatus memberStatus;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<OAuth> oauths = new ArrayList<>();
 
     @OneToOne
@@ -81,5 +83,11 @@ public class Member extends BaseTime {
 
     public OAuth getFirstOAuth() {
         return this.oauths.isEmpty() ? null : this.oauths.get(0);
+    }
+
+    public void checkBusiness() {
+        if (!this.isBusiness()) {
+            throw new ServiceException("403-1", "사업가만 관리할 수 있습니다.");
+        }
     }
 }

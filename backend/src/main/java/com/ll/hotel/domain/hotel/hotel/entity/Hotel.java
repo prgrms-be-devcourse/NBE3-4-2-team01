@@ -1,5 +1,6 @@
 package com.ll.hotel.domain.hotel.hotel.entity;
 
+import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.hotel.room.entity.Room;
@@ -79,7 +80,7 @@ public class Hotel extends BaseTime {
     public void updateAverageRating(int countOffset, int ratingOffset) {
         this.totalReviewCount += countOffset;
         this.totalReviewRatingSum += ratingOffset;
-        this.averageRating = Math.round(((double)totalReviewRatingSum / totalReviewCount) * 10.0) / 10.0;
+        this.averageRating = Math.round(((double) totalReviewRatingSum / totalReviewCount) * 10.0) / 10.0;
     }
 
     public boolean isOwnedBy(Member member) {
@@ -107,5 +108,21 @@ public class Hotel extends BaseTime {
         if (totalReviewCount == null) {
             totalReviewCount = 0L;
         }
+    }
+
+    public static Hotel hotelBuild(PostHotelRequest request, Business business, Set<HotelOption> hotelOptions) {
+        return Hotel.builder()
+                .hotelName(request.hotelName())
+                .hotelEmail(request.hotelEmail())
+                .hotelPhoneNumber(request.hotelPhoneNumber())
+                .streetAddress(request.streetAddress())
+                .zipCode(request.zipCode())
+                .hotelGrade(request.hotelGrade())
+                .checkInTime(request.checkInTime())
+                .checkOutTime(request.checkOutTime())
+                .hotelExplainContent(request.hotelExplainContent())
+                .business(business)
+                .hotelOptions(hotelOptions)
+                .build();
     }
 }

@@ -2,6 +2,7 @@ package com.ll.hotel.domain.hotel.hotel.controller;
 
 import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelRevenueResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
@@ -9,15 +10,18 @@ import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.validation.GlobalValidation;
 import com.ll.hotel.standard.base.Empty;
 import com.ll.hotel.standard.page.dto.PageDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,18 +44,10 @@ public class HotelController {
     public RsData<PostHotelResponse> create(@RequestBody @Valid PostHotelRequest postHotelRequest) {
         Member actor = this.rq.getActor();
 
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인 해주세요.");
-        }
-
-        if (!actor.isBusiness()) {
-            throw new ServiceException("403-1", "사업가만 호텔을 등록할 수 있습니다.");
-        }
-
         return new RsData<>(
                 "201-1",
                 "호텔을 정상적으로 등록하였습니다.",
-                this.hotelService.create(actor, postHotelRequest)
+                this.hotelService.createHotel(actor, postHotelRequest)
         );
     }
 
@@ -61,15 +57,7 @@ public class HotelController {
     ) {
         Member actor = this.rq.getActor();
 
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인 해주세요.");
-        }
-
-        if (!actor.isBusiness()) {
-            throw new ServiceException("403-1", "사업가만 호텔 사진을 등록할 수 있습니다.");
-        }
-
-        this.hotelService.saveImages(ImageType.HOTEL, hotelId, urls);
+        this.hotelService.saveImages(actor, ImageType.HOTEL, hotelId, urls);
 
         return new RsData<>(
                 "201-1",
@@ -82,13 +70,22 @@ public class HotelController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "latest") String filterName,
-            @RequestParam(required = false) String filterDirection
+            @RequestParam(required = false) String filterDirection,
+            @RequestParam(defaultValue = "") String streetAddress,
+            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}") @DateTimeFormat(iso = ISO.DATE)
+            LocalDate checkInDate,
+            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().plusDays(1)}") @DateTimeFormat(iso = ISO.DATE)
+            LocalDate checkoutDate
     ) {
+        GlobalValidation.checkPageSize(pageSize);
+        GlobalValidation.checkCheckInAndOutDate(checkInDate, checkoutDate);
+
         return new RsData<>(
                 "200-1",
                 "모든 호텔 정보를 정상적으로 조회했습니다.",
                 new PageDto<>(
-                        this.hotelService.findAll(page, pageSize, filterName, filterDirection))
+                        this.hotelService.findAllHotels(page, pageSize, filterName, filterDirection,
+                                streetAddress, checkInDate, checkoutDate))
         );
     }
 
@@ -107,18 +104,10 @@ public class HotelController {
     ) {
         Member actor = this.rq.getActor();
 
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인 해주세요.");
-        }
-
-        if (!actor.isBusiness()) {
-            throw new ServiceException("403-1", "사업가만 호텔을 수정할 수 있습니다.");
-        }
-
         return new RsData<>(
                 "200-1",
                 "호텔 정보 수정에 성공하였습니다.",
-                this.hotelService.modify(hotelId, actor, request)
+                this.hotelService.modifyHotel(hotelId, actor, request)
         );
     }
 
@@ -126,19 +115,30 @@ public class HotelController {
     public RsData<Empty> deleteHotel(@PathVariable Long hotelId) {
         Member actor = this.rq.getActor();
 
+        this.hotelService.deleteHotel(hotelId, actor);
+
+        return new RsData<>(
+                "200-1",
+                "호텔 삭제에 성공하였습니다."
+        );
+    }
+
+    @GetMapping("{hotelId}/revenue")
+    public RsData<GetHotelRevenueResponse> findHotelRevenue(@PathVariable long hotelId) {
+        Member actor = this.rq.getActor();
+
         if (actor == null) {
             throw new ServiceException("401-1", "로그인 해주세요.");
         }
 
         if (!actor.isBusiness()) {
-            throw new ServiceException("403-1", "사업가만 호텔을 삭제할 수 있습니다.");
+            throw new ServiceException("403-1", "사업가만 호텔 매출을 확인할 수 있습니다.");
         }
-
-        this.hotelService.delete(hotelId, actor);
 
         return new RsData<>(
                 "200-1",
-                "호텔 삭제에 성공하였습니다."
+                "호텔 매출 조회에 성공하였습니다.",
+                this.hotelService.findRevenue(hotelId, actor)
         );
     }
 }
