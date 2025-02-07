@@ -27,9 +27,18 @@ export const book = async function(bookingRequest : BookingRequest) : Promise<Bo
 };
 
 // 전체 예약 조회 (관리자측, 미사용)
-export const getAllBookings = async function() : Promise<PageDto<BookingResponseSummary>> {
+export const getAllBookings = async function(page? : number, pageSize? : number) : Promise<PageDto<BookingResponseSummary>> {
     try {
-        const response = await fetch("http://localhost:8080/api/bookings");
+        const params = new URLSearchParams();
+
+        if (page) {
+            params.append("page", page.toString());
+        }
+        if (pageSize) {
+            params.append("page_size", pageSize.toString());
+        }
+
+        const response = await fetch(`http://localhost:8080/api/bookings?${params.toString()}`);
         const rsData = await response.json();
 
         if (rsData.resultCode.startsWith("2")) {
@@ -43,9 +52,18 @@ export const getAllBookings = async function() : Promise<PageDto<BookingResponse
 }
 
 // 내 예약 조회 (사용자측)
-export const getMyBookings = async function() : Promise<PageDto<BookingResponseSummary>> {
+export const getMyBookings = async function(page? : number, pageSize? : number) : Promise<PageDto<BookingResponseSummary>> {
     try {
-        const response = await fetch("http://localhost:8080/api/bookings/me");
+        const params = new URLSearchParams();
+
+        if (page) {
+            params.append("page", page.toString());
+        }
+        if (pageSize) {
+            params.append("page_size", pageSize.toString());
+        }
+
+        const response = await fetch(`http://localhost:8080/api/bookings/me?${params.toString()}`);
         const rsData = await response.json();
 
         if (rsData.resultCode.startsWith("2")) {
@@ -59,9 +77,18 @@ export const getMyBookings = async function() : Promise<PageDto<BookingResponseS
 }
 
 // 호텔 예약 조회 (사업자측)
-export const getHotelBookings = async function() : Promise<PageDto<BookingResponseSummary>> {
+export const getHotelBookings = async function(page? : number, pageSize? : number) : Promise<PageDto<BookingResponseSummary>> {
     try {
-        const response = await fetch("http://localhost:8080/api/bookings/myHotel");
+        const params = new URLSearchParams();
+
+        if (page) {
+            params.append("page", page.toString());
+        }
+        if (pageSize) {
+            params.append("page_size", pageSize.toString());
+        }
+
+        const response = await fetch(`http://localhost:8080/api/bookings/myHotel?${params.toString()}`);
         const rsData = await response.json();
 
         if (rsData.resultCode.startsWith("2")) {
