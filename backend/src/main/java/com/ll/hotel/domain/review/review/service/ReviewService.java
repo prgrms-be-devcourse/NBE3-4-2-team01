@@ -10,6 +10,7 @@ import com.ll.hotel.domain.image.repository.ImageRepository;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.review.review.dto.*;
+import com.ll.hotel.domain.review.review.dto.response.*;
 import com.ll.hotel.domain.review.review.entity.Review;
 import com.ll.hotel.domain.review.review.repository.ReviewRepository;
 import com.ll.hotel.domain.review.review.type.ReviewStatus;

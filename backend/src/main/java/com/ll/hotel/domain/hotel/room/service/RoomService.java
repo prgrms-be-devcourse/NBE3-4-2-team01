@@ -20,7 +20,7 @@ import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
+import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.net.URL;
@@ -31,6 +31,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,8 +72,12 @@ public class RoomService {
                 .roomOptions(roomOptions)
                 .build();
 
-        return new PostRoomResponse(this.roomRepository.save(room),
-                this.saveRoomImages(room.getId(), postRoomRequest.imageExtensions()));
+        try {
+            return new PostRoomResponse(this.roomRepository.save(room),
+                    this.saveRoomImages(room.getId(), postRoomRequest.imageExtensions()));
+        } catch (DataIntegrityViolationException e) {
+            throw new ServiceException("409-1", "동일한 이름의 방이 이미 호텔에 존재합니다.");
+        }
     }
 
     @Transactional
@@ -135,6 +140,10 @@ public class RoomService {
         }
 
         Room room = this.getRoomDetail(hotelId, roomId);
+
+        if (this.roomRepository.existsByHotelIdAndRoomNameAndIdNot(hotelId, request.roomName(), roomId)) {
+            throw new ServiceException("409-1", "동일한 이름의 방이 이미 호텔에 존재합니다.");
+        }
 
         modifyIfPresent(request.roomName(), room::getRoomName, room::setRoomName);
         modifyIfPresent(request.roomNumber(), room::getRoomNumber, room::setRoomNumber);
