@@ -1,7 +1,7 @@
 package com.ll.hotel.domain.review.review.repository;
 
-import com.ll.hotel.domain.review.review.dto.HotelReviewWithCommentDto;
-import com.ll.hotel.domain.review.review.dto.MyReviewWithCommentDto;
+import com.ll.hotel.domain.review.review.dto.response.HotelReviewWithCommentDto;
+import com.ll.hotel.domain.review.review.dto.response.MyReviewWithCommentDto;
 import com.ll.hotel.domain.review.review.entity.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

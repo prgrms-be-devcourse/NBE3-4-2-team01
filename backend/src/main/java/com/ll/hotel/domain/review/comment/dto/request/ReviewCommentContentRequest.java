@@ -1,4 +1,4 @@
-package com.ll.hotel.domain.review.comment.dto;
+package com.ll.hotel.domain.review.comment.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
