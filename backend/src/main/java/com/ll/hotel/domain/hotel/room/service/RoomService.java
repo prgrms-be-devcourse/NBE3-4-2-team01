@@ -20,7 +20,8 @@ import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
+import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
+import com.ll.hotel.global.annotation.BusinessOnly;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.net.URL;
@@ -45,9 +46,10 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomOptionRepository roomOptionRepository;
 
+    @BusinessOnly
     @Transactional
-    public PostRoomResponse create(long hotelId, Member actor, PostRoomRequest postRoomRequest) {
-        Hotel hotel = this.getHotel(hotelId);
+    public PostRoomResponse createRoom(long hotelId, Member actor, PostRoomRequest postRoomRequest) {
+        Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
@@ -61,16 +63,7 @@ public class RoomService {
             throw new ServiceException("404-2", "사용할 수 없는 객실 옵션이 존재합니다.");
         }
 
-        Room room = Room.builder()
-                .hotel(hotel)
-                .roomName(postRoomRequest.roomName())
-                .roomNumber(postRoomRequest.roomNumber())
-                .basePrice(postRoomRequest.basePrice())
-                .standardNumber(postRoomRequest.standardNumber())
-                .maxNumber(postRoomRequest.maxNumber())
-                .bedTypeNumber(bedTypeNumber)
-                .roomOptions(roomOptions)
-                .build();
+        Room room = Room.roomBuild(hotel, postRoomRequest, bedTypeNumber, roomOptions);
 
         try {
             return new PostRoomResponse(this.roomRepository.save(room),
@@ -80,20 +73,22 @@ public class RoomService {
         }
     }
 
+    @BusinessOnly
     @Transactional
-    public void saveImages(ImageType imageType, long roomId, List<String> urls) {
+    public void saveImages(Member actor, ImageType imageType, long roomId, List<String> urls) {
         this.imageService.saveImages(imageType, roomId, urls);
     }
 
+    @BusinessOnly
     @Transactional
-    public void delete(long hotelId, long roomId, Member actor) {
-        Hotel hotel = this.getHotel(hotelId);
+    public void deleteRoom(long hotelId, long roomId, Member actor) {
+        Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
         }
 
-        Room room = this.getRoom(roomId);
+        Room room = this.getRoomById(roomId);
 
         room.setRoomStatus(RoomStatus.UNAVAILABLE);
 
@@ -126,14 +121,15 @@ public class RoomService {
     public GetRoomOptionResponse findRoomOptions(long hotelId, long roomId) {
         this.checkHotelExists(hotelId);
 
-        Room room = this.getRoom(roomId);
+        Room room = this.getRoomById(roomId);
 
         return new GetRoomOptionResponse(room);
     }
 
+    @BusinessOnly
     @Transactional
-    public PutRoomResponse modify(long hotelId, long roomId, Member actor, PutRoomRequest request) {
-        Hotel hotel = this.getHotel(hotelId);
+    public PutRoomResponse modifyRoom(long hotelId, long roomId, Member actor, PutRoomRequest request) {
+        Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
@@ -192,12 +188,12 @@ public class RoomService {
         room.setRoomOptions(options);
     }
 
-    private Hotel getHotel(long hotelId) {
+    private Hotel getHotelById(long hotelId) {
         return this.hotelRepository.findById(hotelId)
                 .orElseThrow(() -> new ServiceException("404-1", "호텔 정보가 존재하지 않습니다."));
     }
 
-    private Room getRoom(long roomId) {
+    private Room getRoomById(long roomId) {
         return this.roomRepository.findById(roomId)
                 .orElseThrow(() -> new ServiceException("404-2", "객실 정보가 존재하지 않습니다."));
     }
