@@ -1,7 +1,7 @@
 import BookingList from "@/components/Booking/BookingList";
-import { View } from "@/lib/types/Booking/BookingListProps";
+import { View } from "@/lib/types/Booking/BookingProps";
 
-const OrdersPage = () => {
+const MyBookingsPage = () => {
     return (
         <div>
             <h1>내 예약 목록</h1>
@@ -10,4 +10,4 @@ const OrdersPage = () => {
     );
 };
 
-export default OrdersPage;
+export default MyBookingsPage;

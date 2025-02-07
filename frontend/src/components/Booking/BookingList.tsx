@@ -1,12 +1,12 @@
 'use client'
 
-import { JSX, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import HotelBookingList from "./HotelBookingList";
 import UserBookingList from "./UserBookingList";
 import { BookingResponseSummary } from "@/lib/types/Booking/BookingResponseSummary";
 import { PageDto } from "@/lib/types/PageDto";
 import { getHotelBookings, getMyBookings } from "@/lib/api/Booking/BookingApi";
-import { BookingListProps, View } from "@/lib/types/Booking/BookingListProps";
+import { BookingListProps, View } from "@/lib/types/Booking/BookingProps";
 
 const BookingList = function({view, page, pageSize} : BookingListProps) {
     const [bookings, setBookings] = useState<PageDto<BookingResponseSummary> | null>(null);

@@ -2,6 +2,14 @@ import { PageDto } from "@/lib/types/PageDto";
 import { BookingResponseSummary } from "@/lib/types/Booking/BookingResponseSummary";
 
 const UserBookingList = function({bookings} : {bookings : PageDto<BookingResponseSummary>}) {
+    const openBookingDetailsPopup = function(bookingId : number) {
+        window.open(
+            `/orders/${bookingId}`,
+            "OrderPopup",
+            "width=500,height=600,left=200,top=200"
+        );
+    }
+    
     return (
         <div>
           <h2 className="text-lg font-bold mb-4">예약 목록</h2>
@@ -18,9 +26,20 @@ const UserBookingList = function({bookings} : {bookings : PageDto<BookingRespons
               </tr>
             </thead>
             <tbody>
+              <style jsx>{`
+                tr:hover {
+                    background-color: #f0f0f0;
+                }
+                tr {
+                    transition: background-color 0.3s ease;
+                }
+              `}
+              </style>
               {bookings.items.length > 0 ? (
                 bookings.items.map((booking) => (
-                  <tr key={booking.bookingId} className="border">
+                  <tr key={booking.bookingId} className="border" 
+                  onClick={() => openBookingDetailsPopup(booking.bookingId)} 
+                  style={{ cursor: 'pointer' }}>
                     <td className="border p-2">{booking.bookingId}</td>
                     <td className="border p-2">{booking.roomId}</td>
                     <td className="border p-2">{booking.hotelId}</td>
