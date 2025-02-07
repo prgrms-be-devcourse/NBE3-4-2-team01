@@ -36,6 +36,14 @@ import com.ll.hotel.domain.review.review.repository.ReviewRepository;
 import com.ll.hotel.domain.review.review.type.ReviewStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
 import jakarta.transaction.Transactional;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
@@ -43,12 +51,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import java.time.*;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 @Configuration
+//@Profile("!test")
 @RequiredArgsConstructor
 public class BaseInit {
     private final PaymentService paymentService;
