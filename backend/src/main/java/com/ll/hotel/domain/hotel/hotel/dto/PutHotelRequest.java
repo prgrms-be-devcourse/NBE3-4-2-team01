@@ -5,7 +5,10 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.hibernate.validator.constraints.Length;
 
@@ -34,11 +37,15 @@ public record PutHotelRequest(
 
         String hotelStatus,
 
-        /**
-         * 변경 가능
-         */
-        List<String> hotelImages,
+        List<String> deleteImageUrls,
+
+        List<String> imageExtensions,
 
         Set<String> hotelOptions
 ) {
+    public PutHotelRequest {
+        deleteImageUrls = Objects.requireNonNullElse(deleteImageUrls, new ArrayList<>());
+        imageExtensions = Objects.requireNonNullElse(imageExtensions, new ArrayList<>());
+        hotelOptions = Objects.requireNonNullElse(hotelOptions, new HashSet<>());
+    }
 }

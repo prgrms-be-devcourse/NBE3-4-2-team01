@@ -1,18 +1,24 @@
 package com.ll.hotel.domain.review.review.controller;
 
+import com.ll.hotel.domain.hotel.hotel.service.HotelService;
 import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.review.dto.*;
+import com.ll.hotel.domain.review.review.dto.request.PostReviewRequest;
+import com.ll.hotel.domain.review.review.dto.request.UpdateReviewRequest;
+import com.ll.hotel.domain.review.review.dto.response.*;
 import com.ll.hotel.domain.review.review.service.ReviewService;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
+import com.ll.hotel.standard.page.dto.PageDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +35,7 @@ import java.util.Optional;
 public class ReviewController {
 
     private final ImageService imageService;
+    private final HotelService hotelService;
     private final ReviewService reviewService;
     private final S3Service s3Service;
     private final Rq rq;
@@ -39,7 +46,7 @@ public class ReviewController {
             @PathVariable("bookingId") Long bookingId,
             @RequestParam("hotelId") Long hotelId,
             @RequestParam("roomId") Long roomId,
-            @RequestBody PostReviewRequest postReviewRequest) {
+            @RequestBody @Valid PostReviewRequest postReviewRequest) {
         // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
         if (actor == null) {
@@ -86,7 +93,7 @@ public class ReviewController {
     @Operation(summary = "리뷰 수정")
     public RsData<PresignedUrlsResponse> updateReview(
             @PathVariable("reviewId") long reviewId,
-            @RequestBody UpdateReviewRequest updateReviewRequest
+            @RequestBody @Valid UpdateReviewRequest updateReviewRequest
     ) {
         // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
@@ -161,7 +168,9 @@ public class ReviewController {
 
     @GetMapping("/me")
     @Operation(summary = "내 리뷰 목록 조회")
-    public RsData<List<MyReviewResponse>> getMyReviews() {
+    public RsData<PageDto<MyReviewResponse>> getMyReviews(
+            @RequestParam(value = "page", defaultValue = "0") int page
+    ) {
         // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
         if (actor == null) {
@@ -173,23 +182,31 @@ public class ReviewController {
             throw new ServiceException("403-1", "관리자, 사업자는 리뷰 목록 조회가 불가능합니다.");
         }
 
+        Page<MyReviewResponse> myReviewPage = reviewService.getMyReviewResponses(actor.getId(), page);
+
         return new RsData<>(
                 "200-1",
                 "나의 리뷰 목록 생성",
-                reviewService.getMyReviewResponses(actor.getId())
+                new PageDto<>(myReviewPage)
         );
     }
 
     @GetMapping("/hotels/{hotelId}")
     @Operation(summary = "호텔 리뷰 목록 조회")
-    public RsData<List<HotelReviewResponse>> getHotelReviews(
+    public RsData<HotelReviewListResponse> getHotelReviews(
+            @RequestParam(value = "page", defaultValue = "0") int page,
             @PathVariable("hotelId") long hotelId
     ) {
+
+        Page<HotelReviewResponse> hotelReviewPage = reviewService.getHotelReviewResponses(hotelId, page);
+        HotelReviewListResponse hotelReviewListResponse = new HotelReviewListResponse(
+                new PageDto<>(hotelReviewPage),
+                hotelService.getHotelById(hotelId).getAverageRating());
 
         return new RsData<>(
                 "200-1",
                 "호텔 리뷰 목록 생성",
-                reviewService.getHotelReviewResponses(hotelId)
+                hotelReviewListResponse
         );
     }
 }

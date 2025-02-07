@@ -1,14 +1,15 @@
 package com.ll.hotel.domain.review.review.repository;
 
-import com.ll.hotel.domain.review.review.dto.HotelReviewWithCommentDto;
-import com.ll.hotel.domain.review.review.dto.MyReviewWithCommentDto;
+import com.ll.hotel.domain.review.review.dto.response.HotelReviewWithCommentDto;
+import com.ll.hotel.domain.review.review.dto.response.MyReviewWithCommentDto;
 import com.ll.hotel.domain.review.review.entity.Review;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,7 +21,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // 멤버 ID로 리뷰 목록 조회
     @Query("""  
-        SELECT new com.ll.hotel.domain.review.review.dto.MyReviewWithCommentDto(
+        SELECT new com.ll.hotel.domain.review.review.dto.response.MyReviewWithCommentDto(
             h.hotelName,
             r.roomName,
             rv,
@@ -35,11 +36,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         WHERE rv.member.id = :memberId
         AND rv.reviewStatus <> 'DELETED'
     """)
-    List<MyReviewWithCommentDto> findReviewsWithCommentByMemberId(@Param("memberId") Long memberId);
+    Page<MyReviewWithCommentDto> findReviewsWithCommentByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 
     // 호텔 ID로 리뷰 목록 조회
     @Query("""  
-        SELECT new com.ll.hotel.domain.review.review.dto.HotelReviewWithCommentDto(
+        SELECT new com.ll.hotel.domain.review.review.dto.response.HotelReviewWithCommentDto(
             m.memberEmail,
             r.roomName,
             rv,
@@ -55,6 +56,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         WHERE h.id = :hotelId
         AND rv.reviewStatus <> 'DELETED'
     """)
-    List<HotelReviewWithCommentDto> findReviewsWithCommentByHotelId(@Param("hotelId") Long hotelId);
+    Page<HotelReviewWithCommentDto> findReviewsWithCommentByHotelId(@Param("hotelId") Long hotelId, Pageable pageable);
 }
 

@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -54,24 +55,15 @@ public class MemberController {
     }
 
     @PostMapping("/logout")
-    public RsData<String> logout(@RequestHeader("Authorization") final String accessToken) {
-        try {
-            if (!accessToken.startsWith("Bearer ")) {
-                return new RsData<>("401-1", "잘못된 토큰 형식입니다.", "");
-            }
-            String token = accessToken.substring(7);
-            
-            if (!memberService.verifyToken(token)) {
-                return new RsData<>("401-1", "Access Token 만료", "");
-            }
-
-            String email = memberService.getEmail(token);
-            refreshTokenService.removeRefreshToken(email);
-            return new RsData<>("200-1", "로그아웃이 완료되었습니다.", "");
-        } catch (Exception e) {
-            log.error("Error during logout: {}", e.getMessage());
-            return new RsData<>("500-1", "로그아웃 처리 중 오류가 발생했습니다.", "");
+    public RsData<Void> logout(@RequestHeader("Authorization") String bearerToken) {
+        if (!StringUtils.hasText(bearerToken) || !bearerToken.startsWith("Bearer ")) {
+            throw new ServiceException("400-1", "잘못된 토큰 형식입니다.");
         }
+
+        String token = bearerToken.substring(7);
+        memberService.logout(token);
+        
+        return new RsData<>("200-1", "로그아웃 되었습니다.");
     }
 
     @PostMapping("/refresh")

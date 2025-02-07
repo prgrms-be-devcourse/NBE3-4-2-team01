@@ -12,7 +12,7 @@ import com.ll.hotel.domain.hotel.hotel.service.HotelService;
 import com.ll.hotel.domain.hotel.option.roomOption.dto.request.RoomOptionRequest;
 import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
 import com.ll.hotel.domain.hotel.option.roomOption.service.RoomOptionService;
-import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
@@ -90,7 +90,7 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        this.roomService.createRoom(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
@@ -112,7 +112,7 @@ class RoomServiceTest {
         bedTypeNumber = Map.of("DOUBLE", 4, "QUEEN", 1);
         PostRoomRequest req2 = new PostRoomRequest("객실2", 2, 500000, 3, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), actor, req2);
+        this.roomService.createRoom(hotel.getId(), actor, req2);
 
         room = this.roomRepository.findById(roomId + 1).get();
 
@@ -138,7 +138,7 @@ class RoomServiceTest {
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
         ServiceException error = assertThrows(ServiceException.class, () -> {
-            this.roomService.create(hotel.getId(), actor, req1);
+            this.roomService.createRoom(hotel.getId(), actor, req1);
         });
 
         assertEquals(404, error.getRsData().getStatusCode());
@@ -154,7 +154,7 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        this.roomService.createRoom(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
@@ -162,10 +162,10 @@ class RoomServiceTest {
         bedTypeNumber = Map.of("DOUBLE", 4, "QUEEN", 1);
         PostRoomRequest req2 = new PostRoomRequest("객실2", 2, 500000, 3, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), actor, req2);
+        this.roomService.createRoom(hotel.getId(), actor, req2);
 
-        List<GetAllRoomResponse> rooms = this.roomService.findAllRooms(hotel.getId());
-        GetAllRoomResponse res = rooms.get(0);
+        List<GetRoomResponse> rooms = this.roomService.findAllRooms(hotel.getId());
+        GetRoomResponse res = rooms.getFirst();
 
         assertEquals(res.roomId(), roomId);
         assertEquals(res.roomName(), "객실1");
@@ -196,7 +196,7 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        this.roomService.createRoom(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
@@ -204,39 +204,39 @@ class RoomServiceTest {
         bedTypeNumber = Map.of("DOUBLE", 4, "QUEEN", 1);
         PostRoomRequest req2 = new PostRoomRequest("객실2", 2, 500000, 3, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), actor, req2);
+        this.roomService.createRoom(hotel.getId(), actor, req2);
 
-        GetRoomResponse res = this.roomService.findRoomDetail(hotel.getId(), roomId);
+        GetRoomDetailResponse detRes1 = this.roomService.findRoomDetail(hotel.getId(), roomId);
 
-        assertEquals(res.id(), roomId);
-        assertEquals(res.hotelId(), hotel.getId());
-        assertEquals(res.roomName(), "객실1");
-        assertEquals(res.roomNumber(), req1.roomNumber());
-        assertEquals(res.basePrice(), req1.basePrice());
-        assertEquals(res.bedTypeNumber().bed_single(), req1.bedTypeNumber().get("SINGLE"));
-        assertEquals(res.bedTypeNumber().bed_double(), req1.bedTypeNumber().get("DOUBLE"));
-        assertEquals(res.bedTypeNumber().bed_king(), req1.bedTypeNumber().get("KING"));
-        assertEquals(res.bedTypeNumber().bed_triple(), 0);
-        assertEquals(res.roomStatus(), RoomStatus.AVAILABLE.getValue());
-        assertEquals(res.roomImages().size(), 0);
-        assertEquals(res.roomOptions().size(), 0);
-        assertEquals(res.standardNumber(), 2);
+        assertEquals(detRes1.roomDto().id(), roomId);
+        assertEquals(detRes1.roomDto().hotelId(), hotel.getId());
+        assertEquals(detRes1.roomDto().roomName(), "객실1");
+        assertEquals(detRes1.roomDto().roomNumber(), req1.roomNumber());
+        assertEquals(detRes1.roomDto().basePrice(), req1.basePrice());
+        assertEquals(detRes1.roomDto().bedTypeNumber().bed_single(), req1.bedTypeNumber().get("SINGLE"));
+        assertEquals(detRes1.roomDto().bedTypeNumber().bed_double(), req1.bedTypeNumber().get("DOUBLE"));
+        assertEquals(detRes1.roomDto().bedTypeNumber().bed_king(), req1.bedTypeNumber().get("KING"));
+        assertEquals(detRes1.roomDto().bedTypeNumber().bed_triple(), 0);
+        assertEquals(detRes1.roomDto().roomStatus(), RoomStatus.AVAILABLE.getValue());
+        assertEquals(detRes1.roomImageUrls().size(), 0);
+        assertEquals(detRes1.roomDto().roomOptions().size(), 0);
+        assertEquals(detRes1.roomDto().standardNumber(), 2);
 
         roomId += 1;
-        res = this.roomService.findRoomDetail(hotel.getId(), roomId);
+        detRes1 = this.roomService.findRoomDetail(hotel.getId(), roomId);
 
-        assertEquals(res.id(), roomId);
-        assertEquals(res.hotelId(), hotel.getId());
-        assertEquals(res.roomName(), "객실2");
-        assertEquals(res.roomNumber(), req2.roomNumber());
-        assertEquals(res.basePrice(), req2.basePrice());
-        assertEquals(res.bedTypeNumber().bed_double(), req2.bedTypeNumber().get("DOUBLE"));
-        assertEquals(res.bedTypeNumber().bed_queen(), req2.bedTypeNumber().get("QUEEN"));
-        assertEquals(res.bedTypeNumber().bed_triple(), 0);
-        assertEquals(res.roomStatus(), RoomStatus.AVAILABLE.getValue());
-        assertEquals(res.roomImages().size(), 0);
-        assertEquals(res.roomOptions().size(), 0);
-        assertEquals(res.standardNumber(), 3);
+        assertEquals(detRes1.roomDto().id(), roomId);
+        assertEquals(detRes1.roomDto().hotelId(), hotel.getId());
+        assertEquals(detRes1.roomDto().roomName(), "객실2");
+        assertEquals(detRes1.roomDto().roomNumber(), req2.roomNumber());
+        assertEquals(detRes1.roomDto().basePrice(), req2.basePrice());
+        assertEquals(detRes1.roomDto().bedTypeNumber().bed_double(), req2.bedTypeNumber().get("DOUBLE"));
+        assertEquals(detRes1.roomDto().bedTypeNumber().bed_queen(), req2.bedTypeNumber().get("QUEEN"));
+        assertEquals(detRes1.roomDto().bedTypeNumber().bed_triple(), 0);
+        assertEquals(detRes1.roomDto().roomStatus(), RoomStatus.AVAILABLE.getValue());
+        assertEquals(detRes1.roomImageUrls().size(), 0);
+        assertEquals(detRes1.roomDto().roomOptions().size(), 0);
+        assertEquals(detRes1.roomDto().standardNumber(), 3);
     }
 
     @Test
@@ -254,7 +254,7 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        this.roomService.createRoom(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
@@ -285,16 +285,16 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        this.roomService.createRoom(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
 
         roomOptions = new HashSet<>(Set.of("TV", "AirConditioner"));
         PutRoomRequest putReq1 = new PutRoomRequest("수정 객실1", 5, null, null, 5, null,
-                "in_booking", null, roomOptions);
+                "in_booking", null, null, roomOptions);
 
-        PutRoomResponse res1 = this.roomService.modify(hotel.getId(), roomId, actor, putReq1);
+        PutRoomResponse res1 = this.roomService.modifyRoom(hotel.getId(), roomId, actor, putReq1);
 
         assertEquals(res1.hotelId(), hotel.getId());
         assertEquals(res1.roomId(), room.getId());
@@ -315,7 +315,6 @@ class RoomServiceTest {
         assertEquals(room.getBedTypeNumber(), BedTypeNumber.fromJson(req1.bedTypeNumber()));
         assertEquals(room.getRoomStatus(), RoomStatus.IN_BOOKING);
         assertEquals(room.getHotel().getId(), hotel.getId());
-        assertEquals(room.getRoomImages().size(), 0);
         assertEquals(roomNames, roomOptions);
     }
 
@@ -334,17 +333,17 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        this.roomService.createRoom(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
 
         roomOptions = new HashSet<>(Set.of("TV", "AirConditioner"));
         PutRoomRequest putReq1 = new PutRoomRequest("수정 객실1", 5, null, null, 5, null,
-                "in_booking", null, roomOptions);
+                "in_booking", null, null, roomOptions);
 
         ServiceException error = assertThrows(ServiceException.class, () -> {
-            this.roomService.modify(hotel.getId(), roomId, actor, putReq1);
+            this.roomService.modifyRoom(hotel.getId(), roomId, actor, putReq1);
         });
 
         assertEquals(404, error.getRsData().getStatusCode());
@@ -366,12 +365,12 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        this.roomService.createRoom(hotel.getId(), actor, req1);
 
         Room room = this.roomRepository.findAll().getFirst();
         Long roomId = room.getId();
 
-        this.roomService.delete(hotel.getId(), roomId, actor);
+        this.roomService.deleteRoom(hotel.getId(), roomId, actor);
 
         assertEquals(RoomStatus.UNAVAILABLE, room.getRoomStatus());
     }
@@ -402,7 +401,7 @@ class RoomServiceTest {
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
-        this.hotelService.create(member, postHotelRequest);
+        this.hotelService.createHotel(member, postHotelRequest);
 
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 

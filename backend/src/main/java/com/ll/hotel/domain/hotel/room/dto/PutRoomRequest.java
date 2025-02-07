@@ -2,7 +2,10 @@ package com.ll.hotel.domain.hotel.room.dto;
 
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import jakarta.validation.constraints.Min;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.hibernate.validator.constraints.Length;
 
@@ -22,8 +25,15 @@ public record PutRoomRequest(
 
         String roomStatus,
 
-        List<String> roomImages,
+        List<String> deleteImageUrls,
+
+        List<String> imageExtensions,
 
         Set<String> roomOptions
 ) {
+    public PutRoomRequest {
+        deleteImageUrls = Objects.requireNonNullElse(deleteImageUrls, new ArrayList<>());
+        imageExtensions = Objects.requireNonNullElse(imageExtensions, new ArrayList<>());
+        roomOptions = Objects.requireNonNullElse(roomOptions, new HashSet<>());
+    }
 }

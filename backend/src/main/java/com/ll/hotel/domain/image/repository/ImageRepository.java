@@ -3,6 +3,8 @@ package com.ll.hotel.domain.image.repository;
 import com.ll.hotel.domain.image.dto.ImageDto;
 import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.type.ImageType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -33,11 +35,12 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
             i.imageUrl
         )
         FROM Image i
-        WHERE i.referenceId IN :reviewIds
+        WHERE i.referenceId IN :referenceIds
         AND i.imageType = :imageType
     """)
-    List<ImageDto> findImageUrlsByReviewIdsAndImageType(
-            @Param("reviewIds") List<Long> reviewIds,
-            @Param("imageType") ImageType imageType
+    Page<ImageDto> findImageUrlsByReferenceIdsAndImageType(
+            @Param("referenceIds") List<Long> referenceIds,
+            @Param("imageType") ImageType imageType,
+            Pageable pageable
     );
 }

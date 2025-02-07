@@ -4,9 +4,10 @@ import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
 import com.ll.hotel.domain.hotel.option.roomOption.repository.RoomOptionRepository;
-import com.ll.hotel.domain.hotel.room.dto.GetAllRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
+import com.ll.hotel.domain.hotel.room.dto.RoomDto;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.PutRoomRequest;
@@ -15,16 +16,23 @@ import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import com.ll.hotel.domain.hotel.room.type.RoomStatus;
+import com.ll.hotel.domain.image.entity.Image;
+import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
+import com.ll.hotel.global.annotation.BusinessOnly;
+import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
-import java.util.ArrayList;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,17 +40,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class RoomService {
+    private final ImageService imageService;
+    private final S3Service s3Service;
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
     private final RoomOptionRepository roomOptionRepository;
 
-    /**
-     * RoomImage 등록 추가 필요
-     */
+    @BusinessOnly
     @Transactional
-    public PostRoomResponse create(long hotelId, Member actor, PostRoomRequest postRoomRequest) {
-        Hotel hotel = this.hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔의 정보가 존재하지 않습니다."));
+    public PostRoomResponse createRoom(long hotelId, Member actor, PostRoomRequest postRoomRequest) {
+        Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
@@ -56,88 +63,83 @@ public class RoomService {
             throw new ServiceException("404-2", "사용할 수 없는 객실 옵션이 존재합니다.");
         }
 
-        Room room = Room.builder()
-                .hotel(hotel)
-                .roomName(postRoomRequest.roomName())
-                .roomNumber(postRoomRequest.roomNumber())
-                .basePrice(postRoomRequest.basePrice())
-                .standardNumber(postRoomRequest.standardNumber())
-                .maxNumber(postRoomRequest.maxNumber())
-                .bedTypeNumber(bedTypeNumber)
-                // 객실 이미지 등록 추가 필요
-                .roomOptions(roomOptions)
-                .build();
+        Room room = Room.roomBuild(hotel, postRoomRequest, bedTypeNumber, roomOptions);
 
-        return new PostRoomResponse(this.roomRepository.save(room));
+        try {
+            return new PostRoomResponse(this.roomRepository.save(room),
+                    this.saveRoomImages(room.getId(), postRoomRequest.imageExtensions()));
+        } catch (DataIntegrityViolationException e) {
+            throw new ServiceException("409-1", "동일한 이름의 방이 이미 호텔에 존재합니다.");
+        }
     }
 
+    @BusinessOnly
     @Transactional
-    public void delete(long hotelId, long roomId, Member actor) {
-        Hotel hotel = this.hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
+    public void saveImages(Member actor, ImageType imageType, long roomId, List<String> urls) {
+        this.imageService.saveImages(imageType, roomId, urls);
+    }
+
+    @BusinessOnly
+    @Transactional
+    public void deleteRoom(long hotelId, long roomId, Member actor) {
+        Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
         }
 
-        Room room = this.roomRepository.findById(roomId)
-                .orElseThrow(() -> new ServiceException("404-2", "객실 정보를 찾을 수 없습니다."));
+        Room room = this.getRoomById(roomId);
 
         room.setRoomStatus(RoomStatus.UNAVAILABLE);
+
+        if (this.imageService.deleteImages(ImageType.ROOM, roomId) > 0) {
+            this.s3Service.deleteAllObjectsById(ImageType.ROOM, roomId);
+        }
     }
 
     @Transactional
-    public List<GetAllRoomResponse> findAllRooms(long hotelId) {
-        List<Room> rooms = this.roomRepository.findAllRooms(hotelId, ImageType.ROOM);
-
-        if (rooms.isEmpty()) {
-            throw new ServiceException("404-1", "호텔 Id에 해당하는 객실이 존재하지 않습니다.");
-        }
-
-        List<GetAllRoomResponse> responses = new ArrayList<>();
-
-        for (Room room : rooms) {
-            responses.add(new GetAllRoomResponse(room));
-        }
-
-        return responses;
+    public List<GetRoomResponse> findAllRooms(long hotelId) {
+        return this.roomRepository.findAllRooms(hotelId, ImageType.ROOM).stream()
+                .map(GetRoomResponse::new)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public GetRoomResponse findRoomDetail(long hotelId, long roomId) {
-        if (!this.hotelRepository.existsById(hotelId)) {
-            throw new ServiceException("404-1", "호텔 정보가 존재하지 않습니다.");
-        }
+    public GetRoomDetailResponse findRoomDetail(long hotelId, long roomId) {
+        checkHotelExists(hotelId);
 
-        Room room = this.roomRepository.findRoomDetail(hotelId, roomId, ImageType.ROOM)
-                .orElseThrow(() -> new ServiceException("404-2", "객실 정보가 존재하지 않습니다."));
+        Room room = this.getRoomDetail(hotelId, roomId);
 
-        return new GetRoomResponse(room);
+        List<String> imageUrls = this.imageService.findImagesById(ImageType.ROOM, roomId).stream()
+                .map(Image::getImageUrl)
+                .toList();
+
+        return new GetRoomDetailResponse(new RoomDto(room), imageUrls);
     }
 
     @Transactional
     public GetRoomOptionResponse findRoomOptions(long hotelId, long roomId) {
-        if (!this.hotelRepository.existsById(hotelId)) {
-            throw new ServiceException("404-1", "호텔 정보가 존재하지 않습니다.");
-        }
+        this.checkHotelExists(hotelId);
 
-        Room room = this.roomRepository.findById(roomId)
-                .orElseThrow(() -> new ServiceException("404-2", "객실 정보가 존재하지 않습니다."));
+        Room room = this.getRoomById(roomId);
 
         return new GetRoomOptionResponse(room);
     }
 
+    @BusinessOnly
     @Transactional
-    public PutRoomResponse modify(long hotelId, long roomId, Member actor, PutRoomRequest request) {
-        Hotel hotel = this.hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 조회할 수 없습니다."));
+    public PutRoomResponse modifyRoom(long hotelId, long roomId, Member actor, PutRoomRequest request) {
+        Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
             throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
         }
 
-        Room room = this.roomRepository.findRoomDetail(hotelId, roomId, ImageType.ROOM)
-                .orElseThrow(() -> new ServiceException("404-2", "객실 정보를 조회할 수 없습니다."));
+        Room room = this.getRoomDetail(hotelId, roomId);
+
+        if (this.roomRepository.existsByHotelIdAndRoomNameAndIdNot(hotelId, request.roomName(), roomId)) {
+            throw new ServiceException("409-1", "동일한 이름의 방이 이미 호텔에 존재합니다.");
+        }
 
         modifyIfPresent(request.roomName(), room::getRoomName, room::setRoomName);
         modifyIfPresent(request.roomNumber(), room::getRoomNumber, room::setRoomNumber);
@@ -154,11 +156,14 @@ public class RoomService {
             }
         }
 
-        // 이미지 수정 처리 필요
-
         modifyOptions(room, request.roomOptions());
 
-        return new PutRoomResponse(room);
+        List<String> deleteImageUrls = request.deleteImageUrls();
+
+        this.imageService.deleteImagesByIdAndUrls(ImageType.ROOM, roomId, deleteImageUrls);
+        this.s3Service.deleteObjectsByUrls(deleteImageUrls);
+
+        return new PutRoomResponse(room, this.saveRoomImages(roomId, request.imageExtensions()));
     }
 
     private <T> void modifyIfPresent(T newValue, Supplier<T> getter, Consumer<T> setter) {
@@ -181,5 +186,33 @@ public class RoomService {
         }
 
         room.setRoomOptions(options);
+    }
+
+    private Hotel getHotelById(long hotelId) {
+        return this.hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보가 존재하지 않습니다."));
+    }
+
+    private Room getRoomById(long roomId) {
+        return this.roomRepository.findById(roomId)
+                .orElseThrow(() -> new ServiceException("404-2", "객실 정보가 존재하지 않습니다."));
+    }
+
+    private Room getRoomDetail(long hotelId, long roomId) {
+        return this.roomRepository.findRoomDetail(hotelId, roomId)
+                .orElseThrow(() -> new ServiceException("404-2", "객실 정보를 조회할 수 없습니다."));
+    }
+
+    private void checkHotelExists(long hotelId) {
+        if (!this.hotelRepository.existsById(hotelId)) {
+            throw new ServiceException("404-1", "호텔 정보가 존재하지 않습니다.");
+        }
+    }
+
+    // 객실 이미지 저장
+    private PresignedUrlsResponse saveRoomImages(long roomId, List<String> extensions) {
+        List<URL> urls = this.s3Service.generatePresignedUrls(ImageType.ROOM, roomId, extensions);
+
+        return new PresignedUrlsResponse(roomId, urls);
     }
 }

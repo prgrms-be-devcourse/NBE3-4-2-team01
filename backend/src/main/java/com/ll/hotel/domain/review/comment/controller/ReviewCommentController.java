@@ -1,7 +1,7 @@
 package com.ll.hotel.domain.review.comment.controller;
 
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.comment.dto.ReviewCommentContentRequest;
+import com.ll.hotel.domain.review.comment.dto.request.ReviewCommentContentRequest;
 import com.ll.hotel.domain.review.comment.dto.ReviewCommentDto;
 import com.ll.hotel.domain.review.comment.service.ReviewCommentService;
 import com.ll.hotel.global.exceptions.ServiceException;
@@ -10,6 +10,7 @@ import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,7 @@ public class ReviewCommentController {
     @Operation(summary = "리뷰 답변 생성")
     public RsData<Empty> createReviewComment(
             @PathVariable("reviewId") long reviewId,
-            @RequestBody ReviewCommentContentRequest contentRequest
+            @RequestBody @Valid ReviewCommentContentRequest contentRequest
     ) {
         // 인증 로직 (로그인 여부 체크)
         Member actor = rq.getActor();
@@ -56,7 +57,7 @@ public class ReviewCommentController {
     public RsData<Empty> updateReviewComment(
             @PathVariable("reviewId") long reviewId,
             @PathVariable("commentId") long commentId,
-            @RequestBody ReviewCommentContentRequest contentRequest
+            @RequestBody @Valid ReviewCommentContentRequest contentRequest
     ) {
         // 인증 로직 (로그인 여부 체크)
         Member actor = rq.getActor();

@@ -4,10 +4,8 @@ package com.ll.hotel.global.security;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.exceptions.JwtExceptionFilter;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthenticationSuccessHandler;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2FailureHandler;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtAuthFilter;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2UserService;
+import com.ll.hotel.global.security.oauth2.*;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +29,7 @@ public class SecurityConfig {
     private final CustomOAuth2FailureHandler oAuth2AuthenticationFailureHandler;
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+    private final CustomOAuth2AuthorizationRequestRepository customOAuth2AuthorizationRequestRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -53,23 +52,46 @@ public class SecurityConfig {
                                 "/api/users/login",
                                 "/api/users/refresh",
                                 "/api/hotels/**",
+                                "/api/bookings/**",
+                                "/api/favorites/**",
+                                "/api/businesses/**",
                                 "/api/reviews/hotels/**",
                                 "/oauth2/authorization/**",
                                 "/login/oauth2/code/**",
                                 "/api/*/oauth2/callback"
                         ).permitAll()
-                        
+
                         // 관리자 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        
-                        // 비즈니스 회원 전용
-                        .requestMatchers("/api/businesses/**").hasRole("BUSINESS")
-                        
+
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write(String.format(
+                                    "{\"resultCode\": \"%d-1\", \"msg\": \"%s\", \"data\": null}",
+                                    HttpServletResponse.SC_UNAUTHORIZED,
+                                    "사용자 인증정보가 올바르지 않습니다."
+                            ));
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write(String.format(
+                                    "{\"resultCode\": \"%d-1\", \"msg\": \"%s\", \"data\": null}",
+                                    HttpServletResponse.SC_FORBIDDEN,
+                                    "접근 권한이 없습니다."
+                            ));
+                        })
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth2Login -> oauth2Login
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestRepository(customOAuth2AuthorizationRequestRepository)
+                        )
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )

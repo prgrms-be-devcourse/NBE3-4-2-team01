@@ -11,6 +11,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.hibernate.validator.constraints.Length;
 
@@ -47,12 +48,12 @@ public record PostHotelRequest(
         @NotBlank
         String hotelExplainContent,
 
-        List<String> hotelImages,
+        List<String> imageExtensions,
 
         Set<String> hotelOptions
 ) {
     public PostHotelRequest {
-        hotelImages = hotelImages == null ? new ArrayList<>() : hotelImages;
-        hotelOptions = hotelOptions == null ? new HashSet<>() : hotelOptions;
+        imageExtensions = Objects.requireNonNullElse(imageExtensions, new ArrayList<>());
+        hotelOptions = Objects.requireNonNullElse(hotelOptions, new HashSet<>());
     }
 }
