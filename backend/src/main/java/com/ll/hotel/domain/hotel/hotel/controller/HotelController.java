@@ -15,8 +15,11 @@ import com.ll.hotel.standard.base.Empty;
 import com.ll.hotel.standard.page.dto.PageDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,13 +68,19 @@ public class HotelController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "latest") String filterName,
-            @RequestParam(required = false) String filterDirection
+            @RequestParam(required = false) String filterDirection,
+            @RequestParam(defaultValue = "") String streetAddress,
+            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}") @DateTimeFormat(iso = ISO.DATE)
+            LocalDate checkInDate,
+            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().plusDays(1)}") @DateTimeFormat(iso = ISO.DATE)
+            LocalDate checkoutDate
     ) {
         return new RsData<>(
                 "200-1",
                 "모든 호텔 정보를 정상적으로 조회했습니다.",
                 new PageDto<>(
-                        this.hotelService.findAllHotels(page, pageSize, filterName, filterDirection))
+                        this.hotelService.findAllHotels(page, pageSize, filterName, filterDirection,
+                                streetAddress, checkInDate, checkoutDate))
         );
     }
 

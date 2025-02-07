@@ -7,6 +7,7 @@ import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.hotel.option.hotelOption.repository.HotelOptionRepository;
 import com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto;
+import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.service.ImageService;
@@ -18,22 +19,23 @@ import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import com.ll.hotel.global.annotation.BusinessOnly;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -78,8 +80,9 @@ public class HotelService {
         this.imageService.saveImages(imageType, hotelId, urls);
     }
 
-    @Transactional
-    public Page<GetHotelResponse> findAllHotels(int page, int pageSize, String filterName, String filterDirection) {
+    @Transactional(readOnly = true)
+    public Page<GetHotelResponse> findAllHotels(int page, int pageSize, String filterName, String filterDirection,
+                                                String streetAddress, LocalDate checkInDate, LocalDate checkOutDate) {
         Map<String, String> sortFieldMapping = Map.of(
                 "latest", "createdAt",
                 "averageRating", "averageRating",
@@ -102,8 +105,12 @@ public class HotelService {
         Sort sort = Sort.by(direction, sortField);
         PageRequest pageRequest = PageRequest.of(page - 1, pageSize, sort);
 
-        return this.hotelRepository.findAllHotels(ImageType.HOTEL, pageRequest)
-                .map(GetHotelResponse::new);
+        Page<HotelWithImageDto> hotels = this.hotelRepository.findAllHotels(ImageType.HOTEL, streetAddress,
+                pageRequest);
+
+        List<GetHotelResponse> availableHotels = this.getAvailableHotels(checkInDate, checkOutDate, hotels);
+
+        return new PageImpl<>(availableHotels, pageRequest, availableHotels.size());
     }
 
     @Transactional
@@ -208,5 +215,49 @@ public class HotelService {
     public Hotel getHotelById(Long hotelId) {
         return this.hotelRepository.findById(hotelId)
                 .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
+    }
+
+    /**
+     * 예약 가능한 호텔 리스트
+     * 예약 가능한 객실이 없으면 해당 호텔은 보여주지 않음
+     * room 이 변경되므로, 다른 곳에서는 사용하지 말 것
+     */
+    // 배포 시 .filter 부분 주석 해제 (예약 가능한 Room이 없으면 호텔을 보여주지 않는 부분)
+    private List<GetHotelResponse> getAvailableHotels(LocalDate checkInDate, LocalDate checkOutDate,
+                                                      Page<HotelWithImageDto> hotels) {
+        return hotels.stream()
+                .map(dto -> {
+                    Hotel hotel = dto.hotel();
+                    List<Room> availableRooms = hotel.getRooms().stream()
+                            .filter(room -> this.roomIsAvailable(room, checkInDate, checkOutDate))
+                            .map(room -> {
+                                room.setRoomNumber(this.countAvailableRoomNumber(room, checkInDate, checkOutDate));
+                                return room;
+                            })
+                            .filter(room -> room.getRoomNumber() > 0)
+                            .toList();
+                    hotel.setRooms(availableRooms);
+                    return dto;
+                })
+//                .filter(dto -> !dto.hotel().getRooms().isEmpty())
+                .map(GetHotelResponse::new)
+                .toList();
+    }
+
+    // 예약 가능한 객실 여부
+    private boolean roomIsAvailable(Room room, LocalDate checkInDate, LocalDate checkOutDate) {
+        return room.getBookings().stream()
+                .noneMatch(booking -> (booking.getCheckInDate().isBefore(checkOutDate)
+                                       && booking.getCheckOutDate().isAfter(checkInDate)));
+    }
+
+    // 호텔의 예약 가능한 객실 수 Count
+    private int countAvailableRoomNumber(Room room, LocalDate checkInDate, LocalDate checkOutDate) {
+        long resolvedCount = room.getBookings().stream()
+                .filter(booking -> booking.getCheckInDate().isBefore(checkOutDate)
+                                   && booking.getCheckOutDate().isAfter(checkInDate))
+                .count();
+
+        return room.getRoomNumber() - (int) resolvedCount;
     }
 }
