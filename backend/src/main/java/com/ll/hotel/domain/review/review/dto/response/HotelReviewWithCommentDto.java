@@ -1,21 +1,22 @@
-package com.ll.hotel.domain.review.review.dto;
+package com.ll.hotel.domain.review.review.dto.response;
 
 import com.ll.hotel.domain.review.comment.dto.ReviewCommentDto;
 import com.ll.hotel.domain.review.comment.entity.ReviewComment;
+import com.ll.hotel.domain.review.review.dto.ReviewDto;
 import com.ll.hotel.domain.review.review.entity.Review;
 
 import java.time.LocalDateTime;
 
-public record MyReviewWithCommentDto(
-        String hotelName,
+public record HotelReviewWithCommentDto(
+        String memberEmail,
         String roomTypeName,
         ReviewDto reviewDto,
         ReviewCommentDto reviewCommentDto,
         LocalDateTime reservedAt
 ) {
-    public MyReviewWithCommentDto(String hotelName, String roomTypeName, Review review, ReviewComment reviewComment, LocalDateTime reservedAt) {
+    public HotelReviewWithCommentDto(String memberEmail, String roomTypeName, Review review, ReviewComment reviewComment, LocalDateTime reservedAt) {
         this(
-                hotelName,
+                memberEmail,
                 roomTypeName,
                 new ReviewDto(review),
                 reviewComment != null ? new ReviewCommentDto(reviewComment) : null,
