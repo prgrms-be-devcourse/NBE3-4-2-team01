@@ -17,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -46,6 +47,7 @@ public class BusinessServiceTest {
                     .memberPhoneNumber("01012345678")
                     .memberStatus(MemberStatus.ACTIVE)
                     .role(Role.BUSINESS)
+                    .oauths(new ArrayList<>())
                     .build()
             );
 
@@ -56,19 +58,23 @@ public class BusinessServiceTest {
     }
 
     @Test
-    @DisplayName("사업자 등록")
+    @DisplayName("사업자 등록 - 01")
     public void registerBusinessTest() {
         // Given
-        BusinessRequest businessRequest = new BusinessRequest("1234567890");
+        BusinessRequest.RegistrationInfo businessRequest = new BusinessRequest.RegistrationInfo(
+                "1234567890",
+                LocalDate.now(),
+                "김사장"
+        );
 
         Member member = memberRepository.findById(testId).get();
 
         // When
-        Business result = businessService.register(businessRequest, member);
+        Business result = businessService.register(businessRequest, member, "01");
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getApprovalStatus()).isEqualTo(BusinessApprovalStatus.PENDING);
+        assertThat(result.getApprovalStatus()).isEqualTo(BusinessApprovalStatus.APPROVED);
         assertThat(result.getBusinessRegistrationNumber()).isEqualTo(businessRequest.businessRegistrationNumber());
     }
 }

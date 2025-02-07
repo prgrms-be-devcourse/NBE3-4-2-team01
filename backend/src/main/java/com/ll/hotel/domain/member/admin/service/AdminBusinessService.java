@@ -27,8 +27,19 @@ public class AdminBusinessService {
     }
 
     @Transactional
-    public void approve(Business business, AdminBusinessRequest adminBusinessRequest) {
-        business.setApprovalStatus(adminBusinessRequest.businessApprovalStatus());
+    public void modify(Business business, AdminBusinessRequest adminBusinessRequest) {
+        if (adminBusinessRequest.businessRegistrationNumber() != null) {
+            business.setBusinessRegistrationNumber(adminBusinessRequest.businessRegistrationNumber());
+        }
+        if (adminBusinessRequest.startDate() != null) {
+            business.setStartDate(adminBusinessRequest.startDate());
+        }
+        if (adminBusinessRequest.ownerName() != null) {
+            business.setOwnerName(adminBusinessRequest.ownerName());
+        }
+        if (adminBusinessRequest.businessApprovalStatus() != null) {
+            business.setApprovalStatus(adminBusinessRequest.businessApprovalStatus());
+        }
     }
 
     public void flush() {
