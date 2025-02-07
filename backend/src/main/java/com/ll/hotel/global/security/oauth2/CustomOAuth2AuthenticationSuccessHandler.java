@@ -1,22 +1,26 @@
 package com.ll.hotel.global.security.oauth2;
 
 
-import com.ll.hotel.domain.member.member.service.AuthTokenService;
-import com.ll.hotel.domain.member.member.service.MemberService;
-import com.ll.hotel.global.security.dto.SecurityUser;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.domain.member.member.service.AuthTokenService;
+import com.ll.hotel.domain.member.member.service.MemberService;
+import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -32,12 +36,13 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
+        log.debug("OAuth2 login success - provider: {}, oauthId: {}, email: {}", 
+            securityUser.getProvider(), securityUser.getOauthId(), securityUser.getEmail());
         
         if (securityUser.isNewUser()) {
             String redirectUrl = UriComponentsBuilder.fromUriString(authorizedRedirectUri)
-                    .queryParam("email", URLEncoder.encode(securityUser.getEmail(), StandardCharsets.UTF_8))
-                    .queryParam("name", URLEncoder.encode(securityUser.getUsername(), StandardCharsets.UTF_8))
                     .queryParam("provider", URLEncoder.encode(securityUser.getProvider(), StandardCharsets.UTF_8))
+                    .queryParam("oauthId", URLEncoder.encode(securityUser.getOauthId(), StandardCharsets.UTF_8))
                     .queryParam("status", "REGISTER")
                     .build()
                     .encode()
@@ -45,18 +50,26 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
 
             response.sendRedirect(redirectUrl);
         } else {
-            String accessToken = authTokenService.generateToken(securityUser.getEmail()).accessToken();
-            String refreshToken = memberService.generateRefreshToken(securityUser.getEmail());
+            Member member = memberService.findByProviderAndOauthId(
+                securityUser.getProvider(), 
+                securityUser.getOauthId()
+            );
+            String accessToken = authTokenService.generateToken(member.getMemberEmail()).accessToken();
+            String refreshToken = memberService.generateRefreshToken(member.getMemberEmail());
+            log.debug("Generated JWT access token: {}", accessToken);
+            log.debug("Generated JWT refresh token: {}", refreshToken);
             
-            authTokenService.generateToken(securityUser.getEmail());
-
             String redirectUrl = UriComponentsBuilder.fromUriString(authorizedRedirectUri)
                     .queryParam("accessToken", "Bearer " + accessToken)
-                    .queryParam("refreshToken", "Bearer " + refreshToken)
                     .queryParam("status", "SUCCESS")
                     .build()
-                    .encode()
                     .toUriString();
+            
+            Cookie refreshTokenCookie = new Cookie("refresh_token", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(true);
+            refreshTokenCookie.setPath("/");
+            response.addCookie(refreshTokenCookie);
             
             response.sendRedirect(redirectUrl);
         }

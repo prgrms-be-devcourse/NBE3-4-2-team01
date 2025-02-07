@@ -1,14 +1,17 @@
 package com.ll.hotel.domain.member.member.service;
 
 
+import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
+import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
+import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.member.member.dto.JoinRequest;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.jwt.dto.JwtProperties;
+import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import com.ll.hotel.global.security.oauth2.repository.OAuthRepository;
 import jakarta.validation.Valid;
@@ -20,11 +23,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -32,49 +38,56 @@ public class MemberService {
     private final AuthTokenService authTokenService;
     private final RefreshTokenService refreshTokenService;
     private final RedisTemplate<String, String> redisTemplate;
-    private final CustomOAuth2JwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
+    private final HotelRepository hotelRepository;
+    private final Rq rq;
+
     private static final Logger log = LoggerFactory.getLogger(MemberService.class);
     private static final String LOGOUT_PREFIX = "LOGOUT:";
 
     @Transactional
     public Member join(@Valid JoinRequest joinRequest) {
-        log.debug("Starting join process for email: {}", joinRequest.email());
-        
-        if (memberRepository.existsByMemberEmail(joinRequest.email())) {
-            throw new ServiceException("400-1", "이미 가입된 이메일입니다.");
+        log.debug("Join service - OAuth 정보: provider={}, oauthId={}", 
+                 joinRequest.provider(), joinRequest.oauthId());
+                 
+        Optional<Member> existingMember = memberRepository.findByMemberEmail(joinRequest.email());
+        if (existingMember.isPresent()) {
+            Member member = existingMember.get();
+            
+            // OAuth 정보가 있는 경우에만 저장
+            if (joinRequest.provider() != null && joinRequest.oauthId() != null) {
+                OAuth oauth = OAuth.builder()
+                        .member(member)
+                        .provider(joinRequest.provider())
+                        .oauthId(joinRequest.oauthId())
+                        .build();
+                oAuthRepository.save(oauth);
+                member.getOauths().add(oauth);
+                return member;
+            }
+            
+            throw new ServiceException("400", "이미 가입된 이메일입니다.");
         }
 
-        log.debug("Building member entity with provider: {}, oauthId: {}", 
-                 joinRequest.provider(), joinRequest.oauthId());
-
-        Member member = Member.builder()
+        Member newMember = Member.builder()
                 .memberEmail(joinRequest.email())
                 .memberName(joinRequest.name())
                 .memberPhoneNumber(joinRequest.phoneNumber())
-                .birthDate(joinRequest.birthDate())
-                .role(Role.USER)
+                .role(joinRequest.role())
                 .memberStatus(MemberStatus.ACTIVE)
-                .password("")
+                .birthDate(joinRequest.birthDate())
                 .build();
-
-        log.debug("Attempting to save member entity");
-        member = memberRepository.save(member);
-        log.debug("Successfully saved member entity with id: {}", member.getId());
-
-        if (joinRequest.provider() != null && joinRequest.oauthId() != null) {
-            log.debug("Creating OAuth entity - provider: {}, oauthId: {}", 
-                     joinRequest.provider(), joinRequest.oauthId());
-                     
-            OAuth oauth = OAuth.create(
-                member,
-                joinRequest.provider(),
-                joinRequest.oauthId()
-            );
-            oAuthRepository.save(oauth);
-            log.debug("Successfully saved OAuth entity");
-        }
-
-        return member;
+        
+        Member savedMember = memberRepository.save(newMember);
+        
+        OAuth oauth = OAuth.builder()
+                .member(savedMember)
+                .provider(joinRequest.provider())
+                .oauthId(joinRequest.oauthId())
+                .build();
+        oAuthRepository.save(oauth);
+        
+        return savedMember;
     }
 
     public Optional<Member> findByMemberEmail(String email) {
@@ -90,10 +103,6 @@ public class MemberService {
 
     public boolean verifyToken(String accessToken) {
         return authTokenService.verifyToken(accessToken);
-    }
-
-    public String getEmail(String accessToken) {
-        return authTokenService.getEmail(accessToken);
     }
 
     public RsData<String> refreshAccessToken(String refreshToken) {
@@ -137,5 +146,59 @@ public class MemberService {
             throw new ServiceException("401-2", "유효하지 않은 토큰입니다.");
         }
         return getEmailFromToken(token);
+    }
+
+    @Transactional
+    public void addFavorite(Long hotelId) {
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인이 필요합니다.");
+        }
+
+        Hotel hotel = hotelRepository.findById(hotelId)
+            .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 호텔입니다."));
+
+        if (actor.getFavoriteHotels().contains(hotel)) {
+            throw new ServiceException("400-1", "이미 즐겨찾기에 추가된 호텔입니다.");
+        }
+
+        actor.getFavoriteHotels().add(hotel);
+        hotel.getFavorites().add(actor);
+    }
+
+    @Transactional
+    public void removeFavorite(Long hotelId) {
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인이 필요합니다.");
+        }
+
+        Hotel hotel = hotelRepository.findById(hotelId)
+            .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 호텔입니다."));
+
+        if (!actor.getFavoriteHotels().contains(hotel)) {
+            throw new ServiceException("400-1", "즐겨찾기에 없는 호텔입니다.");
+        }
+
+        actor.getFavoriteHotels().remove(hotel);
+        hotel.getFavorites().remove(actor);
+    }
+
+    public List<HotelDto> getFavoriteHotels() {
+        Member actor = rq.getActor();
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인이 필요합니다.");
+        }
+
+        return actor.getFavoriteHotels().stream()
+            .map(HotelDto::new)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Member findByProviderAndOauthId(String provider, String oauthId) {
+        return oAuthRepository.findByProviderAndOauthIdWithMember(provider, oauthId)
+            .orElseThrow(() -> new ServiceException("404-1", "해당 OAuth 정보를 찾을 수 없습니다."))
+            .getMember();
     }
 }
