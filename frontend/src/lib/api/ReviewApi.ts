@@ -1,21 +1,22 @@
 import { Empty } from "../types/Empty";
 import { GetReviewResponse } from "../types/GetReviewResponse";
-import { HotelReviewResponse } from "../types/HotelReviewResponse";
+import { HotelReviewListResponse } from "../types/HotelReviewListResponse";
 import { MyReviewResponse } from "../types/MyReviewResponse";
+import { PageDto } from "../types/PageDto";
 import { PostReviewRequest } from "../types/PostReviewRequest"
 import { PresignedUrlsResponse } from "../types/PresignedUrlsResponse";
 import { RsData } from "../types/RsData";
 import { UpdateReviewRequest } from "../types/UpdateReviewRequest";
 
 // 리뷰 생성 요청 후 PresignedUrlReponse 응답
-export const postReview = async (bookingId: string, 
-    hotelId: string,
-    roomId: string, 
-    memberId: string, 
+export const postReview = async (
+    bookingId: number, 
+    hotelId: number,
+    roomId: number, 
     postReviewRequest: PostReviewRequest) : Promise<PresignedUrlsResponse> => {
     
         try{
-            const response = await fetch(`http://localhost:8080/api/reviews/${bookingId}?hotelId=${hotelId}&roomId=${roomId}&memberId=${memberId}`, {
+            const response = await fetch(`http://localhost:8080/api/reviews/${bookingId}?hotelId=${hotelId}&roomId=${roomId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -70,9 +71,9 @@ export const deleteReview = async (reviewId: number) => {
 }
 
 // 호텔 리뷰 목록 조회
-export const getHotelReviews = async (hotelId: number) : Promise<HotelReviewResponse[]> => {
+export const getHotelReviews = async (hotelId: number, page: number) : Promise<HotelReviewListResponse> => {
     try {
-        const response = await fetch(`http://localhost:8080/api/reviews/hotels/${hotelId}`);
+        const response = await fetch(`http://localhost:8080/api/reviews/hotels/${hotelId}?page=${page}`);
         
         const rsData = await response.json();
         if(rsData.resultCode !== '200') {
@@ -85,9 +86,9 @@ export const getHotelReviews = async (hotelId: number) : Promise<HotelReviewResp
 }
 
 // 내 리뷰 목록 조회
-export const getMyReviews = async (memberId: number) : Promise<MyReviewResponse[]> => {
+export const getMyReviews = async (page: number) : Promise<PageDto<MyReviewResponse>> => {
     try {
-        const response = await fetch(`http://localhost:8080/api/reviews/hotels/${memberId}`);
+        const response = await fetch(`http://localhost:8080/api/reviews/me?page=${page}`);
         const rsData = await response.json();
         if(rsData.resultCode !== '200') {
             throw new Error(rsData.msg);
