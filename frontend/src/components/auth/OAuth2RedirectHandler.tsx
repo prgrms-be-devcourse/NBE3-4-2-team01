@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface OAuth2RedirectProps {
-  onLoginSuccess?: (tokens: { accessToken: string }) => void;
+  onLoginSuccess?: () => void;
 }
 
 const OAuth2RedirectHandler = ({ onLoginSuccess }: OAuth2RedirectProps) => {
@@ -33,15 +33,7 @@ const OAuth2RedirectHandler = ({ onLoginSuccess }: OAuth2RedirectProps) => {
           }
           
           case 'SUCCESS': {
-            // OAuth 정보로 이미 가입된 회원인 경우
-            const accessToken = searchParams.get('accessToken');
-            
-            if (!accessToken) {
-              throw new Error('인증 토큰이 누락되었습니다.');
-            }
-            
-            localStorage.setItem('accessToken', accessToken);
-            onLoginSuccess?.({ accessToken });
+            onLoginSuccess?.();
             router.push('/');
             break;
           }
