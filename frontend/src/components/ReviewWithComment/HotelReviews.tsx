@@ -17,7 +17,7 @@ const HotelReviews: React.FC<{ hotelId: number }> = ({ hotelId }) => {
         const response : HotelReviewListResponse = await getHotelReviews(hotelId);
         const reviewPage : PageDto<HotelReviewResponse> = response.hotelReviewPage;
         setReviews(reviewPage.items);
-        alert('호텔 리뷰 목록 조회 성공');   
+        alert('호텔 리뷰 목록 조회 성공');
       } catch (error) {
         if (error instanceof Error) {
           alert(error.message);
