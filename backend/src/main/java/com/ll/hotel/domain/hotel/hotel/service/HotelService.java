@@ -1,12 +1,17 @@
 package com.ll.hotel.domain.hotel.hotel.service;
 
+import com.ll.hotel.domain.booking.booking.entity.Booking;
+import com.ll.hotel.domain.booking.booking.type.BookingStatus;
+import com.ll.hotel.domain.booking.payment.entity.Payment;
 import com.ll.hotel.domain.hotel.hotel.dto.*;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
 import com.ll.hotel.domain.hotel.option.hotelOption.repository.HotelOptionRepository;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomRevenueResponse;
 import com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto;
+import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.service.ImageService;
@@ -25,14 +30,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.net.URL;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -203,6 +202,32 @@ public class HotelService {
         if (this.imageService.deleteImages(ImageType.HOTEL, hotelId) > 0) {
             this.s3Service.deleteAllObjectsById(ImageType.HOTEL, hotelId);
         }
+    }
+
+    @Transactional
+    public GetHotelRevenueResponse findRevenue(long hotelId, Member actor) {
+        Hotel hotel = getHotel(hotelId);
+
+        if (!hotel.isOwnedBy(actor)) {
+            throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
+        }
+
+        long hotelRevenue = 0;
+        List<GetRoomRevenueResponse> roomRevenueResponses = new ArrayList<>();
+        for (Room room : hotel.getRooms()) {
+            long roomRevenue = room.getBookings().stream()
+                    .filter(booking -> booking.getBookingStatus().equals(BookingStatus.COMPLETED))
+                    .map(Booking::getPayment)
+                    .mapToLong(Payment::getAmount)
+                    .sum();
+
+            hotelRevenue += roomRevenue;
+
+            roomRevenueResponses.add(
+                    new GetRoomRevenueResponse(room.getId(), room.getRoomName(), room.getBasePrice(), roomRevenue));
+        }
+
+        return new GetHotelRevenueResponse(roomRevenueResponses, hotelRevenue);
     }
 
     // 호텔 이미지 저장
