@@ -11,6 +11,7 @@ import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.validation.GlobalValidation;
 import com.ll.hotel.standard.base.Empty;
 import com.ll.hotel.standard.page.dto.PageDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -75,6 +76,9 @@ public class HotelController {
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().plusDays(1)}") @DateTimeFormat(iso = ISO.DATE)
             LocalDate checkoutDate
     ) {
+        GlobalValidation.checkPageSize(pageSize);
+        GlobalValidation.checkCheckInAndOutDate(checkInDate, checkoutDate);
+
         return new RsData<>(
                 "200-1",
                 "모든 호텔 정보를 정상적으로 조회했습니다.",
