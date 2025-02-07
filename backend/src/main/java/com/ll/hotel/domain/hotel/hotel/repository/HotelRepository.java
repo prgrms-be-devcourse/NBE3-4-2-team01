@@ -18,15 +18,18 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             ON i.referenceId = h.id
             AND i.imageType = :imageType
             WHERE h.hotelStatus <> 'UNAVAILABLE'
-            AND i.uploadedAt = (
+            AND (i.uploadedAt = (
                 SELECT MIN(i2.uploadedAt)
                 FROM Image i2
                 WHERE i2.referenceId = h.id
                 AND i2.imageType = :imageType
             )
-            OR i is NULL
+            OR i is NULL)
+            AND h.streetAddress LIKE %:streetAddress%
             """)
-    Page<HotelWithImageDto> findAllHotels(@Param("imageType") ImageType imageType, PageRequest pageRequest);
+    Page<HotelWithImageDto> findAllHotels(@Param("imageType") ImageType imageType,
+                                          @Param("streetAddress") String streetAddress,
+                                          PageRequest pageRequest);
 
     @Query("""
             SELECT h

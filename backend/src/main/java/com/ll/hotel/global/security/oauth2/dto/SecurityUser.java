@@ -1,4 +1,4 @@
-package com.ll.hotel.global.security.dto;
+package com.ll.hotel.global.security.oauth2.dto;
 
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.hibernate.validator.constraints.Length;
 
@@ -29,10 +30,8 @@ public record PostRoomRequest(
         Set<String> roomOptions
 ) {
     public PostRoomRequest {
-        imageExtensions = imageExtensions == null ? new ArrayList<>() : imageExtensions;
-        roomOptions = roomOptions == null ? new HashSet<>() : roomOptions;
-        bedTypeNumber = bedTypeNumber == null || bedTypeNumber.isEmpty()
-                ? new HashMap<>()
-                : bedTypeNumber;
+        imageExtensions = Objects.requireNonNullElse(imageExtensions, new ArrayList<>());
+        roomOptions = Objects.requireNonNullElse(roomOptions, new HashSet<>());
+        bedTypeNumber = Objects.requireNonNullElse(bedTypeNumber, new HashMap<>());
     }
 }

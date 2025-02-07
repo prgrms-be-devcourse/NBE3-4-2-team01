@@ -3,8 +3,8 @@ package com.ll.hotel.domain.member.member.service;
 
 import com.ll.hotel.domain.member.member.repository.RefreshTokenRepository;
 import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.global.security.dto.RefreshToken;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
+import com.ll.hotel.global.jwt.dto.RefreshToken;
+import com.ll.hotel.global.jwt.dto.JwtProperties;
 import com.ll.hotel.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import java.util.Map;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository repository;
-    private final CustomOAuth2JwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
 
     @Transactional
     void saveTokenInfo(String email, String refreshToken, String accessToken) {
