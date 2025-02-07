@@ -1,7 +1,7 @@
 import { ReviewCommentDto } from "../types/ReviewCommentDto";
 import { RsData } from "../types/RsData";
 
-export const postReviewComment = async (reviewId: string, content: string) => {
+export const postReviewComment = async (reviewId: number, content: string) => {
     try {
       const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/comments`, {
         method: 'POST',
@@ -20,7 +20,7 @@ export const postReviewComment = async (reviewId: string, content: string) => {
     }
   };
 
-  export const deleteReviewComment = async (reviewId: string, commentId: string) => {
+  export const deleteReviewComment = async (reviewId: number, commentId: number) => {
     try {
       const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/comments/${commentId}`, {
         method: 'DELETE',
@@ -37,7 +37,7 @@ export const postReviewComment = async (reviewId: string, content: string) => {
       }
   }
 
-  export const fetchReviewComment = async (reviewId: string, commentId: string) : Promise<ReviewCommentDto> => {
+  export const fetchReviewComment = async (reviewId: number, commentId: number) : Promise<ReviewCommentDto> => {
     try {
       const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/comments/${commentId}`);
       const rsData: RsData<ReviewCommentDto> = await response.json();
@@ -51,7 +51,7 @@ export const postReviewComment = async (reviewId: string, content: string) => {
     }
   }
 
-  export const updateReviewComment = async (reviewId: string, commentId: string, content: string) => {
+  export const updateReviewComment = async (reviewId: number, commentId: number, content: string) => {
     try {
       const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/comments/${commentId}`, {
         method: 'PUT',

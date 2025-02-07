@@ -16,7 +16,7 @@ interface ReviewWithCommentProps {
   review: ReviewResponseType;
 }
 
-export const ReviewWithComment: React.FC<ReviewWithCommentProps> = ({ review }) => {
+export const MyReviewWithComment: React.FC<ReviewWithCommentProps> = ({ review }) => {
   const getReviewData = (review: ReviewResponseType) => {
     if (isHotelReview(review)) {
       const { hotelReviewWithCommentDto, imageUrls } = review;
@@ -117,4 +117,4 @@ export const ReviewWithComment: React.FC<ReviewWithCommentProps> = ({ review }) 
   );
 };
 
-export default ReviewWithComment;
+export default MyReviewWithComment;
