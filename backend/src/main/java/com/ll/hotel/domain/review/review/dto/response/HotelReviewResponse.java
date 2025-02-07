@@ -1,4 +1,4 @@
-package com.ll.hotel.domain.review.review.dto;
+package com.ll.hotel.domain.review.review.dto.response;
 
 import java.util.List;
 

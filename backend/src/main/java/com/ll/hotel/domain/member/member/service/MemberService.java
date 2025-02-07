@@ -62,10 +62,11 @@ public class MemberService {
                         .oauthId(joinRequest.oauthId())
                         .build();
                 oAuthRepository.save(oauth);
-                throw new ServiceException("400", "이미 가입된 이메일입니다. 소셜 로그인이 연동되었습니다.");
+                member.getOauths().add(oauth);
+                return member;
             }
             
-            return member;
+            throw new ServiceException("400", "이미 가입된 이메일입니다.");
         }
 
         Member newMember = Member.builder()

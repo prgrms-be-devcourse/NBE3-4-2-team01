@@ -1,7 +1,7 @@
 package com.ll.hotel.domain.review.review.repository;
 
-import com.ll.hotel.domain.review.review.dto.HotelReviewWithCommentDto;
-import com.ll.hotel.domain.review.review.dto.MyReviewWithCommentDto;
+import com.ll.hotel.domain.review.review.dto.response.HotelReviewWithCommentDto;
+import com.ll.hotel.domain.review.review.dto.response.MyReviewWithCommentDto;
 import com.ll.hotel.domain.review.review.entity.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +21,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // 멤버 ID로 리뷰 목록 조회
     @Query("""  
-        SELECT new com.ll.hotel.domain.review.review.dto.MyReviewWithCommentDto(
+        SELECT new com.ll.hotel.domain.review.review.dto.response.MyReviewWithCommentDto(
             h.hotelName,
             r.roomName,
             rv,
@@ -40,7 +40,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // 호텔 ID로 리뷰 목록 조회
     @Query("""  
-        SELECT new com.ll.hotel.domain.review.review.dto.HotelReviewWithCommentDto(
+        SELECT new com.ll.hotel.domain.review.review.dto.response.HotelReviewWithCommentDto(
             m.memberEmail,
             r.roomName,
             rv,

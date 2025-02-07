@@ -6,6 +6,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -89,14 +90,9 @@ public class MemberController {
     }
 
     @PostMapping("/refresh")
-    public RsData<String> refresh(@RequestHeader("Authorization") final String refreshToken) {
-        if (!refreshToken.startsWith("Bearer ")) {
-            return new RsData<>("401-1", "잘못된 토큰 형식입니다.", "");
-        }
-        String token = refreshToken.substring(7);
-        
+    public RsData<String> refresh(@CookieValue("refresh_token") String refreshToken) {
         try {
-            return memberService.refreshAccessToken(token);
+            return memberService.refreshAccessToken(refreshToken);
         } catch (MalformedJwtException e) {
             return new RsData<>("401-2", "유효하지 않은 토큰 형식입니다.", "");
         }
