@@ -28,7 +28,7 @@ public class HotelOption extends BaseEntity {
     @Column(name = "hotel_option_name", unique = true, nullable = false, length = 255)
     private String name;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "hotelOptions")
     @Builder.Default
     private Set<Hotel> hotels = new HashSet<>();
 }
