@@ -1,3 +1,4 @@
+```
 frontend
 ├─ .gitignore
 ├─ components.json
@@ -106,3 +107,4 @@ frontend
 │     └─ utils.ts
 ├─ tailwind.config.ts
 └─ tsconfig.json
+```
