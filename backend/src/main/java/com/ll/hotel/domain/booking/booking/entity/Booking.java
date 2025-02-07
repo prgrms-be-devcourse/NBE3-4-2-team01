@@ -63,6 +63,6 @@ public class Booking extends BaseTime {
     }
 
     public boolean isOwnedBy(Member member) {
-        return member.isBusiness() && hotel.isOwnedBy(member);
+        return member.isBusiness() && member.getBusiness().equals(hotel.getBusiness());
     }
 }

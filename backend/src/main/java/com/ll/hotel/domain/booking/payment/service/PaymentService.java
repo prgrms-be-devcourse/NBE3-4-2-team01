@@ -48,7 +48,7 @@ public class PaymentService {
             }
         }
 
-        throw new ServiceException("500", "merchantUid 생성에 실패했습니다.");
+        throw new ServiceException("400", "merchantUid 생성에 실패했습니다.");
     }
 
     /*
