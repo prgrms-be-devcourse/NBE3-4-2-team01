@@ -10,7 +10,11 @@ export const getFavorites = async (): Promise<RsData<HotelDto[]>> => { // 호텔
     });
     const data = await response.json();
     
-    if (data.resultCode !== '200') {
+    if (!response.ok) {
+      throw new Error(data.msg || '서버 오류가 발생했습니다.');
+    }
+    
+    if (data.resultCode !== '200-1') {
       throw new Error(data.msg);
     }
     
@@ -29,7 +33,11 @@ export const addFavorite = async (hotelId: number): Promise<RsData<Empty>> => {
     });
     const data = await response.json();
     
-    if (data.resultCode !== '200') {
+    if (!response.ok) {
+      throw new Error(data.msg || '서버 오류가 발생했습니다.');
+    }
+    
+    if (data.resultCode !== '200-1') {
       throw new Error(data.msg);
     }
     
@@ -48,7 +56,11 @@ export const removeFavorite = async (hotelId: number): Promise<RsData<Empty>> =>
     });
     const data = await response.json();
     
-    if (data.resultCode !== '200') {
+    if (!response.ok) {
+      throw new Error(data.msg || '서버 오류가 발생했습니다.');
+    }
+    
+    if (data.resultCode !== '200-1') {
       throw new Error(data.msg);
     }
     
