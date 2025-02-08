@@ -8,11 +8,13 @@ import com.ll.hotel.global.jwt.dto.JwtProperties;
 import com.ll.hotel.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class RefreshTokenService {
 
     private final RefreshTokenRepository repository;
     private final JwtProperties jwtProperties;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional
     void saveTokenInfo(String email, String refreshToken, String accessToken) {
@@ -28,9 +31,12 @@ public class RefreshTokenService {
             log.debug("Saving token for email: {}", email);
             RefreshToken token = new RefreshToken(email, refreshToken, accessToken);
             repository.save(token);
+            
+            String key = "rt:refreshToken:" + refreshToken;
+            redisTemplate.expire(key, 86400, TimeUnit.SECONDS);
             log.debug("Token saved successfully for email: {}", email);
         } catch (Exception e) {
-            log.error("Failed to save token for email: {}", email, e);
+            log.error("Failed to save token", e);
             throw e;
         }
     }
