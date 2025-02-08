@@ -2,10 +2,11 @@ package com.ll.hotel.domain.member.member.service;
 
 
 import com.ll.hotel.domain.member.member.repository.RefreshTokenRepository;
-import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.global.jwt.dto.RefreshToken;
 import com.ll.hotel.global.jwt.dto.JwtProperties;
+import com.ll.hotel.global.jwt.dto.RefreshToken;
+import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.util.Ut;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -51,17 +52,20 @@ public class RefreshTokenService {
 
     @Transactional
     RsData<String> refreshAccessToken(String refreshToken) {
-        String token = refreshToken.replace("Bearer ", "").trim();
-        
-        String tokenType = Ut.jwt.getClaims(jwtProperties, token).get("type", String.class);
-        if (!"refresh".equals(tokenType)) {
-            return new RsData<>("401-1", "리프레시 토큰이 아닙니다.", "");
-        }
+        try {
+            String token = refreshToken.replace("Bearer ", "").trim();
+
+            String tokenType = Ut.jwt.getClaims(jwtProperties, token).get("type", String.class);
+            if (!"refresh".equals(tokenType)) {
+                return new RsData<>("401-1", "리프레시 토큰이 아닙니다.", "");
+            }
 
         boolean tokenExists = repository.existsByRefreshToken(token);
         log.debug("Found refresh token in repository: {}", tokenExists);
 
-        if (tokenExists) {
+            if (!tokenExists) {
+                return new RsData<>("400-1", "유효하지 않은 리프레시 토큰입니다.", "");
+            }
             RefreshToken resultToken = repository.findByRefreshToken(token)
                 .orElseThrow(() -> new RuntimeException("토큰을 찾을 수 없습니다."));
             
@@ -73,9 +77,12 @@ public class RefreshTokenService {
             repository.save(resultToken);
             
             return new RsData<>("200-1", "토큰이 갱신되었습니다.", newAccessToken);
+        } catch (MalformedJwtException e) {
+            return new RsData<>("401-2", "유효하지 않은 토큰 형식입니다.", "");
+        } catch (Exception e) {
+            log.error("토큰 갱신 중 오류 발생", e);
+            return new RsData<>("500-1", "토큰 갱신 중 오류가 발생했습니다.", "");
         }
-
-        return new RsData<>("400-1", "유효하지 않은 리프레시 토큰입니다.", "");
     }
 
     @Transactional
