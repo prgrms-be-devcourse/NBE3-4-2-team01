@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -164,6 +165,9 @@ public class MemberService {
 
         actor.getFavoriteHotels().add(hotel);
         hotel.getFavorites().add(actor);
+        
+        memberRepository.save(actor);
+        hotelRepository.save(hotel);
     }
 
     @Transactional
@@ -182,16 +186,27 @@ public class MemberService {
 
         actor.getFavoriteHotels().remove(hotel);
         hotel.getFavorites().remove(actor);
+        
+        memberRepository.save(actor);
+        hotelRepository.save(hotel);
     }
 
     public List<HotelDto> getFavoriteHotels() {
         Member actor = rq.getActor();
+        log.debug("getFavoriteHotels - actor: {}", actor);
+        
         if (actor == null) {
             throw new ServiceException("401-1", "로그인이 필요합니다.");
         }
 
-        return actor.getFavoriteHotels().stream()
-            .map(HotelDto::new)
+        Set<Hotel> favorites = actor.getFavoriteHotels();
+        log.debug("getFavoriteHotels - favorites size: {}", favorites.size());
+
+        return favorites.stream()
+            .map(hotel -> {
+                log.debug("getFavoriteHotels - hotel: {}", hotel.getHotelName());
+                return new HotelDto(hotel);
+            })
             .collect(Collectors.toList());
     }
 
