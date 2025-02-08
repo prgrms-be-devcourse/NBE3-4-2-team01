@@ -1,5 +1,5 @@
 export interface HotelDto { // 호텔 파트 데이터 사용할 때 사용하세요
-  id: number;
+  hotelId: number;
   hotelName: string;
   hotelEmail: string;
   hotelPhoneNumber: string;
@@ -9,5 +9,7 @@ export interface HotelDto { // 호텔 파트 데이터 사용할 때 사용하�
   checkInTime: string;
   checkOutTime: string;
   hotelExplainContent: string;
-  averageRating: number;
+  hotelStatus: string;
+  rooms: any[];
+  hotelOptions: Set<string>;
 } 
