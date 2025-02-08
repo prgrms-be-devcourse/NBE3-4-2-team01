@@ -396,7 +396,7 @@ class RoomServiceTest {
         this.memberRepository.save(member);
         this.businessRepository.save(business);
 
-        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 

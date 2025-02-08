@@ -238,11 +238,11 @@ public class BaseInit {
         // 호텔 추가
         // ------------------------------------------------------------------
 
-        PostHotelRequest postHotelRequest1 = new PostHotelRequest(business1.getId(), "호텔1", "hotel1@naver.com",
+        PostHotelRequest postHotelRequest1 = new PostHotelRequest("호텔1", "hotel1@naver.com",
                 "010-1111-1111", "서울시", 11111,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔1입니다.", null, hotelOptions);
 
-        PostHotelRequest postHotelRequest2 = new PostHotelRequest(business2.getId(), "호텔2", "hotel2@naver.com",
+        PostHotelRequest postHotelRequest2 = new PostHotelRequest("호텔2", "hotel2@naver.com",
                 "010-2222-2222", "서울시", 22222,
                 4, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔2입니다.", null, hotelOptions);
 

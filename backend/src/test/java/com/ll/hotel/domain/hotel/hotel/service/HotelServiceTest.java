@@ -76,7 +76,7 @@ class HotelServiceTest {
 
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
-        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
 
@@ -117,7 +117,7 @@ class HotelServiceTest {
 
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
-        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
 
@@ -135,7 +135,7 @@ class HotelServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Business business = this.businessRepository.findAll().getFirst();
 
-        PostHotelRequest req1 = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+        PostHotelRequest req1 = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
@@ -167,7 +167,7 @@ class HotelServiceTest {
         this.memberRepository.save(member);
         this.businessRepository.save(business);
 
-        PostHotelRequest req2 = new PostHotelRequest(business.getId(), "호텔2", "sin@naver.com",
+        PostHotelRequest req2 = new PostHotelRequest("호텔2", "sin@naver.com",
                 "010-1111-1111", "부산시", 1111,
                 5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
 
@@ -198,7 +198,7 @@ class HotelServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Business business = this.businessRepository.findAll().getFirst();
 
-        PostHotelRequest req1 = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+        PostHotelRequest req1 = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
@@ -230,7 +230,7 @@ class HotelServiceTest {
         this.memberRepository.save(member);
         this.businessRepository.save(business);
 
-        PostHotelRequest req2 = new PostHotelRequest(business.getId(), "호텔2", "sin@naver.com",
+        PostHotelRequest req2 = new PostHotelRequest("호텔2", "sin@naver.com",
                 "010-1111-1111", "부산시", 1111,
                 5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
 
@@ -261,7 +261,7 @@ class HotelServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Business business = this.businessRepository.findAll().getFirst();
 
-        PostHotelRequest req1 = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+        PostHotelRequest req1 = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
@@ -293,7 +293,7 @@ class HotelServiceTest {
         this.memberRepository.save(member);
         this.businessRepository.save(business);
 
-        PostHotelRequest req2 = new PostHotelRequest(business.getId(), "호텔2", "sin@naver.com",
+        PostHotelRequest req2 = new PostHotelRequest("호텔2", "sin@naver.com",
                 "010-1111-1111", "부산시", 1111,
                 5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
 
@@ -321,7 +321,7 @@ class HotelServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Business business = this.businessRepository.findAll().getFirst();
 
-        PostHotelRequest req1 = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+        PostHotelRequest req1 = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
@@ -359,7 +359,7 @@ class HotelServiceTest {
         this.memberRepository.save(member);
         this.businessRepository.save(business);
 
-        PostHotelRequest req2 = new PostHotelRequest(business.getId(), "호텔2", "sin@naver.com",
+        PostHotelRequest req2 = new PostHotelRequest("호텔2", "sin@naver.com",
                 "010-1111-1111", "부산시", 1111,
                 5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
 
@@ -388,7 +388,7 @@ class HotelServiceTest {
         this.hotelOptionService.add(new HotelOptionRequest.Details("Dinner"));
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
-        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
 
@@ -432,7 +432,7 @@ class HotelServiceTest {
         this.hotelOptionService.add(new HotelOptionRequest.Details("Lunch"));
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
-        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
 
@@ -463,7 +463,7 @@ class HotelServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Business business = this.businessRepository.findAll().getFirst();
 
-        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
