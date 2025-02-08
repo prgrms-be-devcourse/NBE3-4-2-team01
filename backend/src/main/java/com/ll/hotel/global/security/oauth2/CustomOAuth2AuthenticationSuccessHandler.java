@@ -59,8 +59,13 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
             log.debug("Generated JWT access token: {}", accessToken);
             log.debug("Generated JWT refresh token: {}", refreshToken);
             
+            Cookie accessTokenCookie = new Cookie("access_token", accessToken);
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(true);
+            accessTokenCookie.setPath("/");
+            response.addCookie(accessTokenCookie);
+            
             String redirectUrl = UriComponentsBuilder.fromUriString(authorizedRedirectUri)
-                    .queryParam("accessToken", "Bearer " + accessToken)
                     .queryParam("status", "SUCCESS")
                     .build()
                     .toUriString();
