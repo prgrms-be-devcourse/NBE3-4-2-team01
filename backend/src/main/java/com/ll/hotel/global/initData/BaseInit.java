@@ -36,6 +36,14 @@ import com.ll.hotel.domain.review.review.repository.ReviewRepository;
 import com.ll.hotel.domain.review.review.type.ReviewStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
 import jakarta.transaction.Transactional;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
@@ -43,12 +51,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import java.time.*;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 @Configuration
+//@Profile("!test")
 @RequiredArgsConstructor
 public class BaseInit {
     private final PaymentService paymentService;
@@ -78,7 +82,9 @@ public class BaseInit {
 
     @Transactional
     public void createMembers() {
-        if (memberRepository.count() > 0) return;
+        if (memberRepository.count() > 0) {
+            return;
+        }
 
         // 손님 3명, 사업자 2명, 관리자 1명 추가
 
@@ -256,7 +262,6 @@ public class BaseInit {
         PostRoomRequest hotel1Req1 = new PostRoomRequest("호텔1_객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
         PostRoomRequest hotel1Req2 = new PostRoomRequest("호텔1_객실2", 2, 400000, 2, 4, bedTypeNumber, null, roomOptions);
 
-
         PostRoomRequest hotel2Req1 = new PostRoomRequest("호텔2_객실1", 1, 500000, 2, 4, bedTypeNumber, null, roomOptions);
         PostRoomRequest hotel2Req2 = new PostRoomRequest("호텔2_객실2", 2, 600000, 2, 4, bedTypeNumber, null, roomOptions);
 
@@ -305,25 +310,29 @@ public class BaseInit {
         Payment payment1 = paymentRepository.save(Payment.builder()
                 .merchantUid(paymentRequest1.merchantUid())
                 .amount(paymentRequest1.amount())
-                .paidAt(LocalDateTime.ofInstant(Instant.ofEpochSecond(paymentRequest1.paidAtTimestamp()), ZoneId.systemDefault()))
+                .paidAt(LocalDateTime.ofInstant(Instant.ofEpochSecond(paymentRequest1.paidAtTimestamp()),
+                        ZoneId.systemDefault()))
                 .build());
 
         Payment payment2 = paymentRepository.save(Payment.builder()
                 .merchantUid(paymentRequest2.merchantUid())
                 .amount(paymentRequest2.amount())
-                .paidAt(LocalDateTime.ofInstant(Instant.ofEpochSecond(paymentRequest2.paidAtTimestamp()), ZoneId.systemDefault()))
+                .paidAt(LocalDateTime.ofInstant(Instant.ofEpochSecond(paymentRequest2.paidAtTimestamp()),
+                        ZoneId.systemDefault()))
                 .build());
 
         Payment payment3 = paymentRepository.save(Payment.builder()
                 .merchantUid(paymentRequest3.merchantUid())
                 .amount(paymentRequest3.amount())
-                .paidAt(LocalDateTime.ofInstant(Instant.ofEpochSecond(paymentRequest3.paidAtTimestamp()), ZoneId.systemDefault()))
+                .paidAt(LocalDateTime.ofInstant(Instant.ofEpochSecond(paymentRequest3.paidAtTimestamp()),
+                        ZoneId.systemDefault()))
                 .build());
 
         Payment payment4 = paymentRepository.save(Payment.builder()
                 .merchantUid(paymentRequest4.merchantUid())
                 .amount(paymentRequest4.amount())
-                .paidAt(LocalDateTime.ofInstant(Instant.ofEpochSecond(paymentRequest4.paidAtTimestamp()), ZoneId.systemDefault()))
+                .paidAt(LocalDateTime.ofInstant(Instant.ofEpochSecond(paymentRequest4.paidAtTimestamp()),
+                        ZoneId.systemDefault()))
                 .build());
 
         Booking booking1 = Booking.builder()
@@ -366,7 +375,6 @@ public class BaseInit {
         bookingRepository.save(booking2);
         bookingRepository.save(booking3);
         bookingRepository.save(booking4);
-
 
         // 리뷰 추가
         // ------------------------------------------------------------------

@@ -23,7 +23,6 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
-import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.time.LocalDate;
@@ -149,7 +148,6 @@ class HotelServiceTest {
 
         Member member = Member.builder()
                 .memberEmail("business@naver.com")
-                .password("456")
                 .memberName("b2")
                 .memberPhoneNumber("010-1111-1111")
                 .birthDate(LocalDate.of(2000, 1, 1))
@@ -159,7 +157,8 @@ class HotelServiceTest {
 
         business = Business.builder()
                 .businessRegistrationNumber("1111111111")
-                .approvalStatus(BusinessApprovalStatus.APPROVED)
+                .startDate(LocalDate.now().minusDays(1))
+                .ownerName("Business2")
                 .member(member)
                 .build();
 
@@ -178,7 +177,7 @@ class HotelServiceTest {
         business.setHotel(hotel);
 
         Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", "asc", "", LocalDate.now(),
-                LocalDate.now().plusDays(1));
+                LocalDate.now().plusDays(1), 2);
         List<GetHotelResponse> list = resultPage.getContent();
         GetHotelResponse Allres1 = list.getFirst();
         GetHotelResponse Allres2 = list.getLast();
@@ -212,7 +211,6 @@ class HotelServiceTest {
 
         Member member = Member.builder()
                 .memberEmail("business@naver.com")
-                .password("456")
                 .memberName("b2")
                 .memberPhoneNumber("010-1111-1111")
                 .birthDate(LocalDate.of(2000, 1, 1))
@@ -222,7 +220,8 @@ class HotelServiceTest {
 
         business = Business.builder()
                 .businessRegistrationNumber("1111111111")
-                .approvalStatus(BusinessApprovalStatus.APPROVED)
+                .startDate(LocalDate.now().minusDays(1))
+                .ownerName("Business2")
                 .member(member)
                 .build();
 
@@ -241,7 +240,7 @@ class HotelServiceTest {
         business.setHotel(hotel);
 
         Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", null, "", LocalDate.now(),
-                LocalDate.now().plusDays(1));
+                LocalDate.now().plusDays(1), 2);
         List<GetHotelResponse> list = resultPage.getContent();
         GetHotelResponse Allres1 = list.getFirst();
         GetHotelResponse Allres2 = list.getLast();
@@ -275,7 +274,6 @@ class HotelServiceTest {
 
         Member member = Member.builder()
                 .memberEmail("business@naver.com")
-                .password("456")
                 .memberName("b2")
                 .memberPhoneNumber("010-1111-1111")
                 .birthDate(LocalDate.of(2000, 1, 1))
@@ -285,7 +283,8 @@ class HotelServiceTest {
 
         business = Business.builder()
                 .businessRegistrationNumber("1111111111")
-                .approvalStatus(BusinessApprovalStatus.APPROVED)
+                .startDate(LocalDate.now().minusDays(1))
+                .ownerName("Business2")
                 .member(member)
                 .build();
 
@@ -305,7 +304,7 @@ class HotelServiceTest {
 
         Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", null, "서울",
                 LocalDate.now(),
-                LocalDate.now().plusDays(1));
+                LocalDate.now().plusDays(1), 2);
         List<GetHotelResponse> list = resultPage.getContent();
         GetHotelResponse Allres1 = list.getFirst();
 
@@ -341,7 +340,6 @@ class HotelServiceTest {
 
         Member member = Member.builder()
                 .memberEmail("business@naver.com")
-                .password("456")
                 .memberName("b2")
                 .memberPhoneNumber("010-1111-1111")
                 .birthDate(LocalDate.of(2000, 1, 1))
@@ -351,7 +349,8 @@ class HotelServiceTest {
 
         business = Business.builder()
                 .businessRegistrationNumber("1111111111")
-                .approvalStatus(BusinessApprovalStatus.APPROVED)
+                .startDate(LocalDate.now().minusDays(1))
+                .ownerName("Business2")
                 .member(member)
                 .build();
 
@@ -483,7 +482,6 @@ class HotelServiceTest {
     public void createOthersForHotel() {
         Member member = Member.builder()
                 .memberEmail("member@naver.com")
-                .password("123")
                 .memberName("business")
                 .memberPhoneNumber("010-1234-5678")
                 .birthDate(LocalDate.of(2020, 2, 2))
@@ -493,7 +491,8 @@ class HotelServiceTest {
 
         Business business = Business.builder()
                 .businessRegistrationNumber("1234567890")
-                .approvalStatus(BusinessApprovalStatus.APPROVED)
+                .startDate(LocalDate.now().minusDays(1))
+                .ownerName("Business")
                 .member(member)
                 .build();
 
