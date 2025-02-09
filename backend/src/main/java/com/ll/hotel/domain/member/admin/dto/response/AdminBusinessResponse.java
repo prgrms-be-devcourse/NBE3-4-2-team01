@@ -31,14 +31,19 @@ public class AdminBusinessResponse {
             Long id,
             String businessRegistrationNumber,
             String ownerName,
-            BusinessApprovalStatus approvalStatus
+            BusinessApprovalStatus approvalStatus,
+            Long hotelId,
+            String hotelName
     ) {
         public static Summary from(Business business) {
+            Hotel hotel = business.getHotel();
             return new Summary(
                     business.getId(),
                     business.getBusinessRegistrationNumber(),
                     business.getOwnerName(),
-                    business.getApprovalStatus()
+                    business.getApprovalStatus(),
+                    (hotel != null) ? hotel.getId() : null,
+                    (hotel != null) ? hotel.getHotelName() : null
             );
         }
     }
