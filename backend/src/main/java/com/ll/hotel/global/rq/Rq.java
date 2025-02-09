@@ -1,9 +1,9 @@
 package com.ll.hotel.global.rq;
 
-
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
-import com.ll.hotel.global.security.dto.SecurityUser;
+import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,10 +25,10 @@ public class Rq {
                     .map(Authentication::getPrincipal)
                     .filter(principal -> principal instanceof SecurityUser)
                     .map(principal -> (SecurityUser) principal)
-                    .map(securityUser -> memberRepository.findByMemberEmail(securityUser.getEmail())
-                            .orElse(null))
-                    .orElse(null);
+                    .flatMap(securityUser -> memberRepository.findByMemberEmail(securityUser.getEmail()))
+                    .orElseThrow(() -> new ServiceException("401-1", "로그인이 필요합니다."));
         }
+
         return actor;
     }
 }

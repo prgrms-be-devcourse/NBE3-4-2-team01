@@ -1,22 +1,24 @@
 import { Empty } from "../types/Empty";
-import { GetReviewResponse } from "../types/GetReviewResponse";
-import { HotelReviewResponse } from "../types/HotelReviewResponse";
-import { MyReviewResponse } from "../types/MyReviewResponse";
-import { PostReviewRequest } from "../types/PostReviewRequest"
-import { PresignedUrlsResponse } from "../types/PresignedUrlsResponse";
+import { GetReviewResponse } from "../types/review/GetReviewResponse";
+import { HotelReviewListResponse } from "../types/review/HotelReviewListResponse";
+import { MyReviewResponse } from "../types/review/MyReviewResponse";
+import { PageDto } from "../types/PageDto";
+import { PostReviewRequest } from "../types/review/PostReviewRequest"
+import { PresignedUrlsResponse } from "../types/review/PresignedUrlsResponse";
 import { RsData } from "../types/RsData";
-import { UpdateReviewRequest } from "../types/UpdateReviewRequest";
+import { UpdateReviewRequest } from "../types/review/UpdateReviewRequest";
 
 // 리뷰 생성 요청 후 PresignedUrlReponse 응답
-export const postReview = async (bookingId: string, 
-    hotelId: string,
-    roomId: string, 
-    memberId: string, 
+export const postReview = async (
+    bookingId: number, 
+    hotelId: number,
+    roomId: number, 
     postReviewRequest: PostReviewRequest) : Promise<PresignedUrlsResponse> => {
     
         try{
-            const response = await fetch(`http://localhost:8080/api/reviews/${bookingId}?hotelId=${hotelId}&roomId=${roomId}&memberId=${memberId}`, {
+            const response = await fetch(`http://localhost:8080/api/reviews/${bookingId}?hotelId=${hotelId}&roomId=${roomId}`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -24,7 +26,7 @@ export const postReview = async (bookingId: string,
             });
 
             const rsData = await response.json();
-            if(rsData.resultCode !== '200') {
+            if(rsData.resultCode !== '200-1') {
                 throw new Error(rsData.msg);
             }   
             return rsData.data;
@@ -38,6 +40,7 @@ export const uploadImageUrls = async (reviewId: number, viewUrls: string[]) => {
     try {
         const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/urls`, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -45,7 +48,7 @@ export const uploadImageUrls = async (reviewId: number, viewUrls: string[]) => {
         })
 
         const rsData : RsData<Empty> = await response.json();
-        if(rsData.resultCode !== '200') {
+        if(rsData.resultCode !== '200-1') {
             throw new Error(rsData.msg);
         }
     } catch (error) {
@@ -58,10 +61,11 @@ export const deleteReview = async (reviewId: number) => {
     try {
         const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
             method: 'DELETE',
+            credentials: 'include',
         });
 
         const rsData = await response.json();
-        if (rsData.resultCode !== '200') {
+        if (rsData.resultCode !== '200-1') {
             throw new Error(rsData.msg);
         }
     } catch (error) {
@@ -70,12 +74,14 @@ export const deleteReview = async (reviewId: number) => {
 }
 
 // 호텔 리뷰 목록 조회
-export const getHotelReviews = async (hotelId: number) : Promise<HotelReviewResponse[]> => {
+export const getHotelReviews = async (hotelId: number, page: number) : Promise<HotelReviewListResponse> => {
     try {
-        const response = await fetch(`http://localhost:8080/api/reviews/hotels/${hotelId}`);
+        const response = await fetch(`http://localhost:8080/api/reviews/hotels/${hotelId}?page=${page}`, {
+            credentials: 'include',
+        });
         
         const rsData = await response.json();
-        if(rsData.resultCode !== '200') {
+        if(rsData.resultCode !== '200-1') {
             throw new Error(rsData.msg);
         }
         return rsData.data;
@@ -85,13 +91,16 @@ export const getHotelReviews = async (hotelId: number) : Promise<HotelReviewResp
 }
 
 // 내 리뷰 목록 조회
-export const getMyReviews = async (memberId: number) : Promise<MyReviewResponse[]> => {
+export const getMyReviews = async (page: number) : Promise<PageDto<MyReviewResponse>> => {
     try {
-        const response = await fetch(`http://localhost:8080/api/reviews/hotels/${memberId}`);
+        const response = await fetch(`http://localhost:8080/api/reviews/me?page=${page}`, {
+            credentials: 'include',
+        });
         const rsData = await response.json();
-        if(rsData.resultCode !== '200') {
+        if(rsData.resultCode !== '200-1') {
             throw new Error(rsData.msg);
         }
+        console.log(rsData.data);
         return rsData.data;
     } catch (error) {
         throw error;
@@ -101,9 +110,11 @@ export const getMyReviews = async (memberId: number) : Promise<MyReviewResponse[
 // 단건 리뷰 조회
 export const fetchReview = async (reviewId: number) : Promise<GetReviewResponse> => {
     try {
-        const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}`);
+        const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
+            credentials: 'include',
+        });
         const rsData = await response.json();
-        if(rsData.resultCode !== '200') {
+        if(rsData.resultCode !== '200-1') {
             throw new Error(rsData.msg);
         }
         return rsData.data;
@@ -117,6 +128,7 @@ export const updateReview = async (reviewId: number, updateReviewRequest: Update
     try {
         const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
             method: 'PUT',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -124,7 +136,7 @@ export const updateReview = async (reviewId: number, updateReviewRequest: Update
         });
 
         const rsData = await response.json();
-        if(rsData.resultCode !== '200') {
+        if(rsData.resultCode !== '200-1') {
             throw new Error(rsData.msg);
         }
         return rsData.data;
