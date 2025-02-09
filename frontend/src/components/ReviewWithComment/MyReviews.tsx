@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import ReviewList from './ReviewList';
 import { getMyReviews } from '@/lib/api/ReviewApi';
 import { PageDto } from '@/lib/types/PageDto';
-import Pagination from '../Pagination/Pagination';
+import Pagination from '../pagination/Pagination';
 
 const MyReviews: React.FC<{ page: number }> = ({ page }) => {
   const [response, setResponse] = useState<PageDto<MyReviewResponse> | null>(null);
