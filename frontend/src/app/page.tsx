@@ -1,8 +1,12 @@
+import Navigation from '@/components/Navigation/Navigation'
 
 export default function Page() {
   return (
-    <div>
-      <h1>메인 페이지</h1>
-    </div>
+    <>
+      <Navigation/>
+      <div className="content-wrapper">
+        <h1>메인 페이지</h1>
+      </div>
+    </>
   );
 }
