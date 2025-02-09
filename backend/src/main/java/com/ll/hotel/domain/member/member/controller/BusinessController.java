@@ -36,7 +36,7 @@ public class BusinessController {
         return new RsData<>(
                 "201",
                 "사업자 정보가 등록되었습니다.",
-                BusinessResponse.ApprovalResult.of(business, validationResult)
+                BusinessResponse.ApprovalResult.of(business)
         );
     }
 }
