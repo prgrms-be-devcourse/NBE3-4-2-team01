@@ -4,7 +4,7 @@ import { BookingResponseSummary } from "@/lib/types/Booking/BookingResponseSumma
 import { PageDto } from "@/lib/types/PageDto";
 
 // 예약 및 결제
-export const book = async function(bookingRequest : BookingRequest) : Promise<BookingResponseDetails> {
+export const book = async function(bookingRequest : BookingRequest) {
     try {
         const response = await fetch("http://localhost:8080/api/bookings", {
             method: "POST",
@@ -18,9 +18,9 @@ export const book = async function(bookingRequest : BookingRequest) : Promise<Bo
         const rsData = await response.json();
 
         if (rsData.resultCode.startsWith("2")) {
-            return rsData.data;
+            return rsData;
         } else {
-            throw new Error(`에러 발생 : ${rsData.resultCode}, ${rsData.msg}`);
+            throw new Error(`${rsData.msg}`);
         }
     } catch (error) {
         throw error;
@@ -47,7 +47,7 @@ export const getMyBookings = async function(page? : number, pageSize? : number) 
         if (rsData.resultCode.startsWith("2")) {
             return rsData.data;
         } else {
-            throw new Error(`에러 발생 : ${rsData.resultCode}, ${rsData.msg}`);
+            throw new Error(`${rsData.msg}`);
         }
     } catch (error) {
         throw error;
@@ -74,7 +74,7 @@ export const getHotelBookings = async function(page? : number, pageSize? : numbe
         if (rsData.resultCode.startsWith("2")) {
             return rsData.data;
         } else {
-            throw new Error(`에러 발생 : ${rsData.resultCode}, ${rsData.msg}`);
+            throw new Error(`${rsData.msg}`);
         }
     } catch (error) {
         throw error;
@@ -92,7 +92,7 @@ export const getBookingDetails = async function(bookingId : number) : Promise<Bo
         if (rsData.resultCode.startsWith("2")) {
             return rsData.data;
         } else {
-            throw new Error(`에러 발생 : ${rsData.resultCode}, ${rsData.msg}`);
+            throw new Error(`${rsData.msg}`);
         }
     } catch (error) {
         throw error;
@@ -100,7 +100,7 @@ export const getBookingDetails = async function(bookingId : number) : Promise<Bo
 }
 
 // 예약 취소
-export const cancelBooking = async function(bookingId : number) : Promise<BookingResponseDetails> {
+export const cancelBooking = async function(bookingId : number) {
     try {
         const response = await fetch(`http://localhost:8080/api/bookings/${bookingId}`, {
             method: "DELETE",
@@ -110,9 +110,9 @@ export const cancelBooking = async function(bookingId : number) : Promise<Bookin
         const rsData = await response.json();
 
         if (rsData.resultCode.startsWith("2")) {
-            return rsData.data;
+            return;
         } else {
-            throw new Error(`에러 발생 : ${rsData.resultCode}, ${rsData.msg}`);
+            throw new Error(`${rsData.msg}`);
         }
     } catch (error) {
         throw error;
@@ -120,7 +120,7 @@ export const cancelBooking = async function(bookingId : number) : Promise<Bookin
 };
 
 // 예약 완료 처리
-export const completeBooking = async function(bookingId : number) : Promise<BookingResponseDetails> {
+export const completeBooking = async function(bookingId : number) {
     try {
         const response = await fetch(`http://localhost:8080/api/bookings/${bookingId}`, {
             method: "POST",
@@ -130,9 +130,9 @@ export const completeBooking = async function(bookingId : number) : Promise<Book
         const rsData = await response.json();
 
         if (rsData.resultCode.startsWith("2")) {
-            return rsData.data;
+            return;
         } else {
-            throw new Error(`에러 발생 : ${rsData.resultCode}, ${rsData.msg}`);
+            throw new Error(`${rsData.msg}`);
         }
     } catch (error) {
         throw error;

@@ -4,7 +4,7 @@ import { BookingResponseSummary } from "@/lib/types/Booking/BookingResponseSumma
 const UserBookingList = function({bookings} : {bookings : PageDto<BookingResponseSummary>}) {
     const openBookingDetailsPopup = function(bookingId : number) {
         window.open(
-            `/orders/${bookingId}`,
+            `/orders/${bookingId}/user`,
             "OrderPopup",
             "width=500,height=600,left=200,top=200"
         );
@@ -36,20 +36,16 @@ const UserBookingList = function({bookings} : {bookings : PageDto<BookingRespons
                       <span>{booking.bookingId}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="font-bold">객실 ID:</span>
-                      <span>{booking.roomId}</span>
+                      <span className="font-bold">호텔 이름:</span>
+                      <span>{booking.hotel.hotelName}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="font-bold">호텔 ID:</span>
-                      <span>{booking.hotelId}</span>
+                      <span className="font-bold">객실 유형:</span>
+                      <span>{booking.room.roomName}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="font-bold">예약 번호:</span>
                       <span>{booking.bookNumber}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="font-bold">상태:</span>
-                      <span>{booking.bookingStatus}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="font-bold">체크인:</span>
@@ -58,6 +54,10 @@ const UserBookingList = function({bookings} : {bookings : PageDto<BookingRespons
                     <div className="flex justify-between text-sm">
                       <span className="font-bold">체크아웃:</span>
                       <span>{booking.checkOutDate}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="font-bold">상태:</span>
+                      <span>{booking.bookingStatus}</span>
                     </div>
                   </div>
                 </div>

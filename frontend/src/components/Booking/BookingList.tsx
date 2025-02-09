@@ -38,7 +38,6 @@ const BookingList = function({view, page, pageSize} : BookingListProps) {
     }
 
     // data를 받아오지 못했을 때
-    // view가 잘못되었을 때도 처리됨
     if (!bookings) {
         return <div>예약을 불러올 수 없습니다.</div>
     }
@@ -46,6 +45,7 @@ const BookingList = function({view, page, pageSize} : BookingListProps) {
     switch (view) {
         case View.User: return <UserBookingList bookings={bookings}/>;
         case View.Hotel: return <HotelBookingList bookings={bookings}/>;
+        default: return <div>예약을 불러올 수 없습니다.</div>
     }
 }
 

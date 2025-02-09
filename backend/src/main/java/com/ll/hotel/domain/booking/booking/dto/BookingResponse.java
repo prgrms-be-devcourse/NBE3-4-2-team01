@@ -3,15 +3,20 @@ package com.ll.hotel.domain.booking.booking.dto;
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.booking.booking.type.BookingStatus;
 import com.ll.hotel.domain.booking.payment.entity.Payment;
+import com.ll.hotel.domain.hotel.hotel.dto.HotelDetailDto;
+import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
+import com.ll.hotel.domain.hotel.room.dto.RoomDto;
+import com.ll.hotel.domain.member.member.dto.MemberDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 public record BookingResponse(
         long bookingId,
-        long roomId,
-        long hotelId,
-        long memberId,
+        RoomDto room,
+        HotelDetailDto hotel,
+        MemberDTO member,
         Payment payment,
         String bookNumber,
         BookingStatus bookingStatus,
@@ -23,9 +28,9 @@ public record BookingResponse(
     public static BookingResponse from(Booking booking) {
         return new BookingResponse(
                 booking.getId(),
-                booking.getRoom().getId(),
-                booking.getHotel().getId(),
-                booking.getMember().getId(),
+                new RoomDto(booking.getRoom()),
+                new HotelDetailDto(booking.getHotel(), new ArrayList<>()),
+                MemberDTO.from(booking.getMember()),
                 booking.getPayment(),
                 booking.getBookingNumber(),
                 booking.getBookingStatus(),
