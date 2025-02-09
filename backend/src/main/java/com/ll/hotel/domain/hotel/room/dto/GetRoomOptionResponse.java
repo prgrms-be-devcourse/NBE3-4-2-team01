@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.hotel.room.dto;
 
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import java.util.HashSet;
 import java.util.Set;

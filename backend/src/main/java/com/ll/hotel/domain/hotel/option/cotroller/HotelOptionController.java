@@ -1,9 +1,9 @@
-package com.ll.hotel.domain.hotel.option.hotelOption.controller;
+package com.ll.hotel.domain.hotel.option.cotroller;
 
-import com.ll.hotel.domain.hotel.option.hotelOption.dto.HotelOptionDto;
-import com.ll.hotel.domain.hotel.option.hotelOption.dto.request.HotelOptionRequest;
-import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
-import com.ll.hotel.domain.hotel.option.hotelOption.service.HotelOptionService;
+import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
+import com.ll.hotel.domain.hotel.option.dto.response.OptionResponse;
+import com.ll.hotel.domain.hotel.option.entity.HotelOption;
+import com.ll.hotel.domain.hotel.option.service.HotelOptionService;
 import com.ll.hotel.global.rsData.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,23 +18,23 @@ public class HotelOptionController {
     private final HotelOptionService hotelOptionService;
 
     @PostMapping
-    public RsData<HotelOptionDto> add(@RequestBody @Valid HotelOptionRequest.Details details) {
+    public RsData<OptionResponse> add(@RequestBody @Valid OptionRequest optionRequest) {
 
-        HotelOption hotelOption = hotelOptionService.add(details);
+        HotelOption hotelOption = hotelOptionService.add(optionRequest);
 
         return new RsData<>(
                 "201",
                 "항목이 추가되었습니다.",
-                HotelOptionDto.toDto(hotelOption)
+                OptionResponse.from(hotelOption)
         );
     }
 
     @GetMapping
-    public RsData<List<HotelOptionDto>> getAll() {
+    public RsData<List<OptionResponse>> getAll() {
 
-        List<HotelOptionDto> hotelOptionList = hotelOptionService.findAll()
+        List<OptionResponse> hotelOptionList = hotelOptionService.findAll()
                 .stream()
-                .map(HotelOptionDto::toDto).toList();
+                .map(OptionResponse::from).toList();
 
         return new RsData<>(
                 "200",
@@ -44,29 +44,29 @@ public class HotelOptionController {
     }
 
     @GetMapping("/{id}")
-    public RsData<HotelOptionDto> getById(@PathVariable("id") Long id) {
+    public RsData<OptionResponse> getById(@PathVariable("id") Long id) {
 
         HotelOption hotelOption = hotelOptionService.findById(id);
 
         return new RsData<>(
                 "200",
                 "항목이 조회되었습니다.",
-                HotelOptionDto.toDto(hotelOption)
+                OptionResponse.from(hotelOption)
         );
     }
 
     @PutMapping("/{id}")
-    public RsData<HotelOptionDto> modify(@PathVariable("id") Long id,
-                                         @RequestBody HotelOptionRequest.Details details) {
+    public RsData<OptionResponse> modify(@PathVariable("id") Long id,
+                                         @RequestBody OptionRequest optionRequest) {
         HotelOption hotelOption = hotelOptionService.findById(id);
-        hotelOptionService.modify(hotelOption, details);
+        hotelOptionService.modify(hotelOption, optionRequest);
 
         hotelOptionService.flush();
 
         return new RsData<>(
                 "200",
                 "항목이 수정되었습니다.",
-                HotelOptionDto.toDto(hotelOption)
+                OptionResponse.from(hotelOption)
         );
     }
 
