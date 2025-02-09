@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { PresignedUrlsResponse } from '@/lib/types/PresignedUrlsResponse';
-import { PostReviewRequest } from '@/lib/types/PostReviewRequest';
+import { useSearchParams, useParams, useRouter } from 'next/navigation';
+import { PresignedUrlsResponse } from '@/lib/types/review/PresignedUrlsResponse';
+import { PostReviewRequest } from '@/lib/types/review/PostReviewRequest';
 import { postReview } from '@/lib/api/ReviewApi';
 import { uploadImagesToS3 } from '@/lib/api/AwsS3Api';
 import { uploadImageUrls } from '@/lib/api/ReviewApi';
@@ -24,9 +24,11 @@ export default function CreateReviewPage() {
   const [roomId, setRoomId] = useState(0);
   const [reviewId, setReviewId] = useState(0);
   const searchParams = useSearchParams();
+  const params = useParams();
+  const router = useRouter();
 
   useEffect(() => {
-    setBookingId(Number(searchParams.get('bookingId')));
+    setBookingId(Number(params.bookingId));
     setHotelId(Number(searchParams.get('hotelId')));
     setRoomId(Number(searchParams.get('roomId')));
   }, [searchParams]);
@@ -56,6 +58,7 @@ export default function CreateReviewPage() {
       const presignedUrlResponse: PresignedUrlsResponse = await postReview(bookingId, hotelId, roomId, requestBody);
       setPresignedUrls(presignedUrlResponse.presignedUrls);
       setReviewId(presignedUrlResponse.reviewId);
+      console.log(presignedUrlResponse);
       await submitImages();
       console.log('리뷰가 성공적으로 생성되었습니다.');
     } catch (error) {
@@ -89,6 +92,7 @@ export default function CreateReviewPage() {
     try {
       await uploadImageUrls(reviewId, viewUrls);
       alert('리뷰가 성공적으로 생성되었습니다.');
+      router.push('/me/reviews/');
     } catch (error) {
       console.error('Error:', error);
       alert('이미지 URL 저장 중 오류가 발생했습니다.');
@@ -117,18 +121,48 @@ export default function CreateReviewPage() {
 
             <div>
               <Label htmlFor="rating" className="block mb-2">평점</Label>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((value) => (
-                  <Button
+                  <button
                     key={value}
                     type="button"
-                    variant="outline"
-                    className={`p-2 ${value <= rating ? 'bg-yellow-400 text-white' : 'bg-gray-200'}`}
                     onClick={() => setRating(value)}
+                    className="text-2xl focus:outline-none"
                   >
-                    {value}
-                  </Button>
+                    {value <= rating ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="#FFD700"
+                        stroke="#FFD700"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#FFD700"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    )}
+                  </button>
                 ))}
+                <span className="ml-2 text-gray-600">
+                  {rating ? `${rating}점` : ''}
+                </span>
               </div>
             </div>
 
@@ -158,7 +192,7 @@ export default function CreateReviewPage() {
             </div>
 
             <Button type="submit" className="w-full bg-blue-500 text-white mt-4">
-              생성
+              리뷰 생성
             </Button>
           </form>
         </CardContent>
