@@ -12,15 +12,15 @@ public record MyReviewWithCommentDto(
         String roomTypeName,
         ReviewDto reviewDto,
         ReviewCommentDto reviewCommentDto,
-        LocalDateTime reservedAt
+        LocalDateTime createdAt
 ) {
-    public MyReviewWithCommentDto(String hotelName, String roomTypeName, Review review, ReviewComment reviewComment, LocalDateTime reservedAt) {
+    public MyReviewWithCommentDto(String hotelName, String roomTypeName, Review review, ReviewComment reviewComment, LocalDateTime createdAt) {
         this(
                 hotelName,
                 roomTypeName,
                 new ReviewDto(review),
                 reviewComment != null ? new ReviewCommentDto(reviewComment) : null,
-                reservedAt
+                createdAt
         );
     }
 }
