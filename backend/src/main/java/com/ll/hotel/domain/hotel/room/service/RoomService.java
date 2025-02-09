@@ -4,6 +4,7 @@ import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
 import com.ll.hotel.domain.hotel.option.roomOption.repository.RoomOptionRepository;
+import com.ll.hotel.domain.hotel.room.dto.GetAllRoomOptionsResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
@@ -97,14 +98,14 @@ public class RoomService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<GetRoomResponse> findAllRooms(long hotelId) {
         return this.roomRepository.findAllRooms(hotelId, ImageType.ROOM).stream()
                 .map(GetRoomResponse::new)
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public GetRoomDetailResponse findRoomDetail(long hotelId, long roomId) {
         checkHotelExists(hotelId);
 
@@ -117,7 +118,7 @@ public class RoomService {
         return new GetRoomDetailResponse(new RoomDto(room), imageUrls);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public GetRoomOptionResponse findRoomOptions(long hotelId, long roomId) {
         this.checkHotelExists(hotelId);
 
@@ -214,5 +215,11 @@ public class RoomService {
         List<URL> urls = this.s3Service.generatePresignedUrls(ImageType.ROOM, roomId, extensions);
 
         return new PresignedUrlsResponse(roomId, urls);
+    }
+
+    @BusinessOnly
+    @Transactional(readOnly = true)
+    public GetAllRoomOptionsResponse findAllRoomOptions(Member actor) {
+        return new GetAllRoomOptionsResponse(this.roomOptionRepository.findAll());
     }
 }

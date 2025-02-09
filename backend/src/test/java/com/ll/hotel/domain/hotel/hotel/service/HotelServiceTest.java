@@ -303,8 +303,12 @@ class HotelServiceTest {
         business.setHotel(hotel);
 
         Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", null, "서울",
+<<<<<<< HEAD
                 LocalDate.now(),
                 LocalDate.now().plusDays(1), 2);
+=======
+                LocalDate.now(), LocalDate.now().plusDays(1), 2);
+>>>>>>> d18307c ([feat] 호텔 등록,FEAT] [FE] [BE] 특정 호텔 조회, 객실 등록, 객실 수정, 엔티티 수정 및 추가)
         List<GetHotelResponse> list = resultPage.getContent();
         GetHotelResponse Allres1 = list.getFirst();
 

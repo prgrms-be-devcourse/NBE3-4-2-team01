@@ -9,5 +9,5 @@ export interface PostHotelRequest {
   checkOutTime: string;
   hotelExplainContent: string;
   imageExtensions: string[];
-  hotelOptions: Set<string>;
+  hotelOptions: string[];
 }

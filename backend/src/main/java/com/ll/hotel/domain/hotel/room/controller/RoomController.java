@@ -1,5 +1,6 @@
 package com.ll.hotel.domain.hotel.room.controller;
 
+import com.ll.hotel.domain.hotel.room.dto.GetAllRoomOptionsResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
@@ -36,8 +37,7 @@ public class RoomController {
 
     @PostMapping
     public RsData<PostRoomResponse> createRoom(@PathVariable long hotelId,
-                                               @RequestBody @Valid PostRoomRequest postRoomRequest)
-    {
+                                               @RequestBody @Valid PostRoomRequest postRoomRequest) {
         Member actor = this.rq.getActor();
 
         return new RsData<>(
@@ -103,13 +103,23 @@ public class RoomController {
     @PutMapping("{roomId}")
     public RsData<PutRoomResponse> modify(@PathVariable long hotelId,
                                           @PathVariable long roomId,
-                                          @RequestBody PutRoomRequest request)
-    {
+                                          @RequestBody PutRoomRequest request) {
         Member actor = this.rq.getActor();
 
         return new RsData<>(
                 "200-1",
                 "객실 정보를 수정에 성공하였습니다.",
                 this.roomService.modifyRoom(hotelId, roomId, actor, request));
+    }
+
+    @GetMapping("/room-option")
+    public RsData<GetAllRoomOptionsResponse> findAllRoomOptions(@PathVariable long hotelId) {
+        Member actor = this.rq.getActor();
+
+        return new RsData<>(
+                "200-1",
+                "객실 옵션 조회에 성공했습니다.",
+                this.roomService.findAllRoomOptions(actor)
+        );
     }
 }

@@ -10,5 +10,5 @@ export interface PutRoomRequest {
   roomStatus: string;
   deleteImageUrls: string[];
   imageExtensions: string[];
-  roomOptions: Set<string>;
+  roomOptions: string[];
 }

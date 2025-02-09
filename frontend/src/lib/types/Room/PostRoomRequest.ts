@@ -1,5 +1,4 @@
 import { BedTypeNumber } from "./BedTypeNumber";
-import { RoomStatus } from "./RoomStatus";
 
 export interface PostRoomRequest {
   roomName: string;
@@ -9,5 +8,5 @@ export interface PostRoomRequest {
   maxNumber: number;
   bedTypeNumber: BedTypeNumber;
   imageExtensions: string[];
-  roomOptions: Set<string>;
+  roomOptions: string[];
 }

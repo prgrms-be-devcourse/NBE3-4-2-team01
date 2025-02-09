@@ -293,4 +293,10 @@ public class HotelService {
 
         return room.getRoomNumber() - (int) resolvedCount;
     }
+
+    @BusinessOnly
+    @Transactional(readOnly = true)
+    public GetAllHotelOptionsResponse findHotelOptions(Member actor) {
+        return new GetAllHotelOptionsResponse(this.hotelOptionRepository.findAll());
+    }
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "react-datepicker";
 import "./globals.css";
 import localFont from "next/font/local";
 

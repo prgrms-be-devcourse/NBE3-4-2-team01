@@ -11,5 +11,5 @@ export interface PutHotelRequest {
   hotelStatus: string;
   deleteImageUrls: string[];
   imageExtensions: string[];
-  hotelOptions: Set<string>;
+  hotelOptions: string[];
 }
