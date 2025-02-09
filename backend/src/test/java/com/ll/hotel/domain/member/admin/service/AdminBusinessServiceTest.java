@@ -1,5 +1,8 @@
 package com.ll.hotel.domain.member.admin.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.ll.hotel.domain.member.admin.dto.request.AdminBusinessRequest;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
@@ -9,18 +12,16 @@ import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
-import org.junit.jupiter.api.*;
+import java.time.LocalDate;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -48,7 +49,6 @@ class AdminBusinessServiceTest {
                     .birthDate(LocalDate.now())
                     .memberEmail(String.format("member[%02d]", i))
                     .memberName("member")
-                    .password("dfkajl12333")
                     .memberPhoneNumber("01012345678")
                     .memberStatus(MemberStatus.ACTIVE)
                     .role(Role.BUSINESS)
@@ -158,6 +158,7 @@ class AdminBusinessServiceTest {
         assertThat(savedBusiness.get().getBusinessRegistrationNumber()).isEqualTo("0123456789"); // DB에 반영된 값 확인
         assertThat(savedBusiness.get().getStartDate()).isEqualTo(LocalDate.of(2020, 1, 1));
         assertThat(savedBusiness.get().getOwnerName()).isEqualTo("김사장");
-        assertThat(savedBusiness.get().getApprovalStatus()).isEqualTo(BusinessApprovalStatus.APPROVED); // DB에 반영된 승인 상태 확인
+        assertThat(savedBusiness.get().getApprovalStatus()).isEqualTo(
+                BusinessApprovalStatus.APPROVED); // DB에 반영된 승인 상태 확인
     }
 }

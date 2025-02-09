@@ -27,7 +27,6 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
-import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.time.LocalDate;
@@ -378,7 +377,6 @@ class RoomServiceTest {
     public void createHotel() {
         Member member = Member.builder()
                 .memberEmail("member@naver.com")
-                .password("123")
                 .memberName("business")
                 .memberPhoneNumber("010-1234-5678")
                 .birthDate(LocalDate.of(2020, 2, 2))
@@ -388,7 +386,8 @@ class RoomServiceTest {
 
         Business business = Business.builder()
                 .businessRegistrationNumber("1234567890")
-                .approvalStatus(BusinessApprovalStatus.APPROVED)
+                .startDate(LocalDate.now().minusDays(1))
+                .ownerName("Business")
                 .member(member)
                 .build();
 
@@ -397,7 +396,7 @@ class RoomServiceTest {
         this.memberRepository.save(member);
         this.businessRepository.save(business);
 
-        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
+        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
