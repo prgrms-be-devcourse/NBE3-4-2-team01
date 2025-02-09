@@ -1,24 +1,29 @@
 package com.ll.hotel.global.jwt.dto;
 
-import jakarta.persistence.Id;
-import lombok.Getter;
+import java.io.Serializable;
+
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
 import org.springframework.util.StringUtils;
 
-import java.io.Serializable;
+import jakarta.persistence.Id;
+import lombok.Getter;
 
 @Getter
-@RedisHash(value = "refreshToken", timeToLive = 86400) // 1일 후 만료
+@RedisHash(value = "rt")
 public class RefreshToken implements Serializable {
 
     @Id
-    private String id;  // email을 id로 사용
+    private String id;
 
-    @Indexed  // refreshToken으로 조회하기 위해 인덱스 추가
+    @Indexed
     private String refreshToken;
 
     private String accessToken;
+
+    @TimeToLive
+    private Long timeToLive = 86400L;
 
     // 기본 생성자 추가
     protected RefreshToken() {
