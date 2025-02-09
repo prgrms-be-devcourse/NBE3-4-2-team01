@@ -1,10 +1,10 @@
-import { HotelReviewResponse } from '@/lib/types/HotelReviewResponse';
+import { HotelReviewResponse } from '@/lib/types/review/HotelReviewResponse';
 import { useEffect, useState } from 'react';
 import ReviewList from './ReviewList';
 import { getHotelReviews } from '@/lib/api/ReviewApi';
-import { HotelReviewListResponse } from '@/lib/types/HotelReviewListResponse';
+import { HotelReviewListResponse } from '@/lib/types/review/HotelReviewListResponse';
 import { PageDto } from '@/lib/types/PageDto';
-import Pagination from '../Pagination/Pagination';
+import Pagination from '../pagination/Pagination';
 
 interface HotelReviewsProps {
   hotelId: number;

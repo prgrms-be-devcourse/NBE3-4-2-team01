@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { MoveLeft } from 'lucide-react';
 
 export default function CreateReviewPage() {
   const [content, setContent] = useState('');
@@ -100,11 +101,23 @@ export default function CreateReviewPage() {
   };
 
   return (
-    <div className="p-4">
+    <div className="container content-wrapper max-w-6xl mx-auto py-6">
       <Card>
-        <CardHeader>
-          <CardTitle>리뷰 생성</CardTitle>
-        </CardHeader>
+      <CardHeader>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => router.back()}
+              className="hover:bg-gray-100 gap-2"
+            >
+              <MoveLeft className="w-5 h-5 text-gray-600" />
+              <span className="text-gray-600">뒤로가기</span>
+            </Button>
+          </div>
+          <CardTitle className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-semibold">리뷰 생성</CardTitle>
+        </div>
+      </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -190,10 +203,11 @@ export default function CreateReviewPage() {
                 </div>
               )}
             </div>
-
-            <Button type="submit" className="w-full bg-blue-500 text-white mt-4">
-              리뷰 생성
-            </Button>
+            <div className="flex justify-center">
+              <Button type="submit" className="w-full bg-blue-400 w-1/5 text-white mx-auto">
+                리뷰 생성
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
