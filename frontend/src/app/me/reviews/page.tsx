@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 
 const MyReviewsPage = () => {
   const searchParams = useSearchParams();
-  const page = Number(searchParams.get('page')) || 1;
+  const page = Number(searchParams.get('page')) || 0;
 
   return (
     <div className="container mx-auto p-4">

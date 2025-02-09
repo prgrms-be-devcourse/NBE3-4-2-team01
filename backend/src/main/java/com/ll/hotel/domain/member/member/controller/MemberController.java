@@ -1,18 +1,5 @@
 package com.ll.hotel.domain.member.member.controller;
 
-import java.util.stream.Collectors;
-
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.StringUtils;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.ll.hotel.domain.member.member.dto.JoinRequest;
 import com.ll.hotel.domain.member.member.dto.MemberDTO;
 import com.ll.hotel.domain.member.member.dto.MemberResponse;
@@ -22,11 +9,18 @@ import com.ll.hotel.domain.member.member.service.RefreshTokenService;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
-
-import io.jsonwebtoken.MalformedJwtException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -90,11 +84,30 @@ public class MemberController {
     }
 
     @PostMapping("/refresh")
-    public RsData<String> refresh(@CookieValue("refresh_token") String refreshToken) {
-        try {
-            return memberService.refreshAccessToken(refreshToken);
-        } catch (MalformedJwtException e) {
-            return new RsData<>("401-2", "유효하지 않은 토큰 형식입니다.", "");
+    public RsData<String> refresh(HttpServletRequest request) {
+        String refreshToken = null;
+        Cookie[] cookies = request.getCookies();
+        
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refresh_token".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
         }
+        
+        if (refreshToken == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                refreshToken = authHeader.substring(7);
+            }
+        }
+        
+        if (refreshToken == null) {
+            return new RsData<>("401-1", "리프레시 토큰이 없습니다.", null);
+        }
+        
+        return memberService.refreshAccessToken(refreshToken);
     }
 }

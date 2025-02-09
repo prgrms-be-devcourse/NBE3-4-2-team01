@@ -1,10 +1,10 @@
 import { ReviewCommentDto } from "./ReviewCommentDto";
 import { ReviewDto } from "./ReviewDto";
 
-export interface MyReviewWithCommentDto {
-    hotelName: string;
+export interface HotelReviewWithCommentDto {
+    memberEmail: string;
     roomTypeName: string;
     reviewDto: ReviewDto;
     reviewCommentDto: ReviewCommentDto;
-    reservedAt: string;
+    createdAt: string;
 }
