@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { PresignedUrlsResponse } from '@/lib/types/PresignedUrlsResponse';
-import { UpdateReviewRequest } from '@/lib/types/UpdateReviewRequest';
-import { fetchReview, updateReview } from '@/lib/api/ReviewApi';
-import { uploadImagesToS3 } from '@/lib/api/AwsS3Api';
-import { uploadImageUrls } from '@/lib/api/ReviewApi';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Star, XCircle } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { PresignedUrlsResponse } from "@/lib/types/review/PresignedUrlsResponse";
+import { UpdateReviewRequest } from "@/lib/types/review/UpdateReviewRequest";
+import { fetchReview, updateReview } from "@/lib/api/ReviewApi";
+import { uploadImagesToS3 } from "@/lib/api/AwsS3Api";
+import { uploadImageUrls } from "@/lib/api/ReviewApi";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Star, XCircle } from "lucide-react";
 
 export default function CreatePage() {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [rating, setRating] = useState(0);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [deleteImageUrls, setDeleteImageUrls] = useState<string[]>([]);
@@ -36,15 +36,15 @@ export default function CreatePage() {
         setRating(response.reviewDto.rating);
         setExistingImages(response.imageUrls);
       } catch (error) {
-        console.error('Failed to fetch review:', error);
+        console.error("Failed to fetch review:", error);
       }
     };
-  
+
     fetchReviewData();
   }, [params.reviewId]);
 
   const handleImageDelete = (imageUrl: string) => {
-    setExistingImages(existingImages.filter(img => img !== imageUrl));
+    setExistingImages(existingImages.filter((img) => img !== imageUrl));
     setDeleteImageUrls([...deleteImageUrls, imageUrl]);
   };
 
@@ -58,12 +58,12 @@ export default function CreatePage() {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       setNewImages([...newImages, ...files]);
-      
-      const newPreviews = files.map(file => URL.createObjectURL(file));
+
+      const newPreviews = files.map((file) => URL.createObjectURL(file));
       setNewImagePreviews([...newImagePreviews, ...newPreviews]);
-      
-      const extensions = files.map(file => {
-        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+
+      const extensions = files.map((file) => {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "";
         return ext;
       });
       setNewImageExtensions([...newImageExtensions, ...extensions]);
@@ -72,7 +72,7 @@ export default function CreatePage() {
 
   useEffect(() => {
     return () => {
-      newImagePreviews.forEach(preview => URL.revokeObjectURL(preview));
+      newImagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
     };
   }, []);
 
@@ -84,50 +84,53 @@ export default function CreatePage() {
       rating,
       deleteImageUrls,
       newImageExtensions,
-    }
+    };
 
     try {
-      const response: PresignedUrlsResponse = await updateReview(reviewId, UpdateReviewRequest);
-      console.log('서버 응답:', response);
+      const response: PresignedUrlsResponse = await updateReview(
+        reviewId,
+        UpdateReviewRequest
+      );
+      console.log("서버 응답:", response);
 
       setPresignedUrls(response.presignedUrls);
       await submitImages();
-      console.log('리뷰 내용, 레이팅이 성공적으로 수정되었습니다.');
-     } catch (error) {
-       console.error('Error:', error);
-       alert('리뷰 생성 또는 이미지 업로드 중 오류가 발생했습니다.');
+      console.log("리뷰 내용, 레이팅이 성공적으로 수정되었습니다.");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("리뷰 생성 또는 이미지 업로드 중 오류가 발생했습니다.");
     }
   };
 
   const submitImages = async () => {
     if (presignedUrls.length === 0) {
-      alert('리뷰가 수정되었습니다.');
-      router.push('/me/reviews/');
+      alert("리뷰가 수정되었습니다.");
+      router.push("/me/reviews/");
       return;
     }
 
     try {
       await uploadImagesToS3(presignedUrls, newImages);
       await saveImageUrls();
-      console.log('이미지가 성공적으로 업로드되었습니다.');
+      console.log("이미지가 성공적으로 업로드되었습니다.");
     } catch (error) {
-      console.error('Error:', error);
-      alert('이미지 업로드 중 오류가 발생했습니다.');
+      console.error("Error:", error);
+      alert("이미지 업로드 중 오류가 발생했습니다.");
     }
-  }
+  };
 
   const saveImageUrls = async () => {
     const viewUrls = presignedUrls.map((presignedUrl) => {
-      return presignedUrl.split('?')[0];
+      return presignedUrl.split("?")[0];
     });
 
     try {
       await uploadImageUrls(reviewId, viewUrls);
-      alert('리뷰가 수정되었습니다.');
-      router.push('/me/reviews/');
-    } catch (error) { 
-      console.error('Error:', error);
-      alert('이미지 URL 저장 중 오류가 발생했습니다.');
+      alert("리뷰가 수정되었습니다.");
+      router.push("/me/reviews/");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("이미지 URL 저장 중 오류가 발생했습니다.");
     }
   };
 
@@ -165,8 +168,8 @@ export default function CreatePage() {
                     <Star
                       className={`w-6 h-6 ${
                         value <= rating
-                          ? 'text-yellow-400 fill-yellow-400'
-                          : 'text-gray-300'
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300"
                       }`}
                     />
                   </Button>
@@ -210,7 +213,7 @@ export default function CreatePage() {
                 onChange={handleNewImageUpload}
                 className="cursor-pointer"
               />
-              
+
               {newImagePreviews.length > 0 && (
                 <div className="mt-4">
                   <Label>새 이미지 미리보기</Label>

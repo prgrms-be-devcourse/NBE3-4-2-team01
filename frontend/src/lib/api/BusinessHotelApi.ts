@@ -36,12 +36,13 @@ export const createHotel = async (
 };
 
 // 호텔 이미지 URL 저장
-export const saveImageUrls = async (
+export const saveHotelImageUrls = async (
   hotelId: number,
   urls: string[]
 ): Promise<void> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/urls`, {
+      credentials: "include",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -83,6 +84,7 @@ export const modifyHotel = async (
 ): Promise<PutHotelResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}`, {
+      credentials: "include",
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -105,6 +107,7 @@ export const modifyHotel = async (
 export const deleteHotel = async (hotelId: number): Promise<void> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}`, {
+      credentials: "include",
       method: "DELETE",
     });
 
@@ -139,7 +142,9 @@ export const findHotelRevenue = async (
 export const findAllHotelOptions =
   async (): Promise<GetAllHotelOptionResponse> => {
     try {
-      const response = await fetch(`${BASE_URL}/hotel-option`);
+      const response = await fetch(`${BASE_URL}/hotel-option`, {
+        credentials: "include",
+      });
       const rsData: RsData<GetAllHotelOptionResponse> = await response.json();
 
       if (rsData.resultCode !== "200-1") {

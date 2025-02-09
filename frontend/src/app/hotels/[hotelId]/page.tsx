@@ -20,6 +20,7 @@ const HotelDetailPage: React.FC = () => {
     const fetchHotelDetail = async () => {
       try {
         const response = await findHotelDetail(Number(hotelId));
+        console.log(response);
         setHotelDetail(response);
       } catch (error) {
         throw error;

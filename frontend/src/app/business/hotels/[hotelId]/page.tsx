@@ -4,14 +4,14 @@ import {
   findAllHotelOptions,
   findHotelDetail,
   modifyHotel,
+  saveHotelImageUrls,
 } from "@/lib/api/BusinessHotelApi";
 import { PutHotelRequest } from "@/lib/types/hotel/PutHotelRequest";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { PresignedUrlsResponse } from "@/lib/types/PresignedUrlsResponse";
+import { PresignedUrlsResponse } from "@/lib/types/review/PresignedUrlsResponse";
 import { PutHotelResponse } from "@/lib/types/hotel/PutHotelResponse";
 import { uploadImagesToS3 } from "@/lib/api/AwsS3Api";
-import { uploadImageUrls } from "@/lib/api/ReviewApi";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import DatePicker from "react-datepicker";
@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { XCircle } from "lucide-react";
 import "react-datepicker/dist/react-datepicker.css";
+import { GetAllHotelOptionResponse } from "@/lib/types/hotel/GetAllHotelOptionResponse";
 
 export default function ModifyHotelPage() {
   const params = useParams();
@@ -61,36 +62,41 @@ export default function ModifyHotelPage() {
         setHotelStatus(response.hotelDetailDto.hotelStatus);
         setExistingImages(response.hotelImageUrls);
         setHotelOptions(new Set(response.hotelDetailDto.hotelOptions || []));
+        console.log(response);
+        console.log(response);
       } catch (error) {
         throw error;
       }
     };
 
-    // const fetchOptions = async () => {
-    //   try {
-    //     const options = await findAllHotelOptions();
-    //     setAvailableHotelOptions(new Set(options.hotelOptions));
-    //   } catch (error) {
-    //     throw error;
-    //   }
-    // };
-
     fetchHotelData();
-    // fetchOptions();
   }, [params.hotelId]);
 
-  //   const handleOptionChange = (option: string) => {
-  //     setHotelOptions((prev) => {
-  //       const newOptions = new Set(prev);
-  //       if (newOptions.has(option)) {
-  //         newOptions.delete(option);
-  //       } else {
-  //         newOptions.add(option);
-  //       }
+  // 호텔 옵션 전체 리스트 가져오기
+  useEffect(() => {
+    const loadHotelOptions = async () => {
+      try {
+        const options: GetAllHotelOptionResponse = await findAllHotelOptions();
+        setAvailableHotelOptions(new Set(options.hotelOptions));
+      } catch (error) {
+        throw error;
+      }
+    };
+    loadHotelOptions();
+  }, []);
 
-  //       return newOptions;
-  //     });
-  //   };
+  const handleOptionChange = (option: string) => {
+    setHotelOptions((prev) => {
+      const newOptions = new Set(prev);
+      if (newOptions.has(option)) {
+        newOptions.delete(option);
+      } else {
+        newOptions.add(option);
+      }
+
+      return newOptions;
+    });
+  };
 
   const handleImageDelete = (imageUrl: string) => {
     setExistingImages(existingImages.filter((img) => img !== imageUrl));
@@ -188,21 +194,24 @@ export default function ModifyHotelPage() {
       );
       const presignedUrlsResponse: PresignedUrlsResponse =
         response.urlsResponse;
+      console.log("서버 응답:", presignedUrlsResponse);
 
       setPresignedUrls(presignedUrlsResponse.presignedUrls);
-      await submitImages();
+      console.log(presignedUrls);
       console.log("호텔이 성공적으로 수정되었습니다.");
     } catch (error) {
       alert("호텔 생성 또는 이미지 업로드 중 오류가 발생했습니다.");
     }
   };
 
-  const submitImages = async () => {
-    if (presignedUrls.length === 0) {
-      alert("이미지 업로드 URL을 가져오지 못했습니다.");
-      return;
+  useEffect(() => {
+    if (presignedUrls.length > 0) {
+      console.log("✅ presignedUrls 설정됨:", presignedUrls);
+      submitImages();
     }
+  }, [presignedUrls]);
 
+  const submitImages = async () => {
     try {
       await uploadImagesToS3(presignedUrls, images);
       await saveImageUrls();
@@ -215,11 +224,12 @@ export default function ModifyHotelPage() {
 
   const saveImageUrls = async () => {
     const urls = presignedUrls.map((presignedUrls) => {
+      console.log(presignedUrls);
       return presignedUrls.split("?")[0];
     });
 
     try {
-      uploadImageUrls(hotelId, urls);
+      saveHotelImageUrls(hotelId, urls);
       alert("이미지 URL이 성공적으로 저장되었습니다.");
     } catch (error) {
       console.error(error);
@@ -407,7 +417,7 @@ export default function ModifyHotelPage() {
                           type="button"
                           variant="destructive"
                           size="icon"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opactiy-100 transition-opacity"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => handlenewImageDelete(index)}
                         >
                           <XCircle className="w-4 h-4" />
@@ -419,7 +429,7 @@ export default function ModifyHotelPage() {
               )}
             </div>
 
-            {/* <div>
+            <div>
               <Label htmlFor="hotelOptions">호텔 옵션</Label>
               <div className="grid grid-cols-2 gap-2">
                 {[...availableHotelOptions].map((option) => (
@@ -434,7 +444,7 @@ export default function ModifyHotelPage() {
                   </label>
                 ))}
               </div>
-            </div> */}
+            </div>
 
             <Button
               type="submit"

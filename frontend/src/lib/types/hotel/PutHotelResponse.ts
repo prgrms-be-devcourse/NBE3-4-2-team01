@@ -1,4 +1,4 @@
-import { PresignedUrlsResponse } from "../PresignedUrlsResponse";
+import { PresignedUrlsResponse } from "../review/PresignedUrlsResponse";
 
 export interface PutHotelResponse {
   businessId: number;

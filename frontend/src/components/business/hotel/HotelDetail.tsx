@@ -31,12 +31,12 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
 
         <p>
           <span className="font-semibold text-gray-900">체크인 시간 : </span>
-          {hotel.checkInTime}
+          {hotel.checkInTime.slice(0, 5)}
         </p>
 
         <p>
           <span className="font-semibold text-gray-900">체크아웃 시간 : </span>
-          {hotel.checkOutTime}
+          {hotel.checkOutTime.slice(0, 5)}
         </p>
 
         <p className="mt-2 text-gray-600">

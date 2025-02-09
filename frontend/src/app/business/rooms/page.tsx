@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { createRoom, findAllRoomOptions } from "@/lib/api/BusinessRoomApi";
+import {
+  createRoom,
+  findAllRoomOptions,
+  saveRoomImageUrls,
+} from "@/lib/api/BusinessRoomApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -11,9 +15,12 @@ import { PostRoomResponse } from "@/lib/types/Room/PostRoomResponse";
 import { PostRoomRequest } from "@/lib/types/Room/PostRoomRequest";
 import { GetAllRoomOptionsResponse } from "@/lib/types/Room/GetAllRoomOptionsResponse";
 import { uploadImagesToS3 } from "@/lib/api/AwsS3Api";
-import { uploadImageUrls } from "@/lib/api/ReviewApi";
+import { PresignedUrlsResponse } from "@/lib/types/review/PresignedUrlsResponse";
+import { useParams } from "next/navigation";
+import { XCircle } from "lucide-react";
 
 export default function CreateRoomPage() {
+  const params = useParams();
   const [roomName, setRoomName] = useState("");
   const [roomNumber, setRoomNumber] = useState(1);
   const [basePrice, setBasePrice] = useState(50000);
@@ -27,10 +34,10 @@ export default function CreateRoomPage() {
     twin: 0,
     triple: 0,
   });
-  const [imageExtensions, setImageExtensions] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [presigendUrls, setPresignedUrls] = useState<string[]>([]);
+  const [hotelId, setHotelId] = useState(Number(params.hotelId));
   const [roomId, setRoomId] = useState(0);
   const [roomOptions, setRoomOptions] = useState<Set<string>>(new Set());
   const [availableRoomOptions, setAvailableRoomOptions] = useState<Set<string>>(
@@ -45,30 +52,30 @@ export default function CreateRoomPage() {
   };
 
   // 객실 옵션 전체 리스트 가져오기
-  //   useEffect(() => {
-  //     const loadRoomOptions = async () => {
-  //       try {
-  //         const options: GetAllRoomOptionsResponse = await findAllRoomOptions();
-  //         setAvailableRoomOptions(new Set(options.roomOptions));
-  //       } catch (error) {
-  //         throw error;
-  //       }
-  //     };
-  //     loadRoomOptions();
-  //   }, []);
+  useEffect(() => {
+    const loadRoomOptions = async () => {
+      try {
+        const options: GetAllRoomOptionsResponse = await findAllRoomOptions();
+        setAvailableRoomOptions(new Set(options.roomOptions));
+      } catch (error) {
+        throw error;
+      }
+    };
+    loadRoomOptions();
+  }, []);
 
-  //   const handleOptionChange = (option: string) => {
-  //     setRoomOptions((prev) => {
-  //       const newOptions = new Set(prev);
-  //       if (newOptions.has(option)) {
-  //         newOptions.delete(option);
-  //       } else {
-  //         newOptions.add(option);
-  //       }
+  const handleOptionChange = (option: string) => {
+    setRoomOptions((prev) => {
+      const newOptions = new Set(prev);
+      if (newOptions.has(option)) {
+        newOptions.delete(option);
+      } else {
+        newOptions.add(option);
+      }
 
-  //       return newOptions;
-  //     });
-  //   };
+      return newOptions;
+    });
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -78,6 +85,13 @@ export default function CreateRoomPage() {
       // 미리보기 업데이트
       setImagePreviews(selectedFiles.map((file) => URL.createObjectURL(file)));
     }
+  };
+
+  const handleImageRemove = (index: number) => {
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    setImagePreviews((prevPreviews) =>
+      prevPreviews.filter((_, i) => i !== index)
+    );
   };
 
   const handleNumberInputChange =
@@ -105,6 +119,10 @@ export default function CreateRoomPage() {
 
     try {
       const response: PostRoomResponse = await createRoom(1, requestBody);
+      const presignedUrlResponse: PresignedUrlsResponse = response.urlsResponse;
+      setPresignedUrls(presignedUrlResponse.presignedUrls);
+      setHotelId(response.hotelId);
+      setRoomId(presignedUrlResponse.reviewId);
       alert("객실이 성공적으로 등록되었습니다.");
     } catch (error) {
       console.error(error);
@@ -112,13 +130,15 @@ export default function CreateRoomPage() {
     }
   };
 
+  useEffect(() => {
+    if (presigendUrls.length > 0) {
+      console.log("✅ presignedUrls 설정됨:", presigendUrls);
+      submitImages();
+    }
+  }, [presigendUrls]);
+
   // PresignedUrls 를 사용하여 이미지 업로드
   const submitImages = async () => {
-    if (presigendUrls.length === 0) {
-      alert("이미지 업로드 URL을 가져오지 못했습니다.");
-      return;
-    }
-
     try {
       await uploadImagesToS3(presigendUrls, images);
       await saveImageUrls();
@@ -136,7 +156,7 @@ export default function CreateRoomPage() {
     });
 
     try {
-      await uploadImageUrls(roomId, viewUrls);
+      await saveRoomImageUrls(hotelId, roomId, viewUrls);
       console.log("객실실 이미지가 성공적으로 저장되었습니다.");
     } catch (error) {
       console.error("이미지 URL 저장 중 오류가 발생했습니다.");
@@ -238,20 +258,29 @@ export default function CreateRoomPage() {
               {imagePreviews.length > 0 && (
                 <div className="mt-4 grid grid-cols-3 gap-4">
                   {imagePreviews.map((preview, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative group">
                       <img
                         src={preview}
                         alt={`미리보기 이미지 ${index + 1}`}
                         className="w-full h-32 object-cover rounded-md"
                       />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleImageRemove(index)}
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </Button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* <div>
-              <Label htmlFor="hotelOptions">호텔 옵션</Label>
+            <div>
+              <Label htmlFor="hotelOptions">객실 옵션</Label>
               <div className="grid grid-cols-2 gap-2">
                 {[...availableRoomOptions].map((option) => (
                   <label key={option} className="flex items-center">
@@ -265,7 +294,7 @@ export default function CreateRoomPage() {
                   </label>
                 ))}
               </div>
-            </div> */}
+            </div>
 
             <Button
               type="submit"

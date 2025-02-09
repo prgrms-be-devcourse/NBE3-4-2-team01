@@ -15,12 +15,8 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@radix-ui/react-label": "^2.1.2",
-<<<<<<< HEAD
     "@radix-ui/react-slot": "^1.1.2",
-=======
-    "@radix-ui/react-slot": "^1.1.1",
     "@types/react-datepicker": "^6.2.0",
->>>>>>> d18307c ([feat] 호텔 등록,FEAT] [FE] [BE] 특정 호텔 조회, 객실 등록, 객실 수정, 엔티티 수정 및 추가)
     "@types/react-router-dom": "^5.3.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

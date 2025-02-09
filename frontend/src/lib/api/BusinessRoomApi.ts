@@ -17,6 +17,7 @@ export const createRoom = async (
 ): Promise<PostRoomResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/rooms`, {
+      credentials: "include",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -45,6 +46,7 @@ export const saveRoomImageUrls = async (
     const response = await fetch(
       `${BASE_URL}/${hotelId}/rooms/${roomId}/urls`,
       {
+        credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -89,6 +91,7 @@ export const modifyRoom = async (
 ): Promise<PutRoomResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/rooms/${roomId}`, {
+      credentials: "include",
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -114,6 +117,7 @@ export const deletRoom = async (
 ): Promise<void> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/rooms/${roomId}`, {
+      credentials: "include",
       method: "DELETE",
     });
 
@@ -148,7 +152,9 @@ export const findAllRooms = async (
 export const findAllRoomOptions =
   async (): Promise<GetAllRoomOptionsResponse> => {
     try {
-      const response = await fetch(`${BASE_URL}/hotel-option`);
+      const response = await fetch(`${BASE_URL}/hotel-option`, {
+        credentials: "include",
+      });
       const rsData: RsData<GetAllRoomOptionsResponse> = await response.json();
 
       if (rsData.resultCode !== "200-1") {

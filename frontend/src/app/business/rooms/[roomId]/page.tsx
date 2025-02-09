@@ -1,6 +1,11 @@
 "use client";
 
-import { findRoomDetail, modifyRoom } from "@/lib/api/BusinessRoomApi";
+import {
+  findAllRoomOptions,
+  findRoomDetail,
+  modifyRoom,
+  saveRoomImageUrls,
+} from "@/lib/api/BusinessRoomApi";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +18,8 @@ import { XCircle } from "lucide-react";
 import { uploadImagesToS3 } from "@/lib/api/AwsS3Api";
 import { uploadImageUrls } from "@/lib/api/ReviewApi";
 import { PutRoomResponse } from "./../../../../lib/types/Room/PutRoomResponse";
-import { PresignedUrlsResponse } from "@/lib/types/PresignedUrlsResponse";
+import { PresignedUrlsResponse } from "@/lib/types/review/PresignedUrlsResponse";
+import { GetAllRoomOptionsResponse } from "@/lib/types/Room/GetAllRoomOptionsResponse";
 
 export default function ModifyRoomPage() {
   const params = useParams();
@@ -44,6 +50,32 @@ export default function ModifyRoomPage() {
     new Set()
   );
 
+  // 객실 옵션 전체 리스트 가져오기
+  useEffect(() => {
+    const loadRoomOptions = async () => {
+      try {
+        const options: GetAllRoomOptionsResponse = await findAllRoomOptions();
+        setAvailableRoomOptions(new Set(options.roomOptions));
+      } catch (error) {
+        throw error;
+      }
+    };
+    loadRoomOptions();
+  }, []);
+
+  const handleOptionChange = (option: string) => {
+    setRoomOptions((prev) => {
+      const newOptions = new Set(prev);
+      if (newOptions.has(option)) {
+        newOptions.delete(option);
+      } else {
+        newOptions.add(option);
+      }
+
+      return newOptions;
+    });
+  };
+
   useEffect(() => {
     const fetchRoomData = async () => {
       try {
@@ -56,6 +88,7 @@ export default function ModifyRoomPage() {
         setStandardNumber(response.roomDto.standardNumber);
         setMaxNumber(response.roomDto.maxNumber);
         setBedTypeNumber(response.roomDto.bedTypeNumber);
+        setRoomOptions(response.roomDto.roomOptions);
       } catch (error) {
         throw error;
       }
@@ -138,8 +171,10 @@ export default function ModifyRoomPage() {
       const preSigendUrlsResponse: PresignedUrlsResponse =
         response.urlsResponse;
 
+      setHotelId(response.hotelId);
+      setRoomId(response.roomId);
       setPresignedUrls(preSigendUrlsResponse.presignedUrls);
-      await submitImages();
+      console.log(presignedUrls);
       alert("객실이 성공적으로 수정되었습니다.");
     } catch (error) {
       console.error(error);
@@ -147,12 +182,14 @@ export default function ModifyRoomPage() {
     }
   };
 
-  const submitImages = async () => {
-    if (presignedUrls.length === 0) {
-      alert("이미지 업로드 URL을 가져오지 못했습니다.");
-      return;
+  useEffect(() => {
+    if (presignedUrls.length > 0) {
+      console.log("✅ presignedUrls 설정됨:", presignedUrls);
+      submitImages();
     }
+  }, [presignedUrls]);
 
+  const submitImages = async () => {
     try {
       await uploadImagesToS3(presignedUrls, images);
       await saveImageUrls();
@@ -169,7 +206,7 @@ export default function ModifyRoomPage() {
     });
 
     try {
-      uploadImageUrls(hotelId, urls);
+      saveRoomImageUrls(hotelId, roomId, urls);
       alert("이미지 URL이 성공적으로 저장되었습니다.");
     } catch (error) {
       console.error(error);
@@ -320,7 +357,7 @@ export default function ModifyRoomPage() {
                           type="button"
                           variant="destructive"
                           size="icon"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opactiy-100 transition-opacity"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => handlenewImageDelete(index)}
                         >
                           <XCircle className="w-4 h-4" />
@@ -330,6 +367,23 @@ export default function ModifyRoomPage() {
                   </div>
                 </div>
               )}
+            </div>
+
+            <div>
+              <Label htmlFor="hotelOptions">객실 옵션</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {[...availableRoomOptions].map((option) => (
+                  <label key={option} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      value={option}
+                      checked={roomOptions.has(option)}
+                      onChange={() => handleOptionChange(option)}
+                    />
+                    {option}
+                  </label>
+                ))}
+              </div>
             </div>
 
             <Button

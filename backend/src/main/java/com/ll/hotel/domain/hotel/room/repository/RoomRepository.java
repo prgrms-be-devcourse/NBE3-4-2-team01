@@ -19,14 +19,9 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             AND i.imageType = :imageType
             WHERE r.hotel.id = :hotelId
             AND r.roomStatus <> 'UNAVAILABLE'
-<<<<<<< HEAD
-            AND i.createdAt = (
-                SELECT MIN(i2.createdAt)
-=======
             AND (
-            i.uploadedAt = (
-                SELECT MIN(i2.uploadedAt)
->>>>>>> d18307c ([feat] 호텔 등록,FEAT] [FE] [BE] 특정 호텔 조회, 객실 등록, 객실 수정, 엔티티 수정 및 추가)
+            i.createdAt = (
+                SELECT MIN(i2.createdAt)
                 FROM Image i2
                 WHERE i2.referenceId = r.id
                 AND i2.imageType = :imageType

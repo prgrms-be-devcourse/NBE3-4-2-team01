@@ -2,11 +2,14 @@
 
 import { PostHotelRequest } from "@/lib/types/hotel/PostHotelRequest";
 import React, { useEffect, useState } from "react";
-import { PresignedUrlsResponse } from "./../../../lib/types/PresignedUrlsResponse";
-import { createHotel, findAllHotelOptions } from "@/lib/api/BusinessHotelApi";
+import { PresignedUrlsResponse } from "./../../../lib/types/review/PresignedUrlsResponse";
+import {
+  createHotel,
+  findAllHotelOptions,
+  saveHotelImageUrls,
+} from "@/lib/api/BusinessHotelApi";
 import { PostHotelResponse } from "@/lib/types/hotel/PostHotelResponse";
 import { uploadImagesToS3 } from "@/lib/api/AwsS3Api";
-import { uploadImageUrls } from "@/lib/api/ReviewApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -14,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { GetAllHotelOptionResponse } from "@/lib/types/hotel/GetAllHotelOptionResponse";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { XCircle } from "lucide-react";
 
 export default function CreateHotelPage() {
   const [hotelName, setHotelName] = useState("");
@@ -35,30 +39,30 @@ export default function CreateHotelPage() {
   >(new Set());
 
   // 호텔 옵션 전체 리스트 가져오기
-  //   useEffect(() => {
-  //     const loadHotelOptions = async () => {
-  //       try {
-  //         const options: GetAllHotelOptionResponse = await findAllHotelOptions();
-  //         setAvailableHotelOptions(new Set(options.hotelOptions));
-  //       } catch (error) {
-  //         throw error;
-  //       }
-  //     };
-  //     loadHotelOptions();
-  //   }, []);
+  useEffect(() => {
+    const loadHotelOptions = async () => {
+      try {
+        const options: GetAllHotelOptionResponse = await findAllHotelOptions();
+        setAvailableHotelOptions(new Set(options.hotelOptions));
+      } catch (error) {
+        throw error;
+      }
+    };
+    loadHotelOptions();
+  }, []);
 
-  //   const handleOptionChange = (option: string) => {
-  //     setHotelOptions((prev) => {
-  //       const newOptions = new Set(prev);
-  //       if (newOptions.has(option)) {
-  //         newOptions.delete(option);
-  //       } else {
-  //         newOptions.add(option);
-  //       }
+  const handleOptionChange = (option: string) => {
+    setHotelOptions((prev) => {
+      const newOptions = new Set(prev);
+      if (newOptions.has(option)) {
+        newOptions.delete(option);
+      } else {
+        newOptions.add(option);
+      }
 
-  //       return newOptions;
-  //     });
-  //   };
+      return newOptions;
+    });
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -68,6 +72,13 @@ export default function CreateHotelPage() {
       // 미리보기 업데이트
       setImagePreviews(selectedFiles.map((file) => URL.createObjectURL(file)));
     }
+  };
+
+  const handleImageRemove = (index: number) => {
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    setImagePreviews((prevPreviews) =>
+      prevPreviews.filter((_, i) => i !== index)
+    );
   };
 
   const parseTimeStringToDate = (time: string): Date | null => {
@@ -124,7 +135,6 @@ export default function CreateHotelPage() {
       const presignedUrlResponse: PresignedUrlsResponse = response.urlsResponse;
       setPresignedUrls(presignedUrlResponse.presignedUrls);
       setHotelId(presignedUrlResponse.reviewId);
-      await submitImages();
       alert("호텔이 성공적으로 등록되었습니다.");
     } catch (error) {
       console.error(error);
@@ -132,13 +142,15 @@ export default function CreateHotelPage() {
     }
   };
 
+  useEffect(() => {
+    if (presigendUrls.length > 0) {
+      console.log("✅ presignedUrls 설정됨:", presigendUrls);
+      submitImages();
+    }
+  }, [presigendUrls]);
+
   // PresignedUrls 를 사용하여 이미지 업로드
   const submitImages = async () => {
-    if (presigendUrls.length === 0) {
-      alert("이미지 업로드 URL을 가져오지 못했습니다.");
-      return;
-    }
-
     try {
       await uploadImagesToS3(presigendUrls, images);
       await saveImageUrls();
@@ -152,11 +164,12 @@ export default function CreateHotelPage() {
   // 사진 조회용 URL들 서버로 전달
   const saveImageUrls = async () => {
     const viewUrls = presigendUrls.map((presigendUrls) => {
+      console.log(presigendUrls);
       return presigendUrls.split("?")[0];
     });
 
     try {
-      await uploadImageUrls(hotelId, viewUrls);
+      await saveHotelImageUrls(hotelId, viewUrls);
       console.log("호텔 이미지가 성공적으로 저장되었습니다.");
     } catch (error) {
       console.error("이미지 URL 저장 중 오류가 발생했습니다.");
@@ -292,19 +305,28 @@ export default function CreateHotelPage() {
               {imagePreviews.length > 0 && (
                 <div className="mt-4 grid grid-cols-3 gap-4">
                   {imagePreviews.map((preview, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative group">
                       <img
                         src={preview}
                         alt={`미리보기 이미지 ${index + 1}`}
                         className="w-full h-32 object-cover rounded-md"
                       />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleImageRemove(index)}
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </Button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* <div>
+            <div>
               <Label htmlFor="hotelOptions">호텔 옵션</Label>
               <div className="grid grid-cols-2 gap-2">
                 {[...availableHotelOptions].map((option) => (
@@ -319,7 +341,7 @@ export default function CreateHotelPage() {
                   </label>
                 ))}
               </div>
-            </div> */}
+            </div>
 
             <Button
               type="submit"
