@@ -56,7 +56,12 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
             String refreshToken = memberService.generateRefreshToken(member.getMemberEmail());
             log.debug("Generated JWT access token: {}", accessToken);
             log.debug("Generated JWT refresh token: {}", refreshToken);
-            
+
+            Cookie roleCookie = new Cookie("role", member.getUserRole());
+            roleCookie.setSecure(true);
+            roleCookie.setPath("/");
+            response.addCookie(roleCookie);
+
             Cookie accessTokenCookie = new Cookie("access_token", accessToken);
             accessTokenCookie.setHttpOnly(true);
             accessTokenCookie.setSecure(true);

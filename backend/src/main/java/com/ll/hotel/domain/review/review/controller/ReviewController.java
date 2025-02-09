@@ -148,7 +148,7 @@ public class ReviewController {
     @GetMapping("/me")
     @Operation(summary = "내 리뷰 목록 조회")
     public RsData<PageDto<MyReviewResponse>> getMyReviews(
-            @RequestParam(value = "page", defaultValue = "0") int page
+            @RequestParam(value = "page", defaultValue = "1") int page
     ) {
         Member actor = rq.getActor();
 
@@ -165,7 +165,7 @@ public class ReviewController {
     @GetMapping("/hotels/{hotelId}")
     @Operation(summary = "호텔 리뷰 목록 조회")
     public RsData<HotelReviewListResponse> getHotelReviews(
-            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "page", defaultValue = "1") int page,
             @PathVariable("hotelId") long hotelId
     ) {
 

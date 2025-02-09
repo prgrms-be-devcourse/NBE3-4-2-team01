@@ -120,7 +120,7 @@ public class ReviewService {
         }
 
         int size = 10;
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by("createdAt").descending());
         Page<MyReviewWithCommentDto> myReviews = reviewRepository.findReviewsWithCommentByMemberId(actor.getId(), pageable);
 
         return getReviewsWithImages(
@@ -134,7 +134,7 @@ public class ReviewService {
     // 호텔의 모든 리뷰 조회 (답변, 이미지 포함)
     public Page<HotelReviewResponse> getHotelReviewResponses(long hotelId, int page) {
         int size = 10;
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by("createdAt").descending());
         Page<HotelReviewWithCommentDto> hotelReviews = reviewRepository.findReviewsWithCommentByHotelId(hotelId, pageable);
 
         return getReviewsWithImages(

@@ -266,10 +266,18 @@ public class HotelService {
                             .filter(room -> room.getRoomNumber() > 0)
                             .toList();
                     hotel.setRooms(availableRooms);
-                    return dto;
+
+                    // 최저가 객실 찾기
+                    Room minPriceRoom = availableRooms.stream()
+                            .min(Comparator.comparing(Room::getBasePrice))
+                            .orElse(null);
+
+                    if(minPriceRoom == null) {
+                        return new GetHotelResponse(dto,null);
+                    }
+
+                    return new GetHotelResponse(dto, minPriceRoom.getBasePrice());
                 })
-//                .filter(dto -> !dto.hotel().getRooms().isEmpty())
-                .map(GetHotelResponse::new)
                 .toList();
     }
 
