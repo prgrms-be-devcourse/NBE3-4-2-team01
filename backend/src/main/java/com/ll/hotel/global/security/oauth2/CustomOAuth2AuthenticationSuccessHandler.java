@@ -1,26 +1,24 @@
 package com.ll.hotel.global.security.oauth2;
 
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
+import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.domain.member.member.service.AuthTokenService;
+import com.ll.hotel.domain.member.member.service.MemberService;
+import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.member.member.service.AuthTokenService;
-import com.ll.hotel.domain.member.member.service.MemberService;
-import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
-
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
