@@ -1,9 +1,9 @@
-package com.ll.hotel.domain.hotel.option.roomOption.controller;
+package com.ll.hotel.domain.hotel.option.cotroller;
 
-import com.ll.hotel.domain.hotel.option.roomOption.dto.RoomOptionDto;
-import com.ll.hotel.domain.hotel.option.roomOption.dto.request.RoomOptionRequest;
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
-import com.ll.hotel.domain.hotel.option.roomOption.service.RoomOptionService;
+import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
+import com.ll.hotel.domain.hotel.option.dto.response.OptionResponse;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.service.RoomOptionService;
 import com.ll.hotel.global.rsData.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,23 +18,23 @@ public class RoomOptionController {
     private final RoomOptionService roomOptionService;
 
     @PostMapping
-    public RsData<RoomOptionDto> add(@RequestBody @Valid RoomOptionRequest.Details details) {
+    public RsData<OptionResponse> add(@RequestBody @Valid OptionRequest optionRequest) {
 
-        RoomOption roomOption = roomOptionService.add(details);
+        RoomOption roomOption = roomOptionService.add(optionRequest);
 
         return new RsData<>(
                 "201",
                 "항목이 추가되었습니다.",
-                RoomOptionDto.toDto(roomOption)
+                OptionResponse.from(roomOption)
         );
     }
 
     @GetMapping
-    public RsData<List<RoomOptionDto>> getAll() {
+    public RsData<List<OptionResponse>> getAll() {
 
-        List<RoomOptionDto> roomAmenityList = roomOptionService.findAll()
+        List<OptionResponse> roomAmenityList = roomOptionService.findAll()
                 .stream()
-                .map(RoomOptionDto::toDto).toList();
+                .map(OptionResponse::from).toList();
 
         return new RsData<>(
                 "200",
@@ -44,29 +44,29 @@ public class RoomOptionController {
     }
 
     @GetMapping("/{id}")
-    public RsData<RoomOptionDto> getById(@PathVariable("id") Long id) {
+    public RsData<OptionResponse> getById(@PathVariable("id") Long id) {
 
         RoomOption roomOption = roomOptionService.findById(id);
 
         return new RsData<>(
                 "200",
                 "항목이 조회되었습니다.",
-                RoomOptionDto.toDto(roomOption)
+                OptionResponse.from(roomOption)
         );
     }
 
     @PutMapping("/{id}")
-    public RsData<RoomOptionDto> modify(@PathVariable("id") Long id,
-                                        @RequestBody RoomOptionRequest.Details details) {
+    public RsData<OptionResponse> modify(@PathVariable("id") Long id,
+                                        @RequestBody OptionRequest optionRequest) {
         RoomOption roomOption = roomOptionService.findById(id);
-        roomOptionService.modify(roomOption, details);
+        roomOptionService.modify(roomOption, optionRequest);
 
         roomOptionService.flush();
 
         return new RsData<>(
                 "200",
                 "항목이 수정되었습니다.",
-                RoomOptionDto.toDto(roomOption)
+                OptionResponse.from(roomOption)
         );
     }
 

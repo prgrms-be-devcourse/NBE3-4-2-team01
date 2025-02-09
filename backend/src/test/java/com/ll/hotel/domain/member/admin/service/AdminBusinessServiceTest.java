@@ -48,7 +48,6 @@ class AdminBusinessServiceTest {
                     .birthDate(LocalDate.now())
                     .memberEmail(String.format("member[%02d]", i))
                     .memberName("member")
-                    .password("dfkajl12333")
                     .memberPhoneNumber("01012345678")
                     .memberStatus(MemberStatus.ACTIVE)
                     .role(Role.BUSINESS)
