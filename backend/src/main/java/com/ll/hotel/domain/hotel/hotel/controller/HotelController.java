@@ -63,7 +63,8 @@ public class HotelController {
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}") @DateTimeFormat(iso = ISO.DATE)
             LocalDate checkInDate,
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().plusDays(1)}") @DateTimeFormat(iso = ISO.DATE)
-            LocalDate checkoutDate
+            LocalDate checkoutDate,
+            @RequestParam(defaultValue = "2") int personal
     ) {
         GlobalValidation.checkPageSize(pageSize);
         GlobalValidation.checkCheckInAndOutDate(checkInDate, checkoutDate);
@@ -73,7 +74,7 @@ public class HotelController {
                 "모든 호텔 정보를 정상적으로 조회했습니다.",
                 new PageDto<>(
                         this.hotelService.findAllHotels(page, pageSize, filterName, filterDirection,
-                                streetAddress, checkInDate, checkoutDate))
+                                streetAddress, checkInDate, checkoutDate, personal))
         );
     }
 

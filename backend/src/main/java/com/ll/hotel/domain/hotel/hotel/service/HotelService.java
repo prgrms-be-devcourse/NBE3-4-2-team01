@@ -84,7 +84,8 @@ public class HotelService {
 
     @Transactional(readOnly = true)
     public Page<GetHotelResponse> findAllHotels(int page, int pageSize, String filterName, String filterDirection,
-                                                String streetAddress, LocalDate checkInDate, LocalDate checkOutDate) {
+                                                String streetAddress, LocalDate checkInDate, LocalDate checkOutDate,
+                                                int personal) {
         Map<String, String> sortFieldMapping = Map.of(
                 "latest", "createdAt",
                 "averageRating", "averageRating",
@@ -110,7 +111,7 @@ public class HotelService {
         Page<HotelWithImageDto> hotels = this.hotelRepository.findAllHotels(ImageType.HOTEL, streetAddress,
                 pageRequest);
 
-        List<GetHotelResponse> availableHotels = this.getAvailableHotels(checkInDate, checkOutDate, hotels);
+        List<GetHotelResponse> availableHotels = this.getAvailableHotels(checkInDate, checkOutDate, personal, hotels);
 
         return new PageImpl<>(availableHotels, pageRequest, availableHotels.size());
     }
@@ -245,21 +246,21 @@ public class HotelService {
                 .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
     }
 
-    /**
-     * 예약 가능한 호텔 리스트
-     * 예약 가능한 객실이 없으면 해당 호텔은 보여주지 않음
-     * room 이 변경되므로, 다른 곳에서는 사용하지 말 것
-     */
-    // 배포 시 .filter 부분 주석 해제 (예약 가능한 Room이 없으면 호텔을 보여주지 않는 부분)
+    // 예약 가능한 호텔 리스트 예약 가능한 객실이 없으면 해당 호텔은 보여주지 않음.
+    // room 이 변경되므로, 다른 곳에서는 사용하지 말 것
+    // 첫 번째 filter 는 중복으로 인해 제거 상태. 문제 시 아래의 메서드와 함께 주석 해제
+    // 배포 시 마지막 filter 부분 주석 해제 (예약 가능한 Room 이 없으면 호텔을 보여주지 않는 부분)
     private List<GetHotelResponse> getAvailableHotels(LocalDate checkInDate, LocalDate checkOutDate,
-                                                      Page<HotelWithImageDto> hotels) {
+                                                      int personal, Page<HotelWithImageDto> hotels) {
         return hotels.stream()
                 .map(dto -> {
                     Hotel hotel = dto.hotel();
                     List<Room> availableRooms = hotel.getRooms().stream()
-                            .filter(room -> this.roomIsAvailable(room, checkInDate, checkOutDate))
+                            .filter(room -> personal >= room.getStandardNumber() && personal <= room.getMaxNumber())
+//                            .filter(room -> this.roomIsAvailable(room, checkInDate, checkOutDate))
                             .map(room -> {
-                                room.setRoomNumber(this.countAvailableRoomNumber(room, checkInDate, checkOutDate));
+                                room.setRoomNumber(
+                                        this.countAvailableRoomNumber(room, checkInDate, checkOutDate, personal));
                                 return room;
                             })
                             .filter(room -> room.getRoomNumber() > 0)
@@ -273,14 +274,18 @@ public class HotelService {
     }
 
     // 예약 가능한 객실 여부
-    private boolean roomIsAvailable(Room room, LocalDate checkInDate, LocalDate checkOutDate) {
-        return room.getBookings().stream()
-                .noneMatch(booking -> (booking.getCheckInDate().isBefore(checkOutDate)
-                                       && booking.getCheckOutDate().isAfter(checkInDate)));
-    }
+//    private boolean roomIsAvailable(Room room, LocalDate checkInDate, LocalDate checkOutDate) {
+//        return room.getBookings().stream()
+//                .noneMatch(booking -> (booking.getCheckInDate().isBefore(checkOutDate)
+//                                       && booking.getCheckOutDate().isAfter(checkInDate)));
+//    }
 
     // 호텔의 예약 가능한 객실 수 Count
-    private int countAvailableRoomNumber(Room room, LocalDate checkInDate, LocalDate checkOutDate) {
+    private int countAvailableRoomNumber(Room room, LocalDate checkInDate, LocalDate checkOutDate, int personal) {
+        if (personal < room.getStandardNumber() || personal > room.getMaxNumber()) {
+            return 0;
+        }
+
         long resolvedCount = room.getBookings().stream()
                 .filter(booking -> booking.getCheckInDate().isBefore(checkOutDate)
                                    && booking.getCheckOutDate().isAfter(checkInDate))
