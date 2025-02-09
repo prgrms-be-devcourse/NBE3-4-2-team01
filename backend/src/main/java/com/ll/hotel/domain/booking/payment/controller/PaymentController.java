@@ -22,38 +22,25 @@ public class PaymentController {
     private final PaymentService paymentService;
     private final Rq rq;
 
-    /*
-     * portone api 호출에 필요한 keys
-     * application-api-keys.yml에 저장된 값을 가져옴
-     */
-    @Value("${api-keys.portone.apiId}")
-    private String apiId;
-    @Value("${api-keys.portone.channel-key}")
-    private String channelKey;
-
-    /*
-     * 상점 uid 및 api key 발급
-     * 결제 관련 api는 /uid 외에 실제로 호출하도록 설계되지 않았음
-     * 다만 테스트용으로 작성한 바가 있음
-     */
+    // 상점 uid 및 api key 발급
     @GetMapping("/uid")
     public RsData<UidResponse> getUid() {
         Member actor = rq.getActor();
-        if (actor == null) {
-            throw new ServiceException("401", "Uid 발급 권한이 없습니다.");
-        }
 
-        String merchantUid = paymentService.generateMerchantUid();
         return new RsData<>(
                 "200",
                 "Uid 발급에 성공했습니다.",
-                new UidResponse(apiId, channelKey, merchantUid)
+                paymentService.generateMerchantUid()
         );
     }
 
+    /*
+     * 본래 결제 api와 예약 api는 독립적으로 설계되어 프론트에서 트랜잭션을 수행할 계획이었으나
+     * 프론트 역량이 부족하여 결제와 예약 로직을 백엔드에서 동시에 처리하도록 함
+     * 이에 결제 api는 독립적으로 호출이 불가능하도록 변경함
+     *
     // 결제
     @PostMapping
-    @Transactional
     public RsData<PaymentResponse> pay(
             @RequestBody @Valid PaymentRequest paymentRequest) {
         Member actor = rq.getActor();
@@ -87,7 +74,6 @@ public class PaymentController {
     }
 
     @DeleteMapping("/{payment_id}")
-    @Transactional
     public RsData<PaymentResponse> cancel(
             @PathVariable("payment_id") Long paymentId) {
         Member actor = rq.getActor();
@@ -102,4 +88,5 @@ public class PaymentController {
                 PaymentResponse.from(payment)
         );
     }
+    */
 }
