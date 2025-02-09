@@ -5,10 +5,10 @@ spring:
   cloud:
     aws:
       s3:
-        bucket: temp
+        bucket: ${BUCKET_NAME}
       credentials:
-        access-key: test-access-key
-        secret-key: test-secret-key
+        access-key: ${IAM_ACCESS_KEY}
+        secret-key: ${IAM_SECRET_KEY}
       region:
         static: us-east-1
 
