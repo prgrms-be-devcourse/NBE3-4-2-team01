@@ -3,18 +3,12 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Star } from 'lucide-react';
-import { HotelReviewResponse } from '@/lib/types/HotelReviewResponse';
-import { MyReviewResponse } from '@/lib/types/MyReviewResponse';
+import { HotelReviewResponse } from '@/lib/types/review/HotelReviewResponse';
 import { postReviewComment, updateReviewComment, deleteReviewComment } from '@/lib/api/ReviewCommentApi';
 
-export type ReviewResponseType = HotelReviewResponse | MyReviewResponse;
-
-export const isHotelReview = (review: ReviewResponseType): review is HotelReviewResponse => {
-  return 'hotelReviewWithCommentDto' in review;
-};
 
 interface ReviewWithCommentProps {
-  review: ReviewResponseType;
+  review: HotelReviewResponse;
   isBusinessUser?: boolean;
   onCommentUpdate?: () => void;
 }
@@ -24,32 +18,21 @@ export const HotelReviewWithComment: React.FC<ReviewWithCommentProps> = ({
   isBusinessUser = false,
   onCommentUpdate 
 }) => {
+  console.log(isBusinessUser);
   const [comment, setComment] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const getReviewData = (review: ReviewResponseType) => {
-    if (isHotelReview(review)) {
-      const { hotelReviewWithCommentDto, imageUrls } = review;
-      return {
-        title: hotelReviewWithCommentDto.memberEmail,
-        roomTypeName: hotelReviewWithCommentDto.roomTypeName,
-        reviewDto: hotelReviewWithCommentDto.reviewDto,
-        reviewCommentDto: hotelReviewWithCommentDto.reviewCommentDto,
-        reservedAt: hotelReviewWithCommentDto.reservedAt,
-        imageUrls
-      };
-    } else {
-      const { myReviewWithCommentDto, imageUrls } = review;
-      return {
-        title: myReviewWithCommentDto.hotelName,
-        roomTypeName: myReviewWithCommentDto.roomTypeName,
-        reviewDto: myReviewWithCommentDto.reviewDto,
-        reviewCommentDto: myReviewWithCommentDto.reviewCommentDto,
-        reservedAt: myReviewWithCommentDto.reservedAt,
-        imageUrls
-      };
-    }
+  const getReviewData = (review: HotelReviewResponse) => {
+    const { hotelReviewWithCommentDto, imageUrls } = review;
+    return {
+      title: hotelReviewWithCommentDto.memberEmail,
+      roomTypeName: hotelReviewWithCommentDto.roomTypeName,
+      reviewDto: hotelReviewWithCommentDto.reviewDto,
+      reviewCommentDto: hotelReviewWithCommentDto.reviewCommentDto,
+      createdAt: hotelReviewWithCommentDto.createdAt,
+      imageUrls
+    };
   };
 
   const {
@@ -57,7 +40,7 @@ export const HotelReviewWithComment: React.FC<ReviewWithCommentProps> = ({
     roomTypeName,
     reviewDto,
     reviewCommentDto,
-    reservedAt,
+    createdAt,
     imageUrls
   } = getReviewData(review);
 
@@ -166,8 +149,8 @@ export const HotelReviewWithComment: React.FC<ReviewWithCommentProps> = ({
             <p className="text-sm text-gray-500 mt-2">
               {new Date(reviewCommentDto.createdAt).toLocaleString()}
             </p>
-            <div className="mt-4 flex gap-2">
-              <Button onClick={() => setIsEditing(true)}>수정</Button>
+            <div className="flex justify-end gap-2">
+              <Button className="bg-blue-500" onClick={() => setIsEditing(true)}>수정</Button>
               <Button variant="destructive" onClick={handleDeleteComment}>
                 삭제
               </Button>
@@ -187,7 +170,7 @@ export const HotelReviewWithComment: React.FC<ReviewWithCommentProps> = ({
           <div>
             <h3 className="text-lg font-semibold">{title}</h3>
             <p className="text-sm text-gray-500">
-              {roomTypeName} • {new Date(reservedAt).toLocaleDateString()}
+              {roomTypeName} • {new Date(createdAt).toLocaleDateString()}
             </p>
           </div>
           <div className="flex items-center">

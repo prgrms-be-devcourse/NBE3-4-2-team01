@@ -9,7 +9,7 @@ const HotelReviewsPage = () => {
   const searchParams = useSearchParams();
   const params = useParams();
   const hotelId: number = Number(params.hotelId);
-  const page = Number(searchParams.get('page')) || 1;
+  const page = Number(searchParams.get('page')) || 0;
 
   return (
     <div className="container mx-auto p-4">

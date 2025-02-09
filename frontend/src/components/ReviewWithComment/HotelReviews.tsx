@@ -23,11 +23,11 @@ const HotelReviews: React.FC<HotelReviewsProps> = ({ hotelId, page, isBusinessUs
     try {
       setIsLoading(true);
       const response : HotelReviewListResponse = await getHotelReviews(hotelId, page);
+      console.log(response);
       const reviewPage : PageDto<HotelReviewResponse> = response.hotelReviewPage;
       setResponse(response);
       setReviewPage(reviewPage);
       setReviews(reviewPage.items);
-      alert('호텔 리뷰 목록 조회 성공');
     } catch (error) {
       if (error instanceof Error) {
         alert(error.message);

@@ -29,11 +29,17 @@ const Pagination = ({ currentPage, totalPages, basePath }: PaginationProps) => {
     return range;
   };
 
+  // 경로가 '/me/reviews' 같은 절대 경로라면, 상대경로를 만들어줍니다.
+  const createLink = (page: number) => {
+    // basePath가 '/'로 시작하지 않으면 '/'를 추가하여 절대경로를 만듦
+    return `${basePath.startsWith("/") ? basePath : `/${basePath}`}?page=${page}`;
+  };
+
   return (
     <div className={styles.paginationContainer}>
       {/* 이전 페이지 */}
       <Link
-        href={`${basePath}?page=${currentPage - 1}`}
+        href={createLink(currentPage - 1)}
         className={`${styles.pageLink} ${
           currentPage === 1 ? styles.disabled : ""
         }`}
@@ -45,7 +51,7 @@ const Pagination = ({ currentPage, totalPages, basePath }: PaginationProps) => {
       {getPageRange().map((page) => (
         <Link
           key={page}
-          href={`${basePath}?page=${page}`}
+          href={createLink(currentPage)}
           className={`${styles.pageLink} ${
             page === currentPage ? styles.active : ""
           }`}
@@ -56,7 +62,7 @@ const Pagination = ({ currentPage, totalPages, basePath }: PaginationProps) => {
 
       {/* 다음 페이지 */}
       <Link
-        href={`${basePath}?page=${currentPage + 1}`}
+        href={createLink(currentPage + 1)}
         className={`${styles.pageLink} ${
           currentPage === totalPages ? styles.disabled : ""
         }`}

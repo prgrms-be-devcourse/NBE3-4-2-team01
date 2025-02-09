@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { PresignedUrlsResponse } from '@/lib/types/PresignedUrlsResponse';
 import { UpdateReviewRequest } from '@/lib/types/UpdateReviewRequest';
 import { fetchReview, updateReview } from '@/lib/api/ReviewApi';
@@ -25,6 +25,7 @@ export default function CreatePage() {
   const [presignedUrls, setPresignedUrls] = useState<string[]>([]);
   const [reviewId, setReviewId] = useState(0);
   const params = useParams();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchReviewData = async () => {
@@ -58,7 +59,6 @@ export default function CreatePage() {
       const files = Array.from(e.target.files);
       setNewImages([...newImages, ...files]);
       
-      // Create preview URLs for new images
       const newPreviews = files.map(file => URL.createObjectURL(file));
       setNewImagePreviews([...newImagePreviews, ...newPreviews]);
       
@@ -70,7 +70,6 @@ export default function CreatePage() {
     }
   };
 
-  // Cleanup preview URLs when component unmounts
   useEffect(() => {
     return () => {
       newImagePreviews.forEach(preview => URL.revokeObjectURL(preview));
@@ -93,7 +92,7 @@ export default function CreatePage() {
 
       setPresignedUrls(response.presignedUrls);
       await submitImages();
-      console.log('리뷰가 성공적으로 수정되었습니다.');
+      console.log('리뷰 내용, 레이팅이 성공적으로 수정되었습니다.');
      } catch (error) {
        console.error('Error:', error);
        alert('리뷰 생성 또는 이미지 업로드 중 오류가 발생했습니다.');
@@ -102,7 +101,8 @@ export default function CreatePage() {
 
   const submitImages = async () => {
     if (presignedUrls.length === 0) {
-      alert('이미지 업로드 URL을 가져오지 못했습니다.');
+      alert('리뷰가 수정되었습니다.');
+      router.push('/me/reviews/');
       return;
     }
 
@@ -122,8 +122,9 @@ export default function CreatePage() {
     });
 
     try {
-      uploadImageUrls(reviewId, viewUrls);
-      alert('이미지 URL이 성공적으로 저장되었습니다.');
+      await uploadImageUrls(reviewId, viewUrls);
+      alert('리뷰가 수정되었습니다.');
+      router.push('/me/reviews/');
     } catch (error) { 
       console.error('Error:', error);
       alert('이미지 URL 저장 중 오류가 발생했습니다.');
@@ -236,10 +237,11 @@ export default function CreatePage() {
                 </div>
               )}
             </div>
-
-            <Button type="submit" className="w-full">
-              수정완료
-            </Button>
+            <div className="flex justify-center">
+              <Button type="submit" className="w-1/2 mx-auto">
+                수정완료
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

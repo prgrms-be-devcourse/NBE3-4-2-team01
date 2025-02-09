@@ -1,5 +1,5 @@
 import { HotelReviewResponse } from "./HotelReviewResponse";
-import { PageDto } from "./PageDto";
+import { PageDto } from "../PageDto";
 
 export interface HotelReviewListResponse {
     hotelReviewPage : PageDto<HotelReviewResponse>;
