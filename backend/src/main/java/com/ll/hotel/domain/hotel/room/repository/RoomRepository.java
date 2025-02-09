@@ -3,11 +3,12 @@ package com.ll.hotel.domain.hotel.room.repository;
 import com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.image.type.ImageType;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface RoomRepository extends JpaRepository<Room, Long> {
     @Query("""
@@ -18,8 +19,8 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             AND i.imageType = :imageType
             WHERE r.hotel.id = :hotelId
             AND r.roomStatus <> 'UNAVAILABLE'
-            AND i.uploadedAt = (
-                SELECT MIN(i2.uploadedAt)
+            AND i.createdAt = (
+                SELECT MIN(i2.createdAt)
                 FROM Image i2
                 WHERE i2.referenceId = r.id
                 AND i2.imageType = :imageType
