@@ -21,7 +21,7 @@ public class Image extends BaseEntity {
 
     @CreatedDate
     @Column(nullable = false)
-    private LocalDateTime uploadedAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
     private Long referenceId;

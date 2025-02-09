@@ -9,11 +9,10 @@ import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.repository.ImageRepository;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.review.dto.*;
+import com.ll.hotel.domain.review.review.dto.ReviewDto;
 import com.ll.hotel.domain.review.review.dto.response.*;
 import com.ll.hotel.domain.review.review.entity.Review;
 import com.ll.hotel.domain.review.review.repository.ReviewRepository;
-import com.ll.hotel.domain.review.review.type.ReviewStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +44,7 @@ public class ReviewService {
         Room room = entityManager.getReference(Room.class, roomId);
         Booking booking = entityManager.getReference(Booking.class, bookingId);
 
-        if(booking.isReservedBy(member)) {
+        if(!booking.isReservedBy(member)) {
             throw new ServiceException("403-1", "예약자만 리뷰 생성이 가능합니다.");
         }
 
@@ -59,7 +58,6 @@ public class ReviewService {
                 .booking(booking)
                 .content(content)
                 .rating(rating)
-                .reviewStatus(ReviewStatus.CREATED)
                 .build();
 
         Review savedReview = reviewRepository.save(review);
@@ -68,10 +66,10 @@ public class ReviewService {
 
     // 리뷰의 content, rating 수정
     public void updateReviewContentAndRating(Member actor, long reviewId, String content, int rating){
-        Review review = reviewRepository.findByIdWithFilter(reviewId)
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ServiceException("400-1", "수정할 리뷰가 존재하지 않습니다."));
 
-        if(review.isWrittenBy(actor)) {
+        if(!review.isWrittenBy(actor)) {
             throw new ServiceException("403-1", "리뷰 작성자만 리뷰 수정 가능합니다.");
         }
 
@@ -80,30 +78,29 @@ public class ReviewService {
 
         review.setContent(content);
         review.setRating(rating);
-        review.setReviewStatus(ReviewStatus.UPDATED);
     }
 
     // 리뷰 삭제
     public void deleteReview(Member actor, long reviewId) {
-        Review review = reviewRepository.findByIdWithFilter(reviewId)
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ServiceException("400-1", "삭제할 리뷰가 존재하지 않습니다."));
 
-        if(review.isWrittenBy(actor)) {
+        if(!review.isWrittenBy(actor)) {
             throw new ServiceException("403-1", "리뷰 작성자만 리뷰 삭제 가능합니다.");
         }
 
         // 호텔 평균 리뷰 수정
         updateRatingOnReviewDeleted(review.getHotel(), review.getRating());
 
-        review.setReviewStatus(ReviewStatus.DELETED);
+        reviewRepository.delete(review);
     }
 
     // 리뷰 단건 조회
     public GetReviewResponse getReviewResponse(Member actor, long reviewId) {
-        Review review = reviewRepository.findByIdWithFilter(reviewId)
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ServiceException("400-1", "해당 리뷰가 존재하지 않습니다."));
 
-        if(review.isWrittenBy(actor)) {
+        if(!review.isWrittenBy(actor)) {
             throw new ServiceException("403-1", "리뷰 작성자만 리뷰 수정 가능합니다.");
         }
 
@@ -116,10 +113,15 @@ public class ReviewService {
     }
 
     // 현재 접속한 유저가 작성한 모든 리뷰 조회 (답변, 이미지 포함)
-    public Page<MyReviewResponse> getMyReviewResponses(long memberId, int page) {
+    public Page<MyReviewResponse> getMyReviewResponses(Member actor, int page) {
+
+        if (!actor.isUser()) {
+            throw new ServiceException("403-1", "관리자, 사업자는 리뷰 목록 조회가 불가능합니다.");
+        }
+
         int size = 10;
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<MyReviewWithCommentDto> myReviews = reviewRepository.findReviewsWithCommentByMemberId(memberId, pageable);
+        Page<MyReviewWithCommentDto> myReviews = reviewRepository.findReviewsWithCommentByMemberId(actor.getId(), pageable);
 
         return getReviewsWithImages(
                 myReviews,

@@ -1,10 +1,9 @@
 package com.ll.hotel.domain.review.comment.controller;
 
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.comment.dto.request.ReviewCommentContentRequest;
 import com.ll.hotel.domain.review.comment.dto.ReviewCommentDto;
+import com.ll.hotel.domain.review.comment.dto.request.ReviewCommentContentRequest;
 import com.ll.hotel.domain.review.comment.service.ReviewCommentService;
-import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
@@ -28,11 +27,7 @@ public class ReviewCommentController {
             @PathVariable("reviewId") long reviewId,
             @RequestBody @Valid ReviewCommentContentRequest contentRequest
     ) {
-        // 인증 로직 (로그인 여부 체크)
         Member actor = rq.getActor();
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인한 사용자만 답변 생성 가능합니다.");
-        }
 
         reviewCommentService.createReviewComment(actor, reviewId, contentRequest.content());
         return RsData.OK; // 201 vs 200
@@ -59,11 +54,7 @@ public class ReviewCommentController {
             @PathVariable("commentId") long commentId,
             @RequestBody @Valid ReviewCommentContentRequest contentRequest
     ) {
-        // 인증 로직 (로그인 여부 체크)
         Member actor = rq.getActor();
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인한 사용자만 답변 수정 가능합니다.");
-        }
 
         reviewCommentService.updateReviewComment(actor, commentId, contentRequest.content());
         return RsData.OK;
@@ -75,11 +66,7 @@ public class ReviewCommentController {
             @PathVariable("reviewId") long reviewId,
             @PathVariable("commentId") long commentId
     ) {
-        // 인증 로직 (로그인 여부 체크)
         Member actor = rq.getActor();
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인한 사용자만 답변 삭제 가능합니다.");
-        }
 
         reviewCommentService.deleteReviewComment(actor, commentId);
         return RsData.OK;
