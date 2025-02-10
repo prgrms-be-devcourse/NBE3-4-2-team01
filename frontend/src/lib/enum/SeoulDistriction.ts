@@ -1,5 +1,5 @@
 export enum SeoulDistrict {
-    DEFAULT = "",
+    DEFAULT = "전체",
     DOBONG = "도봉구",
     DONGDAEMUN = "동대문구",
     DONGJAK = "동작구",

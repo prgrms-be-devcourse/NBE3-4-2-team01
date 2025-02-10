@@ -17,7 +17,7 @@ interface SearchComponentProps {
 const REGIONS = [...new Set(Object.values(SeoulDistrict))].map((district, index) => ({
   id: index,
   name: district,
-  fullAddress: `서울특별시 ${district}`
+  fullAddress: `${district}`
 }));
 
 export default function SearchComponent({ className = '' }: SearchComponentProps) {
@@ -43,6 +43,7 @@ export default function SearchComponent({ className = '' }: SearchComponentProps
   });
 
   const handleSearch = () => {
+
     if (!location) {
       setErrors({ location: '목적지를 선택해주세요.' });
       setShowLocationSearch(true);
@@ -58,8 +59,11 @@ export default function SearchComponent({ className = '' }: SearchComponentProps
       return;
     }
 
+    // location이 SeoulDistrict.DEFAULT일 경우 빈 문자열로 설정
+    const streetAddress = location === SeoulDistrict.DEFAULT ? '' : location;
+
     const searchParams = new URLSearchParams({
-      streetAddress: location,
+      streetAddress: streetAddress,
       checkInDate: selectedRange.start.toISOString().split('T')[0],
       checkoutDate: selectedRange.end.toISOString().split('T')[0],
       personal: adults.toString()
