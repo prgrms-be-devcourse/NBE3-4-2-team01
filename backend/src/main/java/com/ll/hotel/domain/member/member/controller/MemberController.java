@@ -11,6 +11,7 @@ import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,14 +73,8 @@ public class MemberController {
     }
 
     @PostMapping("/logout")
-    public RsData<Void> logout(@RequestHeader("Authorization") String bearerToken) {
-        if (!StringUtils.hasText(bearerToken) || !bearerToken.startsWith("Bearer ")) {
-            throw new ServiceException("400-1", "잘못된 토큰 형식입니다.");
-        }
-
-        String token = bearerToken.substring(7);
-        memberService.logout(token);
-        
+    public RsData<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        memberService.logout(request, response);
         return new RsData<>("200-1", "로그아웃 되었습니다.");
     }
 
