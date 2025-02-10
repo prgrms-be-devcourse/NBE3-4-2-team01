@@ -1,6 +1,7 @@
 package com.ll.hotel.global.security.oauth2;
 
 
+import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.service.AuthTokenService;
 import com.ll.hotel.domain.member.member.service.MemberService;
@@ -62,8 +63,12 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
 
             Map<String, Object> roleData = new HashMap<>();
             roleData.put("role", member.getUserRole());
-            if(member.getUserRole().equals("BUSINESS") && member.getBusiness().getHotel() != null) {
-                roleData.put("hasHotel", true);
+            if(member.getUserRole().equals("BUSINESS")) {
+                Hotel hotel = member.getBusiness().getHotel();
+                if(hotel != null) {
+                    roleData.put("hasHotel", true);
+                    roleData.put("hotelId", hotel.getId());
+                }
             }
             String encodedRoleData = URLEncoder.encode(Ut.json.toString(roleData),StandardCharsets.UTF_8);
 
