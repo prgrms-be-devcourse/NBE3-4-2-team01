@@ -12,10 +12,10 @@ import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
-import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
-import com.ll.hotel.domain.hotel.option.hotelOption.repository.HotelOptionRepository;
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
-import com.ll.hotel.domain.hotel.option.roomOption.repository.RoomOptionRepository;
+import com.ll.hotel.domain.hotel.option.entity.HotelOption;
+import com.ll.hotel.domain.hotel.option.repository.HotelOptionRepository;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.repository.RoomOptionRepository;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
 import com.ll.hotel.domain.hotel.room.entity.Room;
@@ -30,10 +30,8 @@ import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.domain.review.comment.entity.ReviewComment;
 import com.ll.hotel.domain.review.comment.repository.ReviewCommentRepository;
-import com.ll.hotel.domain.review.comment.type.ReviewCommentStatus;
 import com.ll.hotel.domain.review.review.entity.Review;
 import com.ll.hotel.domain.review.review.repository.ReviewRepository;
-import com.ll.hotel.domain.review.review.type.ReviewStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
@@ -386,7 +384,6 @@ public class BaseInit {
                 .booking(booking1)
                 .content("객실1-1 리뷰")
                 .rating(5)
-                .reviewStatus(ReviewStatus.CREATED)
                 .build();
 
         Review review2 = Review.builder()
@@ -396,7 +393,6 @@ public class BaseInit {
                 .booking(booking2)
                 .content("객실1-2 리뷰")
                 .rating(4)
-                .reviewStatus(ReviewStatus.CREATED)
                 .build();
 
         Review review3 = Review.builder()
@@ -406,7 +402,6 @@ public class BaseInit {
                 .booking(booking3)
                 .content("객실2-1 리뷰")
                 .rating(5)
-                .reviewStatus(ReviewStatus.CREATED)
                 .build();
 
         Review review4 = Review.builder()
@@ -416,7 +411,6 @@ public class BaseInit {
                 .booking(booking4)
                 .content("객실2-2 리뷰")
                 .rating(3)
-                .reviewStatus(ReviewStatus.CREATED)
                 .build();
 
         reviewRepository.save(review1);
@@ -430,25 +424,21 @@ public class BaseInit {
         ReviewComment reviewComment1 = ReviewComment.builder()
                 .review(review1)
                 .content("객실1-1 답변")
-                .reviewCommentStatus(ReviewCommentStatus.CREATED)
                 .build();
 
         ReviewComment reviewComment2 = ReviewComment.builder()
                 .review(review2)
                 .content("객실1-2 답변")
-                .reviewCommentStatus(ReviewCommentStatus.CREATED)
                 .build();
 
         ReviewComment reviewComment3 = ReviewComment.builder()
                 .review(review3)
                 .content("객실2-1 답변")
-                .reviewCommentStatus(ReviewCommentStatus.CREATED)
                 .build();
 
         ReviewComment reviewComment4 = ReviewComment.builder()
                 .review(review4)
                 .content("객실2-2 답변")
-                .reviewCommentStatus(ReviewCommentStatus.CREATED)
                 .build();
 
         reviewCommentRepository.save(reviewComment1);

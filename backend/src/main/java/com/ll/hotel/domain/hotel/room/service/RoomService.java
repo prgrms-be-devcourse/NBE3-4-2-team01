@@ -2,8 +2,8 @@ package com.ll.hotel.domain.hotel.room.service;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
-import com.ll.hotel.domain.hotel.option.roomOption.repository.RoomOptionRepository;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.repository.RoomOptionRepository;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;

@@ -14,10 +14,9 @@ import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
-import com.ll.hotel.domain.hotel.option.hotelOption.dto.request.HotelOptionRequest;
-import com.ll.hotel.domain.hotel.option.hotelOption.dto.request.HotelOptionRequest.Details;
-import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
-import com.ll.hotel.domain.hotel.option.hotelOption.service.HotelOptionService;
+import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
+import com.ll.hotel.domain.hotel.option.entity.HotelOption;
+import com.ll.hotel.domain.hotel.option.service.HotelOptionService;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
@@ -39,6 +38,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.swing.text.html.Option;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -70,9 +71,9 @@ class HotelServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Business business = this.businessRepository.findAll().getFirst();
 
-        this.hotelOptionService.add(new Details("Parking_lot"));
-        this.hotelOptionService.add(new Details("Breakfast"));
-        this.hotelOptionService.add(new Details("Lunch"));
+        this.hotelOptionService.add(new OptionRequest("Parking_lot"));
+        this.hotelOptionService.add(new OptionRequest("Breakfast"));
+        this.hotelOptionService.add(new OptionRequest("Lunch"));
 
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
@@ -112,8 +113,8 @@ class HotelServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Business business = businessRepository.findAll().getFirst();
 
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Parking_lot"));
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Breakfast"));
+        this.hotelOptionService.add(new OptionRequest("Parking_lot"));
+        this.hotelOptionService.add(new OptionRequest("Breakfast"));
 
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
@@ -382,10 +383,10 @@ class HotelServiceTest {
     public void modifyHotel() {
         Member actor = this.memberRepository.findAll().getFirst();
         Business business = businessRepository.findAll().getFirst();
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Parking_lot"));
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Breakfast"));
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Lunch"));
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Dinner"));
+        this.hotelOptionService.add(new OptionRequest("Parking_lot"));
+        this.hotelOptionService.add(new OptionRequest("Breakfast"));
+        this.hotelOptionService.add(new OptionRequest("Lunch"));
+        this.hotelOptionService.add(new OptionRequest("Dinner"));
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
         PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
@@ -427,9 +428,9 @@ class HotelServiceTest {
     public void modifyHotelInvalidHotelOptions() {
         Member actor = this.memberRepository.findAll().getFirst();
         Business business = businessRepository.findAll().getFirst();
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Parking_lot"));
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Breakfast"));
-        this.hotelOptionService.add(new HotelOptionRequest.Details("Lunch"));
+        this.hotelOptionService.add(new OptionRequest("Parking_lot"));
+        this.hotelOptionService.add(new OptionRequest("Breakfast"));
+        this.hotelOptionService.add(new OptionRequest("Lunch"));
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
         PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",

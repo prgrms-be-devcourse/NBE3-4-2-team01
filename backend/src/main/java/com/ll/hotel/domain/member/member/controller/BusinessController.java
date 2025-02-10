@@ -10,7 +10,6 @@ import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +35,7 @@ public class BusinessController {
         return new RsData<>(
                 "201",
                 "사업자 정보가 등록되었습니다.",
-                BusinessResponse.ApprovalResult.of(business, validationResult)
+                BusinessResponse.ApprovalResult.of(business)
         );
     }
 }
