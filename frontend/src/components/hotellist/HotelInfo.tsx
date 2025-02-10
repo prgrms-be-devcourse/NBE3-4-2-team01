@@ -52,7 +52,7 @@ export default function HotelInfo({
                                     <span className="text-sm">/5</span>
                                 </div>
                                 <p className="text-sm text-gray-600 mt-1">
-                                    후기 {totalReviewCount.toLocaleString()}개
+                                    후기 {totalReviewCount && totalReviewCount.toLocaleString()}개
                                 </p>
                             </div>
                         </div>
@@ -67,7 +67,7 @@ export default function HotelInfo({
 
                         <div className="mt-auto text-right">
                             <p className="text-2xl font-bold text-blue-600">
-                                {price.toLocaleString()}원~
+                                {price && price.toLocaleString()}원~
                             </p>
                         </div>
                     </div>
