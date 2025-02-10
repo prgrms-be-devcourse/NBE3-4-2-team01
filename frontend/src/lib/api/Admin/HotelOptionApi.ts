@@ -18,9 +18,11 @@ export const addHotelOption = async (
 };
 
 export const getAllHotelOptions = async (): Promise<OptionResponse[]> => {
-  return fetchAPI<OptionResponse[]>(
+  const data = await fetchAPI<OptionResponse[]>(
     "http://localhost:8080/api/admin/hotel-options"
   );
+
+  return data.sort((a, b) => b.optionId - a.optionId);
 };
 
 export const getHotelOption = async (

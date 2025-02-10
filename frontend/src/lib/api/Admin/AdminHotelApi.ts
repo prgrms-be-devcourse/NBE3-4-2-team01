@@ -8,12 +8,19 @@ import {
 } from "@/lib/types/admin/response/AdminHotelResponse";
 import { PageDto } from "@/lib/types/PageDto";
 
-export const getAllHotelsForAdmin = async (): Promise<
-  PageDto<AdminHotelSummaryReponse>
-> => {
-  return fetchAPI<PageDto<AdminHotelSummaryReponse>>(
-    "http://localhost:8080/api/admin/hotels"
+export const getAllHotelsForAdmin = async (
+  page: number = 0
+): Promise<PageDto<AdminHotelSummaryReponse>> => {
+  const data = await fetchAPI<PageDto<AdminHotelSummaryReponse>>(
+    `http://localhost:8080/api/admin/hotels?page=${page}`
   );
+
+  return {
+    ...data,
+    items: data.items
+      ? data.items.sort((a, b) => (b.id ?? 0) - (a.id ?? 0))
+      : [],
+  };
 };
 
 export const getHotelForAdmin = async (

@@ -8,12 +8,17 @@ import { AdminBusinessRequest } from "@/lib/types/admin/request/AdminBusinessReq
 import { FetchOptions } from "@/lib/types/global/FetchOption";
 import { PageDto } from "@/lib/types/PageDto";
 
-export const getAllBusinesses = async (): Promise<
-  PageDto<AdminBusinessSummaryReponse>
-> => {
-  return fetchAPI<PageDto<AdminBusinessSummaryReponse>>(
-    "http://localhost:8080/api/admin/businesses"
+export const getAllBusinesses = async (
+  page: number = 0
+): Promise<PageDto<AdminBusinessSummaryReponse>> => {
+  const data = await fetchAPI<PageDto<AdminBusinessSummaryReponse>>(
+    `http://localhost:8080/api/admin/businesses?page=${page}`
   );
+
+  return {
+    ...data,
+    items: data.items.sort((a, b) => b.businessId - a.businessId),
+  };
 };
 
 export const getBusiness = async (
