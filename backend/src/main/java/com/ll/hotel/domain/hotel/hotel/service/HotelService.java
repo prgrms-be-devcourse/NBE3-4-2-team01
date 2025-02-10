@@ -155,7 +155,7 @@ public class HotelService {
 
         if (request.hotelStatus() != null) {
             try {
-                hotel.setHotelStatus(HotelStatus.valueOf(request.hotelStatus().toUpperCase()));
+                hotel.setHotelStatus(HotelStatus.fromValue(request.hotelStatus().toUpperCase()));
             } catch (Exception e) {
                 throw new ServiceException("404-2", "호텔 상태 정보를 정확히 입력해주세요.");
             }
@@ -300,5 +300,11 @@ public class HotelService {
                 .count();
 
         return room.getRoomNumber() - (int) resolvedCount;
+    }
+
+    @BusinessOnly
+    @Transactional(readOnly = true)
+    public GetAllHotelOptionsResponse findHotelOptions(Member actor) {
+        return new GetAllHotelOptionsResponse(this.hotelOptionRepository.findAll());
     }
 }
