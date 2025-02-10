@@ -2,7 +2,7 @@ package com.ll.hotel.domain.hotel.room.entity;
 
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import com.ll.hotel.domain.hotel.room.type.RoomStatus;

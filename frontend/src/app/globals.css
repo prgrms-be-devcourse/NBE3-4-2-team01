@@ -7,7 +7,7 @@ body {
 }
 
 .content-wrapper {
-  padding-top: 70px; /* Navigation 높이에 맞춰 조정 */
+  padding-top: 90px; /* Navigation 높이에 맞춰 조정 */
 }
 
 @layer base {

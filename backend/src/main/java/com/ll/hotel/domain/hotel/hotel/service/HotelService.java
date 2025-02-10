@@ -7,8 +7,8 @@ import com.ll.hotel.domain.hotel.hotel.dto.*;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
-import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
-import com.ll.hotel.domain.hotel.option.hotelOption.repository.HotelOptionRepository;
+import com.ll.hotel.domain.hotel.option.entity.HotelOption;
+import com.ll.hotel.domain.hotel.option.repository.HotelOptionRepository;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomRevenueResponse;
 import com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto;
 import com.ll.hotel.domain.hotel.room.entity.Room;
@@ -266,10 +266,18 @@ public class HotelService {
                             .filter(room -> room.getRoomNumber() > 0)
                             .toList();
                     hotel.setRooms(availableRooms);
-                    return dto;
+
+                    // 최저가 객실 찾기
+                    Room minPriceRoom = availableRooms.stream()
+                            .min(Comparator.comparing(Room::getBasePrice))
+                            .orElse(null);
+
+                    if(minPriceRoom == null) {
+                        return new GetHotelResponse(dto,null);
+                    }
+
+                    return new GetHotelResponse(dto, minPriceRoom.getBasePrice());
                 })
-//                .filter(dto -> !dto.hotel().getRooms().isEmpty())
-                .map(GetHotelResponse::new)
                 .toList();
     }
 

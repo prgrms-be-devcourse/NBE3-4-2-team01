@@ -53,7 +53,7 @@ public class Member extends BaseTime {
     @Builder.Default
     private List<OAuth> oauths = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(mappedBy="member", fetch = FetchType.LAZY)
     private Business business;
 
     @ManyToMany

@@ -42,6 +42,7 @@ export const MyReviewWithComment: React.FC<MyReviewWithCommentProps> = ({ review
   const handleDeleteClick = async () => {
     await deleteReview(reviewDto.reviewId);
     onReviewDelete?.();
+    alert('리뷰가 삭제되었습니다');
   };
 
   return (

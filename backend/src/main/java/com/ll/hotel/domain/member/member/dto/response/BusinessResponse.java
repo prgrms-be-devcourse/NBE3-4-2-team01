@@ -3,6 +3,7 @@ package com.ll.hotel.domain.member.member.dto.response;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -10,15 +11,17 @@ public class BusinessResponse {
     public record ApprovalResult(
             Long businessId,
             String businessRegistrationNumber,
-            BusinessApprovalStatus approvalStatus,
-            String apprvalCode
+            LocalDate startDate,
+            String ownerName,
+            BusinessApprovalStatus approvalStatus
     ) {
-        public static ApprovalResult of(Business business, String approvalCode) {
+        public static ApprovalResult of(Business business) {
             return new ApprovalResult(
                     business.getId(),
                     business.getBusinessRegistrationNumber(),
-                    business.getApprovalStatus(),
-                    approvalCode
+                    business.getStartDate(),
+                    business.getOwnerName(),
+                    business.getApprovalStatus()
             );
         }
     }
