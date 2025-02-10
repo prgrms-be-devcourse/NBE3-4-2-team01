@@ -1,4 +1,4 @@
-export interface RoomRevenue {
+export interface RoomRevenueResponse {
     roomId : number;
     roomName : string;
     basePrice : number;

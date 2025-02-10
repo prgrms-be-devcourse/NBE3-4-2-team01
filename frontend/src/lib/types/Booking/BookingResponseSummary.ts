@@ -1,5 +1,6 @@
 import { BookingHotelDto } from "./BookingHotelDto";
 import { BookingRoomDto } from "./BookingRoomDto";
+import { PaymentResponse } from "./Payment/PaymentResponse";
 
 export interface BookingResponseSummary {
     bookingId : number;
