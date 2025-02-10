@@ -14,6 +14,9 @@ import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import com.ll.hotel.global.security.oauth2.repository.OAuthRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -21,13 +24,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -114,13 +116,27 @@ public class MemberService {
         return refreshTokenService.generateRefreshToken(email);
     }
 
-    public void logout(String accessToken) {
-        if (!StringUtils.hasText(accessToken)) {
+    @Transactional
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        String accessToken = null;
+        
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("access_token".equals(cookie.getName())) {
+                    accessToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (accessToken == null) {
             throw new ServiceException("400-1", "토큰이 필요합니다.");
         }
 
         String email = authTokenService.getEmail(accessToken);
         
+        // Redis에서 토큰 무효화
         redisTemplate.opsForValue().set(
             LOGOUT_PREFIX + accessToken,
             email,
@@ -128,7 +144,33 @@ public class MemberService {
             TimeUnit.MILLISECONDS
         );
 
+        // Refresh 토큰 삭제
         refreshTokenService.removeRefreshToken(email);
+
+        deleteCookie(response);
+    }
+
+    private static void deleteCookie(HttpServletResponse response) {
+        Cookie accessTokenCookie = new Cookie("access_token", null);
+        accessTokenCookie.setMaxAge(0);
+        accessTokenCookie.setPath("/");
+
+        Cookie roleCookie = new Cookie("role", null);
+        roleCookie.setMaxAge(0);
+        roleCookie.setPath("/");
+
+        Cookie refreshTokenCookie = new Cookie("refresh_token", null);
+        refreshTokenCookie.setMaxAge(0);
+        refreshTokenCookie.setPath("/");
+
+        Cookie oauth2AuthRequestCookie = new Cookie("oauth2_auth_request", null);
+        oauth2AuthRequestCookie.setMaxAge(0);
+        oauth2AuthRequestCookie.setPath("/");
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(roleCookie);
+        response.addCookie(refreshTokenCookie);
+        response.addCookie(oauth2AuthRequestCookie);
     }
 
     public boolean isLoggedOut(String token) {
