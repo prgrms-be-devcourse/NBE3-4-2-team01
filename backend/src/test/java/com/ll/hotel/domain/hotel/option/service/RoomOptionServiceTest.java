@@ -1,8 +1,8 @@
-package com.ll.hotel.domain.hotel.option.roomOption.service;
+package com.ll.hotel.domain.hotel.option.service;
 
-import com.ll.hotel.domain.hotel.option.roomOption.dto.request.RoomOptionRequest;
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
-import com.ll.hotel.domain.hotel.option.roomOption.repository.RoomOptionRepository;
+import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.repository.RoomOptionRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,8 +32,6 @@ public class RoomOptionServiceTest {
 
     @BeforeEach
     void setUp() {
-        roomOptionRepository.deleteAll();
-
         RoomOption roomOption = roomOptionRepository.save(RoomOption
                 .builder()
                 .name("객실 옵션")
@@ -46,38 +44,40 @@ public class RoomOptionServiceTest {
     @DisplayName("객실 옵션 추가")
     void addRoomOptionTest() {
         // Given
-        RoomOptionRequest.Details details = new RoomOptionRequest.Details(
+        OptionRequest optionRequest = new OptionRequest(
                 "추가 테스트");
 
         // When
-        RoomOption result = roomOptionService.add(details);
+        RoomOption result = roomOptionService.add(optionRequest);
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getName()).isEqualTo(details.name());
+        assertThat(result.getName()).isEqualTo(optionRequest.name());
 
         // DB에 실제로 저장된 값 검증
         Optional<RoomOption> savedRoomOption = roomOptionRepository.findById(result.getId());
         assertThat(savedRoomOption).isPresent();
-        assertThat(savedRoomOption.get().getName()).isEqualTo(details.name());
+        assertThat(savedRoomOption.get().getName()).isEqualTo(optionRequest.name());
     }
 
     @Test
     @DisplayName("객실 옵션 전체 조회")
     void findAllRoomOptionsTest() {
         // Given
-        RoomOptionRequest.Details details1 = new RoomOptionRequest.Details("추가 옵션1");
-        RoomOptionRequest.Details details2 = new RoomOptionRequest.Details("추가 옵션2");
+        int beforeSize = roomOptionService.findAll().size();
 
-        roomOptionService.add(details1);
-        roomOptionService.add(details2);
+        OptionRequest request1 = new OptionRequest("추가 옵션1");
+        OptionRequest request2 = new OptionRequest("추가 옵션2");
+
+        roomOptionService.add(request1);
+        roomOptionService.add(request2);
 
         // When
         List<RoomOption> result = roomOptionService.findAll();
 
         // Then
         assertThat(result).isNotNull();
-        assertThat((long) result.size()).isEqualTo(3);
+        assertThat((long) result.size()).isEqualTo(beforeSize + 2);
     }
 
     @Test
@@ -96,16 +96,16 @@ public class RoomOptionServiceTest {
     void modifyRoomOptionTest() {
         // Given
         RoomOption roomOption = roomOptionService.findById(testId);
-        RoomOptionRequest.Details modifiedDetails = new RoomOptionRequest.Details("수정 후 테스트");
+        OptionRequest modifiedRequest = new OptionRequest("수정 후 테스트");
 
         // When
-        roomOptionService.modify(roomOption, modifiedDetails);
+        roomOptionService.modify(roomOption, modifiedRequest);
 
         RoomOption result = roomOptionService.findById(roomOption.getId());
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getName()).isEqualTo(modifiedDetails.name());
+        assertThat(result.getName()).isEqualTo(modifiedRequest.name());
     }
 
     @Test

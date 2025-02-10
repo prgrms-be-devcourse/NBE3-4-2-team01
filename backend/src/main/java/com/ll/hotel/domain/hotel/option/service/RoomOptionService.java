@@ -1,8 +1,8 @@
-package com.ll.hotel.domain.hotel.option.roomOption.service;
+package com.ll.hotel.domain.hotel.option.service;
 
-import com.ll.hotel.domain.hotel.option.roomOption.dto.request.RoomOptionRequest;
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
-import com.ll.hotel.domain.hotel.option.roomOption.repository.RoomOptionRepository;
+import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.repository.RoomOptionRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,10 +16,10 @@ public class RoomOptionService {
     private final RoomOptionRepository roomOptionRepository;
 
     @Transactional
-    public RoomOption add(RoomOptionRequest.Details details) {
+    public RoomOption add(OptionRequest optionRequest) {
         RoomOption roomOption = RoomOption
                 .builder()
-                .name(details.name())
+                .name(optionRequest.name())
                 .build();
 
         return roomOptionRepository.save(roomOption);
@@ -35,8 +35,8 @@ public class RoomOptionService {
     }
 
     @Transactional
-    public void modify(RoomOption roomOption, RoomOptionRequest.Details details) {
-        roomOption.setName(details.name());
+    public void modify(RoomOption roomOption, OptionRequest optionRequest) {
+        roomOption.setName(optionRequest.name());
     }
 
     public void flush() {

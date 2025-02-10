@@ -1,7 +1,7 @@
 package com.ll.hotel.domain.hotel.hotel.dto;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
-import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
+import com.ll.hotel.domain.hotel.option.entity.HotelOption;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto;
 import jakarta.validation.constraints.NotBlank;
