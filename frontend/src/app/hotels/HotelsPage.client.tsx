@@ -1,16 +1,22 @@
-'use client'
+"use client";
 
-import { useState, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
-import HotelList from '@/components/hotellist/HotelList';
-import Loading from '@/components/hotellist/Loading';
-import Pagination from '@/components/pagination/Pagination';
-import Navigation from '@/components/navigation/Navigation';
-import { FilterName } from '@/lib/enum/FilterName';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { PageDto } from '@/lib/types/PageDto';
-import { GetHotelResponse } from '@/lib/types/hotel/GetHotelResponse';
-import SearchComponent from '@/components/Search/SearchComponent';
+import { useState, Suspense } from "react";
+import { useRouter } from "next/navigation";
+import HotelList from "@/components/hotellist/HotelList";
+import Loading from "@/components/hotellist/Loading";
+import Pagination from "@/components/pagination/Pagination";
+import Navigation from "@/components/navigation/Navigation";
+import { FilterName } from "@/lib/enum/FilterName";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { PageDto } from "@/lib/types/PageDto";
+import { GetHotelResponse } from "@/lib/types/hotel/GetHotelResponse";
+import SearchComponent from "@/components/Search/SearchComponent";
 
 interface HotelsPageClientProps {
   hotelData: PageDto<GetHotelResponse>;
@@ -23,16 +29,16 @@ interface HotelsPageClientProps {
     checkoutDate: string;
     personal: string;
     filterDirection: string;
-  }
+  };
 }
 
-export default function HotelsPageClient({ hotelData, searchParams }: HotelsPageClientProps) {
+export default function HotelsPageClient({
+  hotelData,
+  searchParams,
+}: HotelsPageClientProps) {
   const router = useRouter();
 
-  const {
-    page = 1,
-    filterName = FilterName.LATEST
-  } = searchParams;
+  const { page = 1, filterName = FilterName.LATEST } = searchParams;
 
   const [selectedFilter, setSelectedFilter] = useState<FilterName>(filterName);
 
@@ -45,12 +51,12 @@ export default function HotelsPageClient({ hotelData, searchParams }: HotelsPage
       checkInDate: searchParams.checkInDate,
       checkoutDate: searchParams.checkoutDate,
       personal: searchParams.personal,
-      filterDirection: searchParams.filterDirection
+      filterDirection: searchParams.filterDirection,
     };
-    
+
     const params = new URLSearchParams(stringifiedSearchParams);
-    params.set('filterName', value);
-    
+    params.set("filterName", value);
+
     setSelectedFilter(value);
     router.push(`?${params.toString()}`);
     console.log(value);
@@ -70,15 +76,25 @@ export default function HotelsPageClient({ hotelData, searchParams }: HotelsPage
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={FilterName.LATEST}>최신순</SelectItem>
-            <SelectItem value={FilterName.AVERAGE_RATING}>리뷰 점수순</SelectItem>
+            <SelectItem value={FilterName.AVERAGE_RATING}>
+              리뷰 점수순
+            </SelectItem>
             <SelectItem value={FilterName.REVIEW_COUNT}>리뷰 개수순</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <Suspense fallback={<Loading />}>
-        <HotelList hotels={hotelData.items} checkInDate={searchParams.checkInDate} checkoutDate={searchParams.checkoutDate}/>
+        <HotelList
+          hotels={hotelData.items}
+          checkInDate={searchParams.checkInDate}
+          checkoutDate={searchParams.checkoutDate}
+        />
       </Suspense>
-      <Pagination currentPage={page} totalPages={hotelData?.totalPages || 1} basePath="hotels" />
+      <Pagination
+        currentPage={page}
+        totalPages={hotelData?.totalPages || 1}
+        basePath="hotels"
+      />
     </main>
   );
 }

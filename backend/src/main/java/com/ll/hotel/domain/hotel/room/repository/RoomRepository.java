@@ -19,13 +19,15 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             AND i.imageType = :imageType
             WHERE r.hotel.id = :hotelId
             AND r.roomStatus <> 'UNAVAILABLE'
-            AND i.createdAt = (
+            AND (
+            i.createdAt = (
                 SELECT MIN(i2.createdAt)
                 FROM Image i2
                 WHERE i2.referenceId = r.id
                 AND i2.imageType = :imageType
             )
             OR i is NULL
+            )
             """)
     List<RoomWithImageDto> findAllRooms(@Param("hotelId") long hotelId, @Param("imageType") ImageType imageType);
 

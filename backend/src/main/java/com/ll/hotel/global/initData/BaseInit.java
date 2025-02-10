@@ -21,6 +21,8 @@ import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.hotel.room.service.RoomService;
+import com.ll.hotel.domain.image.service.ImageService;
+import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
@@ -40,6 +42,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +69,7 @@ public class BaseInit {
     private final BookingRepository bookingRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewCommentRepository reviewCommentRepository;
+    private final ImageService imageService;
 
     @Autowired
     @Lazy
@@ -386,6 +390,8 @@ public class BaseInit {
                 .rating(5)
                 .build();
 
+        hotel1.updateAverageRating(1, 5);
+
         Review review2 = Review.builder()
                 .hotel(hotel1)
                 .room(room1_2)
@@ -394,6 +400,8 @@ public class BaseInit {
                 .content("객실1-2 리뷰")
                 .rating(4)
                 .build();
+
+        hotel1.updateAverageRating(1, 4);
 
         Review review3 = Review.builder()
                 .hotel(hotel2)
@@ -404,6 +412,8 @@ public class BaseInit {
                 .rating(5)
                 .build();
 
+        hotel2.updateAverageRating(1, 5);
+
         Review review4 = Review.builder()
                 .hotel(hotel2)
                 .room(room2_2)
@@ -412,6 +422,8 @@ public class BaseInit {
                 .content("객실2-2 리뷰")
                 .rating(3)
                 .build();
+
+        hotel2.updateAverageRating(1, 3);
 
         reviewRepository.save(review1);
         reviewRepository.save(review2);
@@ -445,5 +457,8 @@ public class BaseInit {
         reviewCommentRepository.save(reviewComment2);
         reviewCommentRepository.save(reviewComment3);
         reviewCommentRepository.save(reviewComment4);
+
+        imageService.saveImages(ImageType.HOTEL, 1, List.of("https://i.postimg.cc/wjkDBJQs/pexels-pixabay-258154.jpg"));
+        imageService.saveImages(ImageType.HOTEL, 2, List.of("https://i.postimg.cc/Jn3sTCYH/1787.jpg"));
     }
 }

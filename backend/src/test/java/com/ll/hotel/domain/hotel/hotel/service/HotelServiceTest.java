@@ -189,8 +189,6 @@ class HotelServiceTest {
         assertEquals(Allres2.hotelName(), "호텔2");
         assertEquals(Allres1.streetAddress(), "서울시");
         assertEquals(Allres2.streetAddress(), "부산시");
-        assertEquals(Allres1.hotelStatus(), HotelStatus.PENDING.getValue());
-        assertEquals(Allres2.hotelStatus(), HotelStatus.PENDING.getValue());
     }
 
     @Test
@@ -252,8 +250,6 @@ class HotelServiceTest {
         assertEquals(Allres2.hotelName(), "호텔1");
         assertEquals(Allres1.streetAddress(), "부산시");
         assertEquals(Allres2.streetAddress(), "서울시");
-        assertEquals(Allres1.hotelStatus(), HotelStatus.PENDING.getValue());
-        assertEquals(Allres2.hotelStatus(), HotelStatus.PENDING.getValue());
     }
 
     @Test
@@ -313,7 +309,6 @@ class HotelServiceTest {
         assertEquals(Allres1.hotelId(), res1.hotelId());
         assertEquals(Allres1.hotelName(), "호텔1");
         assertEquals(Allres1.streetAddress(), "서울시");
-        assertEquals(Allres1.hotelStatus(), HotelStatus.PENDING.getValue());
     }
 
     @Test

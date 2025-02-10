@@ -130,4 +130,15 @@ public class HotelController {
                 this.hotelService.findRevenue(hotelId, actor)
         );
     }
+
+    @GetMapping("/hotel-option")
+    public RsData<GetAllHotelOptionsResponse> findAllHotelOptions() {
+        Member actor = this.rq.getActor();
+
+        return new RsData<>(
+                "200-1",
+                "호텔 옵션 조회에 성공했습니다.",
+                this.hotelService.findHotelOptions(actor)
+        );
+    }
 }
