@@ -1,10 +1,12 @@
 package com.ll.hotel.global.security.oauth2;
 
 
+import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.service.AuthTokenService;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
+import com.ll.hotel.standard.util.Ut;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +21,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -57,7 +61,18 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
             log.debug("Generated JWT access token: {}", accessToken);
             log.debug("Generated JWT refresh token: {}", refreshToken);
 
-            Cookie roleCookie = new Cookie("role", member.getUserRole());
+            Map<String, Object> roleData = new HashMap<>();
+            roleData.put("role", member.getUserRole());
+            if(member.getUserRole().equals("BUSINESS")) {
+                Hotel hotel = member.getBusiness().getHotel();
+                if(hotel != null) {
+                    roleData.put("hasHotel", true);
+                    roleData.put("hotelId", hotel.getId());
+                }
+            }
+            String encodedRoleData = URLEncoder.encode(Ut.json.toString(roleData),StandardCharsets.UTF_8);
+
+            Cookie roleCookie = new Cookie("role", encodedRoleData);
             roleCookie.setSecure(true);
             roleCookie.setPath("/");
             response.addCookie(roleCookie);
