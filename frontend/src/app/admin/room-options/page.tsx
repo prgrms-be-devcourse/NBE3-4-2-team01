@@ -1,8 +1,10 @@
 "use client";
 
+import Navigation from "@/components/navigation/Navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   addRoomOption,
-  deleteRoomOption,
   getAllRoomOptions,
   modifyRoomOption,
 } from "@/lib/api/Admin/RoomOptionApi";
@@ -11,9 +13,9 @@ import { useEffect, useState } from "react";
 
 export default function RoomOptionsPage() {
   const [options, setOptions] = useState<OptionResponse[]>([]);
-  const [editingOptions, setEditingOptions] = useState<{
-    [key: number]: string;
-  }>({});
+  const [editingOptions, setEditingOptions] = useState<Record<number, string>>(
+    {}
+  );
   const [newOption, setNewOption] = useState<string>("");
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function RoomOptionsPage() {
   };
 
   const onModify = async (id: number) => {
-    if (!editingOptions[id]) return;
+    if (!editingOptions[id]?.trim()) return;
 
     try {
       await modifyRoomOption(id, { name: editingOptions[id] });
@@ -67,53 +69,69 @@ export default function RoomOptionsPage() {
   };
 
   return (
-    <div>
-      <h1>객실 옵션 관리</h1>
+    <div className="min-h-screen bg-gray-100">
+      <Navigation /> {/* 네비게이션 추가 */}
+      {/* 컨테이너 */}
+      <div className="max-w-3xl mx-auto pt-24 p-6">
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          🛏️ 객실 옵션 관리
+        </h1>
 
-      {/* 옵션 추가 기능 */}
-      <div>
-        <input
-          type="text"
-          placeholder="새 옵션 입력"
-          value={newOption}
-          onChange={(e) => setNewOption(e.target.value)}
-        />
-        <button onClick={onAddOption}>추가</button>
-      </div>
+        {/* 옵션 추가 박스 */}
+        <div className="bg-white p-4 rounded-lg shadow-md flex gap-2">
+          <Input
+            type="text"
+            placeholder="새 옵션 입력"
+            value={newOption}
+            onChange={(e) => setNewOption(e.target.value)}
+          />
+          <Button onClick={onAddOption}>추가</Button>
+        </div>
 
-      {/* 옵션 목록 */}
-      <div>
-        {options.map((option, index) => (
-          <div key={option.optionId ?? `option-${index}`}>
-            {editingOptions[option.optionId] !== undefined ? (
-              <input
-                value={editingOptions[option.optionId]}
-                onChange={(e) =>
-                  setEditingOptions({
-                    ...editingOptions,
-                    [option.optionId]: e.target.value,
-                  })
-                }
-              />
-            ) : (
-              <span>{option.name}</span>
-            )}
-            {editingOptions[option.optionId] !== undefined ? (
-              <button onClick={() => onModify(option.optionId)}>저장</button>
-            ) : (
-              <button
-                onClick={() =>
-                  setEditingOptions({
-                    ...editingOptions,
-                    [option.optionId]: option.name,
-                  })
-                }
-              >
-                수정
-              </button>
-            )}
-          </div>
-        ))}
+        {/* 옵션 목록 */}
+        <div className="mt-6 space-y-4">
+          {options.map((option, index) => (
+            <div
+              key={option.optionId ?? `option-${index}`}
+              className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center"
+            >
+              {editingOptions[option.optionId] !== undefined ? (
+                <Input
+                  value={editingOptions[option.optionId]}
+                  onChange={(e) =>
+                    setEditingOptions({
+                      ...editingOptions,
+                      [option.optionId]: e.target.value,
+                    })
+                  }
+                />
+              ) : (
+                <span className="text-gray-700">{option.name}</span>
+              )}
+
+              {editingOptions[option.optionId] !== undefined ? (
+                <Button
+                  onClick={() => onModify(option.optionId)}
+                  variant="default"
+                >
+                  저장
+                </Button>
+              ) : (
+                <Button
+                  onClick={() =>
+                    setEditingOptions({
+                      ...editingOptions,
+                      [option.optionId]: option.name,
+                    })
+                  }
+                  variant="secondary"
+                >
+                  수정
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
