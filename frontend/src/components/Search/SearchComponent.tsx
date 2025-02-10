@@ -224,7 +224,7 @@ export default function SearchComponent({ className = '' }: SearchComponentProps
             )}
           </div>
 
-          <Button onClick={handleSearch} className="w-24">
+          <Button onClick={handleSearch} className="w-24 bg-blue-500 hover:bg-blue-600">
             <Search className="mr-2" size={20} />
             검색
           </Button>
