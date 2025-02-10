@@ -27,7 +27,7 @@ export default function RegisterBusiness() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">🏢 사업자 등록</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">사업자 등록</h2>
 
         {isSubmitting ? (
           <Loading />

@@ -47,7 +47,7 @@ export default function AdminHotelsPage() {
       <Navigation />
 
       <div className="max-w-4xl mx-auto pt-24 p-6">
-        <h1 className="text-2xl font-bold mb-6 text-center">🏨 호텔 목록</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">호텔 목록</h1>
 
         <div className="bg-white p-6 rounded-lg shadow-md">
           {hotels.length === 0 ? (

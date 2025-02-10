@@ -74,7 +74,7 @@ export default function AdminBusinessDetailPage() {
 
       <div className="max-w-3xl mx-auto pt-24 p-6">
         <h1 className="text-2xl font-bold mb-6 text-center">
-          🏢 사업자 상세 정보
+          사업자 상세 정보
         </h1>
 
         <div className="bg-white p-6 rounded-lg shadow-md">

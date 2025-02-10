@@ -73,9 +73,7 @@ export default function RoomOptionsPage() {
       <Navigation /> {/* 네비게이션 추가 */}
       {/* 컨테이너 */}
       <div className="max-w-3xl mx-auto pt-24 p-6">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          🛏️ 객실 옵션 관리
-        </h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">객실 옵션 관리</h1>
 
         {/* 옵션 추가 박스 */}
         <div className="bg-white p-4 rounded-lg shadow-md flex gap-2">
