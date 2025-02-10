@@ -1,4 +1,3 @@
-// app/hotels/page.tsx
 import { getHotelList } from '@/lib/api/AwsS3Api';
 import { PageDto } from '@/lib/types/PageDto';
 import { GetHotelResponse } from '@/lib/types/hotel/GetHotelResponse';
@@ -21,6 +20,8 @@ interface PageProps {
 }
 
 export default async function HotelsPage({ searchParams }: PageProps) {
+  const params = await Promise.resolve(searchParams);
+  
   const {
     page = 1,
     pageSize = 10,
@@ -30,9 +31,8 @@ export default async function HotelsPage({ searchParams }: PageProps) {
     checkoutDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     personal = '2',
     filterDirection = FilterDirection.DESC
-  } = searchParams;
+  } = params;
 
-  // 서버에서 데이터 가져오기
   const hotelData: PageDto<GetHotelResponse> = await getHotelList(
     page,
     pageSize,
@@ -44,6 +44,5 @@ export default async function HotelsPage({ searchParams }: PageProps) {
     filterDirection
   );
 
-  // 클라이언트 컴포넌트로 전달
-  return <HotelsPageClient hotelData={hotelData} searchParams={searchParams} />;
+  return <HotelsPageClient hotelData={hotelData} searchParams={params} />;
 }
