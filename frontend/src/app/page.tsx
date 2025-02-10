@@ -1,6 +1,6 @@
 'use client';
 
-import Navigation from '@/components/Navigation/Navigation'
+import Navigation from '@/components/navigation/Navigation'
 import SearchComponent from '@/components/Search/SearchComponent'
 
 export default function Page() {
