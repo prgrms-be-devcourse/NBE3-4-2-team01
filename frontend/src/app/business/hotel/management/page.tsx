@@ -4,24 +4,21 @@ import HotelDetail from "@/components/business/hotel/HotelDetail";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { findHotelDetail } from "@/lib/api/BusinessHotelApi";
 import { GetHotelDetailResponse } from "@/lib/types/hotel/GetHotelDetailResponse";
-import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import RoomList from "@/components/business/room/RoomList";
 import HotelImages from "@/components/business/hotel/HotelImages";
+import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
 import Navigation from "@/components/navigation/Navigation";
 
 const HotelDetailPage: React.FC = () => {
-  const { hotelId } = useParams();
+  const cookie = getRoleFromCookie();
+  const hotelId = Number(cookie?.hotelId);
   const [hotelDetail, setHotelDetail] = useState<GetHotelDetailResponse | null>(
     null
   );
   const [isLoading, setIsLoading] = useState(true);
-  const searchParams = useSearchParams();
-  const checkInDate = searchParams.get("checkInDate") || "";
-  const checkoutDate = searchParams.get("checkoutDate") || "";
 
   useEffect(() => {
-    console.log("체크인 - 체크아웃 : ", checkInDate, checkoutDate);
     const fetchHotelDetail = async () => {
       try {
         const response = await findHotelDetail(Number(hotelId));
@@ -51,11 +48,7 @@ const HotelDetailPage: React.FC = () => {
         <CardContent>
           <HotelImages images={hotelDetail.hotelImageUrls} />
           <HotelDetail hotel={hotelDetail.hotelDetailDto} />
-          <RoomList
-            rooms={hotelDetail.hotelDetailDto.rooms}
-            checkInDate={checkInDate}
-            checkoutDate={checkoutDate}
-          />
+          <RoomList rooms={hotelDetail.hotelDetailDto.rooms} />
         </CardContent>
       </Card>
     </div>

@@ -6,5 +6,5 @@ export interface PutRoomResponse {
   roomName: string;
   roomStatus: string;
   modifiedAt: string;
-  urlsResponse: PresignedUrlsResponse;
+  urlResponse: PresignedUrlsResponse;
 }

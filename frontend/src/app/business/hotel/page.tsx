@@ -19,6 +19,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { MoveLeft, Star, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Navigation from "@/components/navigation/Navigation";
 
 export default function CreateHotelPage() {
   const router = useRouter();
@@ -139,7 +140,7 @@ export default function CreateHotelPage() {
       setPresignedUrls(presignedUrlResponse.presignedUrls);
       setHotelId(presignedUrlResponse.reviewId);
       alert("호텔이 성공적으로 등록되었습니다.");
-      // router.push("/business/hotels/management");
+      router.push("/business/hotel/management");
     } catch (error) {
       console.error("Error: ", error);
       alert(error);
@@ -182,7 +183,8 @@ export default function CreateHotelPage() {
   };
 
   return (
-    <div className="p-6 flex justify-center">
+    <div className="p-6 flex justify-center pt-[100px]">
+      <Navigation />
       <Card className="w-full max-w-3xl">
         <CardHeader className="border-b pb-4">
           <div className="flex items-center justify-between w-full">

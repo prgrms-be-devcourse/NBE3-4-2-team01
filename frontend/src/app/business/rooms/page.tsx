@@ -19,6 +19,7 @@ import { PresignedUrlsResponse } from "@/lib/types/review/PresignedUrlsResponse"
 import { useRouter } from "next/navigation";
 import { MoveLeft, XCircle } from "lucide-react";
 import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
+import Navigation from "@/components/navigation/Navigation";
 
 export default function CreateRoomPage() {
   const cookie = getRoleFromCookie();
@@ -29,12 +30,12 @@ export default function CreateRoomPage() {
   const [standardNumber, setStandardNumber] = useState(1);
   const [maxNumber, setMaxNumber] = useState(1);
   const [bedTypeNumber, setBedTypeNumber] = useState<BedTypeNumber>({
-    single: 0,
-    double: 0,
-    queen: 0,
-    king: 0,
-    twin: 0,
-    triple: 0,
+    SINGLE: 0,
+    DOUBLE: 0,
+    QUEEN: 0,
+    KING: 0,
+    TWIN: 0,
+    TRIPLE: 0,
   });
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -121,7 +122,7 @@ export default function CreateRoomPage() {
       setPresignedUrls(presignedUrlResponse.presignedUrls);
       setRoomId(presignedUrlResponse.reviewId);
       alert("객실이 성공적으로 등록되었습니다.");
-      // router.push("/business/hotels/management");
+      router.push("/business/hotel/management");
     } catch (error) {
       console.error("Error: ", error);
       alert(error);
@@ -168,7 +169,8 @@ export default function CreateRoomPage() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-3xl mx-auto pt-[100px]">
+      <Navigation />
       <Card className="border p-6 rounded-lg shadow-lg">
         <CardHeader className="border-b pb-4">
           <div className="flex items-center justify-between w-full">
@@ -228,7 +230,7 @@ export default function CreateRoomPage() {
               <div>
                 <Label htmlFor="standardNumber">최소 인원</Label>
                 <Input
-                  id="maxNumber"
+                  id="standardNumber"
                   type="number"
                   min="1"
                   value={standardNumber}
@@ -264,7 +266,7 @@ export default function CreateRoomPage() {
                       type="number"
                       min="0"
                       className="w-16 text-center border rounded-md"
-                      value={bedTypeNumber[type] || ""}
+                      value={bedTypeNumber[type] ?? 0}
                       onChange={(e) =>
                         setBedTypeNumber({
                           ...bedTypeNumber,

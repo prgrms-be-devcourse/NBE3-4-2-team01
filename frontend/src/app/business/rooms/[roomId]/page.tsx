@@ -20,6 +20,7 @@ import { PutRoomResponse } from "../../../../lib/types/room/PutRoomResponse";
 import { PresignedUrlsResponse } from "@/lib/types/review/PresignedUrlsResponse";
 import { GetAllRoomOptionsResponse } from "@/lib/types/room/GetAllRoomOptionsResponse";
 import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
+import Navigation from "@/components/navigation/Navigation";
 
 export default function ModifyRoomPage() {
   const cookie = getRoleFromCookie();
@@ -33,12 +34,12 @@ export default function ModifyRoomPage() {
   const [standardNumber, setStandardNumber] = useState(1);
   const [maxNumber, setMaxNumber] = useState(1);
   const [bedTypeNumber, setBedTypeNumber] = useState<BedTypeNumber>({
-    single: 0,
-    double: 0,
-    queen: 0,
-    king: 0,
-    twin: 0,
-    triple: 0,
+    SINGLE: 0,
+    DOUBLE: 0,
+    QUEEN: 0,
+    KING: 0,
+    TWIN: 0,
+    TRIPLE: 0,
   });
   const [roomStatus, setRoomStatus] = useState("AVAILABLE");
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -65,7 +66,7 @@ export default function ModifyRoomPage() {
       }
     };
     loadRoomOptions();
-  }, []);
+  }, [roomId]);
 
   const handleOptionChange = (option: string) => {
     setRoomOptions((prev) => {
@@ -84,6 +85,7 @@ export default function ModifyRoomPage() {
     const fetchRoomData = async () => {
       try {
         const response = await findRoomDetail(hotelId, roomId);
+        const bedTypeNumber = response.roomDto.bedTypeNumber;
         setRoomId(response.roomDto.id);
         setRoomName(response.roomDto.roomName);
         setRoomNumber(response.roomDto.roomNumber);
@@ -93,6 +95,7 @@ export default function ModifyRoomPage() {
         setBedTypeNumber(response.roomDto.bedTypeNumber);
         setExistingImages(response.roomImageUrls);
         setRoomOptions(new Set(response.roomDto.roomOptions || []));
+        console.log("객실 정보: ", response);
       } catch (error) {
         throw error;
       }
@@ -130,14 +133,14 @@ export default function ModifyRoomPage() {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!roomId) {
-      alert("유효하지 않은 객실 ID입니다.");
-      console.error("유효하지 않은 객실 ID입니다.");
-      return;
-    }
 
     const requestBody: PutRoomRequest = {
       roomName,
@@ -158,14 +161,19 @@ export default function ModifyRoomPage() {
         roomId,
         requestBody
       );
-      const preSigendUrlsResponse: PresignedUrlsResponse =
-        response.urlsResponse;
+      console.log("ModifyRoom response", response);
+      console.log("responseUrl", response.urlResponse);
+
+      const preSigendUrlsResponse: PresignedUrlsResponse = response.urlResponse;
+
+      console.log("ModifyRoom response", response);
+      console.log("PresignedUrlsResponse", presignedUrls);
 
       setRoomId(response.roomId);
       setPresignedUrls(preSigendUrlsResponse.presignedUrls);
       console.log(presignedUrls);
       alert("객실이 성공적으로 수정되었습니다.");
-      // router.push("/business/hotels/management");
+      router.push("/business/hotel/management");
     } catch (error) {
       console.error("Error:", error);
       alert(error);
@@ -205,7 +213,8 @@ export default function ModifyRoomPage() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-3xl mx-auto pt-[100px]">
+      <Navigation />
       <Card className="border p-6 rounded-lg shadow-lg">
         <CardHeader className="border-b pb-4">
           <div className="flex items-center justify-between w-full">
@@ -263,12 +272,12 @@ export default function ModifyRoomPage() {
               </div>
 
               <div>
-                <Label htmlFor="maxNumber">최소 인원</Label>
+                <Label htmlFor="standardNumber">최소 인원</Label>
                 <Input
-                  id="maxNumber"
+                  id="standardNumber"
                   type="number"
                   min="1"
-                  value={maxNumber}
+                  value={standardNumber}
                   onChange={(e) => setStandardNumber(Number(e.target.value))}
                   required
                 />
@@ -301,7 +310,7 @@ export default function ModifyRoomPage() {
                       type="number"
                       min="0"
                       className="w-16 text-center border rounded-md"
-                      value={bedTypeNumber[type] || ""}
+                      value={bedTypeNumber[type] ?? 0}
                       onChange={(e) =>
                         setBedTypeNumber({
                           ...bedTypeNumber,
@@ -336,7 +345,7 @@ export default function ModifyRoomPage() {
                     <div key={index} className="relative group">
                       <img
                         src={img}
-                        alt={`객실실 이미지 ${index + 1}`}
+                        alt={`객실 이미지 ${index + 1}`}
                         className="w-full h-32 object-cover rounded-md"
                       />
                       <Button
