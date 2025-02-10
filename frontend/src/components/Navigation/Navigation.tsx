@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from './Navigation.module.css';
 import { getRoleFromCookie, RoleData } from '@/lib/utils/CookieUtil';
+import { logout } from '@/lib/api/AuthApi';
 
 interface UserState {
   isLoggedIn: boolean;
@@ -52,11 +53,15 @@ export default function Navigation() {
   }, []);
 
   const handleLogout = async () => {
-    setUser({
-      isLoggedIn: false,
-      userType: 'ANONYMOUS'
-    });
-    // 백엔드에 로그아웃 api 요청
+    try {
+      await logout();
+      setUser({
+        isLoggedIn: false,
+        userType: 'ANONYMOUS'
+      });
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
   };
 
   return (
