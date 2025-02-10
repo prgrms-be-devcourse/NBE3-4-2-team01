@@ -1,7 +1,8 @@
 package com.ll.hotel.domain.hotel.hotel.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.NonNull;
+
+import java.time.LocalTime;
 
 public record GetHotelResponse(
         long hotelId,
@@ -9,25 +10,33 @@ public record GetHotelResponse(
         @NotBlank
         String hotelName,
 
+        long hotelGrade,
+
+        @NotBlank
+        LocalTime checkInTime,
+
         @NotBlank
         String streetAddress,
 
-        @NonNull
-        Integer zipCode,
+        double averageRating,
 
-        @NotBlank
-        String hotelStatus,
+        long totalReviewCount,
+
+        Integer price,
 
         @NotBlank
         String thumbnailUrl
 ) {
-    public GetHotelResponse(HotelWithImageDto hotelWithImageDto) {
+    public GetHotelResponse(HotelWithImageDto hotelWithImageDto, Integer price) {
         this(
                 hotelWithImageDto.hotel().getId(),
                 hotelWithImageDto.hotel().getHotelName(),
+                hotelWithImageDto.hotel().getHotelGrade(),
+                hotelWithImageDto.hotel().getCheckInTime(),
                 hotelWithImageDto.hotel().getStreetAddress(),
-                hotelWithImageDto.hotel().getZipCode(),
-                hotelWithImageDto.hotel().getHotelStatus().getValue(),
+                hotelWithImageDto.hotel().getAverageRating(),
+                hotelWithImageDto.hotel().getTotalReviewCount(),
+                price,
                 hotelWithImageDto.image() == null
                         ? "/images/default.jpg"
                         : hotelWithImageDto.image().getImageUrl()
