@@ -56,7 +56,9 @@ export default function ModifyRoomPage() {
   useEffect(() => {
     const loadRoomOptions = async () => {
       try {
-        const options: GetAllRoomOptionsResponse = await findAllRoomOptions();
+        const options: GetAllRoomOptionsResponse = await findAllRoomOptions(
+          hotelId
+        );
         setAvailableRoomOptions(new Set(options.roomOptions));
       } catch (error) {
         throw error;
@@ -89,7 +91,8 @@ export default function ModifyRoomPage() {
         setStandardNumber(response.roomDto.standardNumber);
         setMaxNumber(response.roomDto.maxNumber);
         setBedTypeNumber(response.roomDto.bedTypeNumber);
-        setRoomOptions(response.roomDto.roomOptions);
+        setExistingImages(response.roomImageUrls);
+        setRoomOptions(new Set(response.roomDto.roomOptions || []));
       } catch (error) {
         throw error;
       }
