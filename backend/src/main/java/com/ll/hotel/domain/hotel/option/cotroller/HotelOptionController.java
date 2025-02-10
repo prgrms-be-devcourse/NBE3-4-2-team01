@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/hotel-options")
+@RequestMapping("/api/admin/hotel-options")
 @RequiredArgsConstructor
 public class HotelOptionController {
     private final HotelOptionService hotelOptionService;
@@ -55,7 +55,7 @@ public class HotelOptionController {
         );
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public RsData<OptionResponse> modify(@PathVariable("id") Long id,
                                          @RequestBody OptionRequest optionRequest) {
         HotelOption hotelOption = hotelOptionService.findById(id);
