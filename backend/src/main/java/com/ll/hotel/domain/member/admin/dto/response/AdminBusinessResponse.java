@@ -28,7 +28,7 @@ public class AdminBusinessResponse {
         }
     }
     public record Summary(
-            Long id,
+            Long businessId,
             String businessRegistrationNumber,
             String ownerName,
             BusinessApprovalStatus approvalStatus,
