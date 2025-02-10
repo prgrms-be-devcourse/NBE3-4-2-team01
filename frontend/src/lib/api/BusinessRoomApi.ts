@@ -111,7 +111,7 @@ export const modifyRoom = async (
 };
 
 // 객실 삭제
-export const deletRoom = async (
+export const deleteRoom = async (
   hotelId: number,
   roomId: number
 ): Promise<void> => {

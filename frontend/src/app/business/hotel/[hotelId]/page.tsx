@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MoveLeft, Star, XCircle } from "lucide-react";
 import "react-datepicker/dist/react-datepicker.css";
 import { GetAllHotelOptionResponse } from "@/lib/types/hotel/GetAllHotelOptionResponse";
+import Navigation from "@/components/navigation/Navigation";
 
 export default function ModifyHotelPage() {
   const params = useParams();
@@ -194,6 +195,7 @@ export default function ModifyHotelPage() {
         hotelId,
         requestBody
       );
+      console.log("response: ", response);
       const presignedUrlsResponse: PresignedUrlsResponse =
         response.urlsResponse;
       console.log("서버 응답:", presignedUrlsResponse);
@@ -201,7 +203,7 @@ export default function ModifyHotelPage() {
       setPresignedUrls(presignedUrlsResponse.presignedUrls);
       console.log(presignedUrls);
       alert("호텔이 성공적으로 수정되었습니다.");
-      // router.push("/business/hotels/management");
+      router.push("/business/hotel/management");
     } catch (error) {
       alert(error);
     }
@@ -241,7 +243,8 @@ export default function ModifyHotelPage() {
   };
 
   return (
-    <div className="p-6 flex justify-center">
+    <div className="p-6 flex justify-center pt-[100px]">
+      <Navigation />
       <Card className="w-full max-w-3xl">
         <CardHeader className="border-b pb-4">
           <div className="flex items-center justify-between w-full">
