@@ -26,7 +26,7 @@ export default async function HotelsPage({ searchParams }: PageProps) {
     page = 1,
     pageSize = 10,
     filterName = FilterName.LATEST,
-    streetAddress = SeoulDistrict.DEFAULT,
+    streetAddress = '',
     checkInDate = new Date().toISOString().split('T')[0],
     checkoutDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     personal = '2',
