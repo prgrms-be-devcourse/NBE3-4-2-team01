@@ -1,11 +1,13 @@
-import { Dayjs } from 'dayjs';
+import { BookingHotelDto } from "./BookingHotelDto";
+import { BookingRoomDto } from "./BookingRoomDto";
 
 export interface BookingResponseSummary {
     bookingId : number;
-    roomId : number;
-    hotelId : number;
+    room : BookingRoomDto;
+    hotel : BookingHotelDto;
+    payment : PaymentResponse;
     bookNumber : string;
     bookingStatus : string;
-    checkInDate : Dayjs;
-    checkOutDate : Dayjs;
+    checkInDate : string;
+    checkOutDate : string;
 }
