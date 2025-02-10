@@ -2,53 +2,45 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import styles from './Navigation.module.css';
+import { getRoleFromCookie, RoleData } from '@/lib/utils/CookieUtil';
 
 interface UserState {
   isLoggedIn: boolean;
   userType: 'USER' | 'BUSINESS' | 'ADMIN' | 'ANONYMOUS' | null;
+  hasHotel?: boolean;
 }
 
-// 쿠키 가져오는 유틸리티 함수
-const getTokenFromCookie = (): string | null => {
-  if (typeof window === 'undefined') return null;
-  
-  const cookies = document.cookie.split("; ");
-  const role = cookies.find((cookie) => cookie.startsWith("role="));
-  
-  console.log(role);
-
-  return role ? role.split("=")[1] : null;
-};
-
 export default function Navigation() {
-  const router = useRouter();
   const [user, setUser] = useState<UserState>({
     isLoggedIn: false,
-    userType: null
+    userType: null,
+    hasHotel: false
   });
 
   useEffect(() => {
     const checkLoginStatus = () => {
-      const token = getTokenFromCookie();
+      const roleData : RoleData | null = getRoleFromCookie();      
+
+      console.log(roleData);
       
-      if (!token) {
+      if (!roleData) {
         setUser({
           isLoggedIn: false,
           userType: 'ANONYMOUS'
         });
-      } else if(token === 'USER') {
+      } else if(roleData.role === 'USER') {
         setUser({
           isLoggedIn: true,
           userType: 'USER'
         });
-      } else if(token === 'BUSINESS') {
+      } else if(roleData.role === 'BUSINESS') {
         setUser({
           isLoggedIn: true,
-          userType: 'BUSINESS'
+          userType: 'BUSINESS',
+          hasHotel: roleData.hasHotel
         });
-      } else if(token === 'ADMIN') {
+      } else if(roleData.role === 'ADMIN') {
         setUser({
           isLoggedIn: true,
           userType: 'ADMIN'
@@ -104,14 +96,17 @@ export default function Navigation() {
 
               {/* BUSINESS 상태 */}
               {user.userType === 'BUSINESS' && (
+                user.hasHotel ? 
                 <>
-                  <Link href="/business/rooms" className={styles.link}>
-                    객실 목록
+                  <Link href={`/business/hotel/management`} className={styles.link}>
+                    내 호텔 관리
                   </Link>
-                  <Link href="/business/hotel" className={styles.link}>
-                    내 호텔
+                  <Link href="/business/hotel/revenue" className={styles.link}>
+                    호텔 매출
                   </Link>
                 </>
+                :
+                <></>
               )}
 
               {/* ADMIN 상태 */}
