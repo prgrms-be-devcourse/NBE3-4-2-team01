@@ -50,7 +50,10 @@ export default function CreateRoomPage() {
   useEffect(() => {
     const loadRoomOptions = async () => {
       try {
-        const options: GetAllRoomOptionsResponse = await findAllRoomOptions();
+        setHotelId(Number(cookie?.hotelId));
+        const options: GetAllRoomOptionsResponse = await findAllRoomOptions(
+          hotelId
+        );
         setAvailableRoomOptions(new Set(options.roomOptions));
       } catch (error) {
         alert("객실 옵션을 가져오는 중 오류가 발생했습니다.");

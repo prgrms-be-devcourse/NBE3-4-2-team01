@@ -149,20 +149,21 @@ export const findAllRooms = async (
 };
 
 // 전체 객실 옵션 조회
-export const findAllRoomOptions =
-  async (): Promise<GetAllRoomOptionsResponse> => {
-    try {
-      const response = await fetch(`${BASE_URL}/hotel-option`, {
-        credentials: "include",
-      });
-      const rsData: RsData<GetAllRoomOptionsResponse> = await response.json();
+export const findAllRoomOptions = async (
+  hotelId: Number
+): Promise<GetAllRoomOptionsResponse> => {
+  try {
+    const response = await fetch(`${BASE_URL}/${hotelId}/rooms/room-option`, {
+      credentials: "include",
+    });
+    const rsData: RsData<GetAllRoomOptionsResponse> = await response.json();
 
-      if (rsData.resultCode !== "200-1") {
-        throw new Error(rsData.msg);
-      }
-
-      return rsData.data;
-    } catch (error) {
-      throw error;
+    if (rsData.resultCode !== "200-1") {
+      throw new Error(rsData.msg);
     }
-  };
+
+    return rsData.data;
+  } catch (error) {
+    throw error;
+  }
+};
