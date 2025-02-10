@@ -7,9 +7,9 @@ export default function Page() {
   return (
     <>
       <Navigation/>
-      <div className="min-h-screen bg-background pt-20">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 flex items-center justify-center" style={{ minHeight: '70vh' }}>
+          <div className="w-full max-w-[80rem] scale-125">
             <SearchComponent />
           </div>
         </div>
