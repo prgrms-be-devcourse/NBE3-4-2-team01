@@ -272,8 +272,8 @@ public class HotelService {
                             .min(Comparator.comparing(Room::getBasePrice))
                             .orElse(null);
 
-                    if(minPriceRoom == null) {
-                        return new GetHotelResponse(dto,null);
+                    if (minPriceRoom == null || hotel.getRooms().isEmpty()) {
+                        return new GetHotelResponse(dto, null);
                     }
 
                     return new GetHotelResponse(dto, minPriceRoom.getBasePrice());
