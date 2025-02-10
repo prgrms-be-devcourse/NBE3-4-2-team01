@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.hotel.room.dto;
 
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import jakarta.validation.constraints.NotBlank;

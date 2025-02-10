@@ -9,9 +9,9 @@ import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
-import com.ll.hotel.domain.hotel.option.roomOption.dto.request.RoomOptionRequest;
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
-import com.ll.hotel.domain.hotel.option.roomOption.service.RoomOptionService;
+import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.service.RoomOptionService;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
@@ -80,8 +80,8 @@ class RoomServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 
-        this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("AirConditioner"));
+        this.roomOptionService.add(new OptionRequest("TV"));
+        this.roomOptionService.add(new OptionRequest("AirConditioner"));
 
         Set<String> roomOptions = new HashSet<>(Set.of("TV", "AirConditioner"));
 
@@ -244,9 +244,9 @@ class RoomServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 
-        this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("Computer"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("ShowerRoom"));
+        this.roomOptionService.add(new OptionRequest("TV"));
+        this.roomOptionService.add(new OptionRequest("Computer"));
+        this.roomOptionService.add(new OptionRequest("ShowerRoom"));
 
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
         Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
@@ -274,10 +274,10 @@ class RoomServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 
-        this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("Computer"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("ShowerRoom"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("AirConditioner"));
+        this.roomOptionService.add(new OptionRequest("TV"));
+        this.roomOptionService.add(new OptionRequest("Computer"));
+        this.roomOptionService.add(new OptionRequest("ShowerRoom"));
+        this.roomOptionService.add(new OptionRequest("AirConditioner"));
 
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
         Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
@@ -323,9 +323,9 @@ class RoomServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 
-        this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("Computer"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("ShowerRoom"));
+        this.roomOptionService.add(new OptionRequest("TV"));
+        this.roomOptionService.add(new OptionRequest("Computer"));
+        this.roomOptionService.add(new OptionRequest("ShowerRoom"));
 
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
         Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
@@ -355,9 +355,9 @@ class RoomServiceTest {
         Member actor = this.memberRepository.findAll().getFirst();
         Hotel hotel = this.hotelRepository.findAll().getFirst();
 
-        this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("Computer"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("ShowerRoom"));
+        this.roomOptionService.add(new OptionRequest("TV"));
+        this.roomOptionService.add(new OptionRequest("Computer"));
+        this.roomOptionService.add(new OptionRequest("ShowerRoom"));
 
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
         Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
