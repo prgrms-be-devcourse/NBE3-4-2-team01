@@ -1,6 +1,8 @@
+"use client";
+
 import { useForm } from "react-hook-form";
-import { BusinessRegistrationForm } from "@/lib/types/business/BusinessRegistrationForm";
 import { registerBusiness } from "@/lib/api/Business/BusinessRegisterApi";
+import { BusinessRegistrationForm } from "@/lib/types/business/BusinessRequest";
 
 export default function RegisterBusiness() {
   const {
