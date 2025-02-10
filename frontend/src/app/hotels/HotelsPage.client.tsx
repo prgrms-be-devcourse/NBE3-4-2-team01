@@ -15,14 +15,14 @@ import SearchComponent from '@/components/Search/SearchComponent';
 interface HotelsPageClientProps {
   hotelData: PageDto<GetHotelResponse>;
   searchParams: {
-    page?: number;
-    pageSize?: number;
-    filterName?: FilterName;
-    streetAddress?: string;
-    checkInDate?: string;
-    checkoutDate?: string;
-    personal?: string;
-    filterDirection?: string;
+    page: number;
+    pageSize: number;
+    filterName: FilterName;
+    streetAddress: string;
+    checkInDate: string;
+    checkoutDate: string;
+    personal: string;
+    filterDirection: string;
   }
 }
 
@@ -37,7 +37,18 @@ export default function HotelsPageClient({ hotelData, searchParams }: HotelsPage
   const [selectedFilter, setSelectedFilter] = useState<FilterName>(filterName);
 
   const handleFilterChange = (value: FilterName) => {
-    const params = new URLSearchParams(searchParams as Record<string, string>);
+    const stringifiedSearchParams: Record<string, string> = {
+      page: String(searchParams.page),
+      pageSize: String(searchParams.pageSize),
+      filterName: String(searchParams.filterName),
+      streetAddress: searchParams.streetAddress,
+      checkInDate: searchParams.checkInDate,
+      checkoutDate: searchParams.checkoutDate,
+      personal: searchParams.personal,
+      filterDirection: searchParams.filterDirection
+    };
+    
+    const params = new URLSearchParams(stringifiedSearchParams);
     params.set('filterName', value);
     
     setSelectedFilter(value);
@@ -65,7 +76,7 @@ export default function HotelsPageClient({ hotelData, searchParams }: HotelsPage
         </Select>
       </div>
       <Suspense fallback={<Loading />}>
-        <HotelList hotels={hotelData.items} />
+        <HotelList hotels={hotelData.items} checkInDate={searchParams.checkInDate} checkoutDate={searchParams.checkoutDate}/>
       </Suspense>
       <Pagination currentPage={page} totalPages={hotelData?.totalPages || 1} basePath="hotels" />
     </main>

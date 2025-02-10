@@ -22,27 +22,27 @@ interface PageProps {
 export default async function HotelsPage({ searchParams }: PageProps) {
   const params = await Promise.resolve(searchParams);
   
-  const {
-    page = 1,
-    pageSize = 10,
-    filterName = FilterName.LATEST,
-    streetAddress = '',
-    checkInDate = new Date().toISOString().split('T')[0],
-    checkoutDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    personal = '2',
-    filterDirection = FilterDirection.DESC
-  } = params;
+  const searchParamsWithDefaults = {
+    page: params.page ?? 1,
+    pageSize: params.pageSize ?? 10,
+    filterName: params.filterName ?? FilterName.LATEST,
+    streetAddress: params.streetAddress ?? '',
+    checkInDate: params.checkInDate ?? new Date().toISOString().split('T')[0],
+    checkoutDate: params.checkoutDate ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    personal: params.personal ?? '2',
+    filterDirection: params.filterDirection ?? FilterDirection.DESC,
+  };
 
   const hotelData: PageDto<GetHotelResponse> = await getHotelList(
-    page,
-    pageSize,
-    filterName,
-    streetAddress,
-    checkInDate,
-    checkoutDate,
-    parseInt(personal),
-    filterDirection
+    searchParamsWithDefaults.page,
+    searchParamsWithDefaults.pageSize,
+    searchParamsWithDefaults.filterName,
+    searchParamsWithDefaults.streetAddress,
+    searchParamsWithDefaults.checkInDate,
+    searchParamsWithDefaults.checkoutDate,
+    parseInt(searchParamsWithDefaults.personal),
+    searchParamsWithDefaults.filterDirection
   );
 
-  return <HotelsPageClient hotelData={hotelData} searchParams={params} />;
+  return <HotelsPageClient hotelData={hotelData} searchParams={searchParamsWithDefaults} />;
 }

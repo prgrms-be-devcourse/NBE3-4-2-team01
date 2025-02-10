@@ -6,6 +6,11 @@ import type { GetHotelResponse } from '@/lib/types/hotel/GetHotelResponse';
 import { useRouter } from "next/navigation";
 import { Clock } from 'lucide-react';
 
+interface HotelInfoProps extends GetHotelResponse {
+    checkInDate: string;
+    checkoutDate: string;
+}
+
 export default function HotelInfo({
   hotelId,
   hotelName,
@@ -16,11 +21,16 @@ export default function HotelInfo({
   thumbnailUrl,
   checkInTime,
   price,
-}: GetHotelResponse) {
+  checkInDate,
+  checkoutDate
+}: HotelInfoProps) {
     const router = useRouter();
     
     const handleClick = () => {
-        router.push(`/hotels/${hotelId}`);
+        const params = new URLSearchParams();
+        params.set('checkInDate', checkInDate);
+        params.set('checkoutDate', checkoutDate);
+        router.push(`/hotels/${hotelId}?${params.toString()}`);
     };
 
     // 초 제거 (HH:mm:ss → HH:mm)
