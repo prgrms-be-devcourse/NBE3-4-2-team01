@@ -1,7 +1,8 @@
-package com.ll.hotel.domain.hotel.option.hotelOption.controller;
+package com.ll.hotel.domain.hotel.option.controller;
 
-import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
-import com.ll.hotel.domain.hotel.option.hotelOption.repository.HotelOptionRepository;
+import com.ll.hotel.domain.hotel.option.cotroller.HotelOptionController;
+import com.ll.hotel.domain.hotel.option.entity.HotelOption;
+import com.ll.hotel.domain.hotel.option.repository.HotelOptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,8 +40,6 @@ public class HotelOptionControllerTest {
 
     @BeforeEach
     void setUp() {
-        hotelOptionRepository.deleteAll();
-
         HotelOption hotelOption = hotelOptionRepository.save(HotelOption
                 .builder()
                 .name("호텔 옵션")

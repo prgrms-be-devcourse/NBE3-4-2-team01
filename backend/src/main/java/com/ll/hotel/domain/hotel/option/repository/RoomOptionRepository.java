@@ -1,6 +1,6 @@
-package com.ll.hotel.domain.hotel.option.roomOption.repository;
+package com.ll.hotel.domain.hotel.option.repository;
 
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import java.util.Collection;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;

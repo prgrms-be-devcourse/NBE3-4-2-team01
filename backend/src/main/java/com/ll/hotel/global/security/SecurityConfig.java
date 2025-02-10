@@ -62,7 +62,6 @@ public class SecurityConfig {
                                 "/api/hotels/**",
                                 "/api/bookings/**",
                                 "/api/favorites/**",
-                                "/api/businesses/**",
                                 "/api/reviews/hotels/**",
                                 "/oauth2/authorization/**",
                                 "/login/oauth2/code/**",
@@ -71,6 +70,10 @@ public class SecurityConfig {
 
                         // 관리자 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // 사업자 전용
+                        .requestMatchers("/api/businesses/register").hasAnyRole("USER", "BUSINESS")
+                        .requestMatchers("/api/businesses/**").hasRole("BUSINESS")
 
                         .anyRequest().authenticated()
                 )
