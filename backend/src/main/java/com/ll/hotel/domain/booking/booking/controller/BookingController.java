@@ -21,14 +21,14 @@ public class BookingController {
     // 예약 페이지 정보 요청
     @GetMapping
     public RsData<BookingFormResponse> preBook(
-            @RequestParam(name = "bookingId") long bookingId,
+            @RequestParam(name = "hotelId") long hotelId,
             @RequestParam(name = "roomId") long roomId) {
         Member actor = rq.getActor();
 
         return new RsData<>(
                 "200",
                 "예약 페이지 정보 조회에 성공했습니다.",
-                bookingService.preCreate(bookingId, roomId, actor)
+                bookingService.preCreate(hotelId, roomId, actor)
         );
     }
 

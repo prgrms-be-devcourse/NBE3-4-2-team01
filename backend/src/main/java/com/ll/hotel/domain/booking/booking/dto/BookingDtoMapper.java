@@ -11,9 +11,12 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class BookingDtoMapper {
+    private final String NO_IMAGE = "https://previews.123rf.com/images/oculo/oculo2004/oculo200400003/143645399-사용-가능한-이미지가-없습니다-아이콘.jpg";
     private final HotelService hotelService;
     private final RoomService roomService;
 
@@ -25,6 +28,10 @@ public class BookingDtoMapper {
         return roomService.findRoomDetail(hotelId, roomId);
     }
 
+    private String getThumbnailUrl(List<String> urls) {
+        return urls.isEmpty() ? NO_IMAGE : urls.get(0);
+    }
+
     public BookingFormResponse getForm(long hotelId, long roomId, Member member) {
         GetHotelDetailResponse hotelDetailResponse = getHotelDetailResponse(hotelId);
         GetRoomDetailResponse roomDetailResponse = getRoomDetailResponse(hotelId, roomId);
@@ -33,8 +40,8 @@ public class BookingDtoMapper {
                 hotelDetailResponse.hotelDetailDto(),
                 roomDetailResponse.roomDto(),
                 new String[] {
-                        hotelDetailResponse.hotelImageUrls().get(0),
-                        roomDetailResponse.roomImageUrls().get(0)
+                        getThumbnailUrl(hotelDetailResponse.hotelImageUrls()),
+                        getThumbnailUrl(roomDetailResponse.roomImageUrls())
                 },
                 MemberDTO.from(member)
         );
@@ -51,7 +58,7 @@ public class BookingDtoMapper {
                 booking.getId(),
                 hotelDetailResponse.hotelDetailDto().hotelName(),
                 roomDetailResponse.roomDto().roomName(),
-                hotelDetailResponse.hotelImageUrls().get(0),
+                getThumbnailUrl(hotelDetailResponse.hotelImageUrls()),
                 booking.getBookingStatus(),
                 booking.getPayment().getAmount(),
                 booking.getCheckInDate(),
@@ -71,8 +78,8 @@ public class BookingDtoMapper {
                 hotelDetailResponse.hotelDetailDto(),
                 roomDetailResponse.roomDto(),
                 new String[] {
-                        hotelDetailResponse.hotelImageUrls().get(0),
-                        roomDetailResponse.roomImageUrls().get(0)
+                        getThumbnailUrl(hotelDetailResponse.hotelImageUrls()),
+                        getThumbnailUrl(roomDetailResponse.roomImageUrls())
                 },
                 MemberDTO.from(booking.getMember()),
                 PaymentResponse.from(booking.getPayment()),
