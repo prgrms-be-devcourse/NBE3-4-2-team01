@@ -113,8 +113,8 @@ const HotelBookingList = function({ bookings }: { bookings: PageDto<BookingRespo
           <TableHeader>
             <TableRow className="bg-gray-50">
               <TableHead className="p-3 text-center">예약 ID</TableHead>
+              <TableHead className="p-3 text-center">투숙객 이름</TableHead>
               <TableHead className="p-3 text-center">객실 유형</TableHead>
-              <TableHead className="p-3 text-center">객실 번호</TableHead>
               <TableHead className="p-3 text-center">체크인</TableHead>
               <TableHead className="p-3 text-center">체크아웃</TableHead>
               <TableHead className="p-3 text-center">상태</TableHead>
@@ -129,8 +129,8 @@ const HotelBookingList = function({ bookings }: { bookings: PageDto<BookingRespo
                   className="hover:bg-gray-50 transition duration-300"
                 >
                   <TableCell className="p-3 text-center">{booking.bookingId}</TableCell>
-                  <TableCell className="p-3 text-center">{booking.room.roomName}</TableCell>
-                  <TableCell className="p-3 text-center">{booking.room.roomNumber}</TableCell>
+                  <TableCell className="p-3 text-center">{booking.memberName}</TableCell>
+                  <TableCell className="p-3 text-center">{booking.roomName}</TableCell>
                   <TableCell className="p-3 text-center">{booking.checkInDate}</TableCell>
                   <TableCell className="p-3 text-center">{booking.checkOutDate}</TableCell>
                   <TableCell className="p-3 text-center">

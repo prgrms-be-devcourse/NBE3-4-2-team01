@@ -7,18 +7,13 @@ export interface HotelApprovalResult {
 }
 
 export interface AdminHotelSummaryReponse {
-  id: number;
+  hotelId: number;
   name: string;
+
   streetAddress: string;
-  zipCode: number;
-  grade: number;
   status: HotelStatus;
-  averageRating: number;
-  totalReviewRatingSum: number;
-  totalReviewCount: number;
+
   ownerName: string;
-  ownerEmail: string;
-  ownerPhoneNumber: string;
 }
 
 export interface AdminHotelDetailResponse {
@@ -26,10 +21,9 @@ export interface AdminHotelDetailResponse {
 
   ownerId: number;
   ownerName: string;
-  ownerEmail: string;
-  ownerPhoneNumber: string;
+  businessRegistrationNumber: string;
+  startDate: string;
 
   averageRating: number;
-  totalReviewRatingSum: number;
   totalReviewCount: number;
 }

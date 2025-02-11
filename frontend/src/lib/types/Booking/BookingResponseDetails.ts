@@ -1,12 +1,13 @@
-import { BookingHotelDto } from './BookingHotelDto';
+import { HotelDetailDto } from '../hotel/HotelDetailDto';
+import { RoomDto } from '../room/RoomDto';
 import { BookingMemberDto } from './BookingMemberDto';
-import { BookingRoomDto } from './BookingRoomDto';
 import { PaymentResponse } from './Payment/PaymentResponse';
 
 export interface BookingResponseDetails {
     bookingId : number;
-    room : BookingRoomDto;
-    hotel : BookingHotelDto;
+    hotel : HotelDetailDto;
+    room : RoomDto;
+    thumbnailUrls : string[];
     member : BookingMemberDto;
     payment : PaymentResponse;
     bookNumber : string;

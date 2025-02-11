@@ -29,20 +29,18 @@ public class AdminBusinessResponse {
     }
     public record Summary(
             Long businessId,
-            String businessRegistrationNumber,
             String ownerName,
+            String contact,
             BusinessApprovalStatus approvalStatus,
-            Long hotelId,
             String hotelName
     ) {
         public static Summary from(Business business) {
             Hotel hotel = business.getHotel();
             return new Summary(
                     business.getId(),
-                    business.getBusinessRegistrationNumber(),
                     business.getOwnerName(),
+                    business.getMember().getMemberPhoneNumber(),
                     business.getApprovalStatus(),
-                    (hotel != null) ? hotel.getId() : null,
                     (hotel != null) ? hotel.getHotelName() : null
             );
         }
@@ -52,19 +50,19 @@ public class AdminBusinessResponse {
             Long businessId,
             String businessRegistrationNumber,
             String ownerName,
-            BusinessApprovalStatus approvalStatus,
+            LocalDate startDate,
 
-            Long userId,
-            String name,
-            String email,
-            String phoneNumber,
-            LocalDate birth,
+            String memberName,
+            String memberEmail,
+            String memberPhoneNumber,
             MemberStatus memberStatus,
 
             Long hotelId,
             String hotelName,
             String streetAddress,
-            HotelStatus hotelStatus
+            HotelStatus hotelStatus,
+
+            BusinessApprovalStatus approvalStatus
     ) {
         public static Detail from(Business business) {
             Member owner = business.getMember();
@@ -73,17 +71,19 @@ public class AdminBusinessResponse {
                     business.getId(),
                     business.getBusinessRegistrationNumber(),
                     business.getOwnerName(),
-                    business.getApprovalStatus(),
-                    owner.getId(),
+                    business.getStartDate(),
+
                     owner.getMemberName(),
                     owner.getMemberEmail(),
                     owner.getMemberPhoneNumber(),
-                    owner.getBirthDate(),
                     owner.getMemberStatus(),
+
                     (hotel != null) ? hotel.getId() : null,
                     (hotel != null) ? hotel.getHotelName() : null,
                     (hotel != null) ? hotel.getStreetAddress() : null,
-                    (hotel != null) ? hotel.getHotelStatus() : null
+                    (hotel != null) ? hotel.getHotelStatus() : null,
+
+                    business.getApprovalStatus()
             );
         }
     }
