@@ -69,7 +69,7 @@ public class BusinessServiceTest {
         Member member = memberRepository.findById(testId).get();
 
         // When
-        Business result = businessService.register(businessRequest, member, "01");
+        Business result = businessService.register(businessRequest, member);
 
         // Then
         assertThat(result).isNotNull();

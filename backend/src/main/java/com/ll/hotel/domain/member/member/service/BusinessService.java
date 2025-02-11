@@ -16,23 +16,14 @@ public class BusinessService {
     private final BusinessRepository businessRepository;
 
     @Transactional
-    public Business register(BusinessRequest.RegistrationInfo registrationInfo, Member member, String validationResult) {
-
-        BusinessApprovalStatus status;
-
-        if (validationResult.equals("01")) {
-            status = BusinessApprovalStatus.APPROVED;
-            member.setRole(Role.BUSINESS);
-        } else {
-            status = BusinessApprovalStatus.REJECTED;
-        }
+    public Business register(BusinessRequest.RegistrationInfo registrationInfo, Member member) {
 
         Business business = Business
                 .builder()
                 .businessRegistrationNumber(registrationInfo.businessRegistrationNumber())
                 .startDate(registrationInfo.startDate())
                 .ownerName(registrationInfo.ownerName())
-                .approvalStatus(status)
+                .approvalStatus(BusinessApprovalStatus.PENDING)
                 .member(member)
                 .hotel(null)
                 .build();
