@@ -115,16 +115,18 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
           <h2 className="text-6xl font-extrabold text-sky-500 drop-shadow-[2px_2px_5px_rgba(255,255,255,0.7)]">
             {hotel.hotelName}
           </h2>
-          <button
-            onClick={handleLike}
-            className="transition-transform hover:scale-110 focus:outline-none"
-          >
-            {isLiked ? (
-              <FaHeart className="text-4xl text-red-500" />
-            ) : (
-              <FaRegHeart className="text-4xl text-gray-400 hover:text-red-500" />
-            )}
-          </button>
+          {!isBusinessUser && (
+            <button
+              onClick={handleLike}
+              className="transition-transform hover:scale-110 focus:outline-none"
+            >
+              {isLiked ? (
+                <FaHeart className="text-4xl text-red-500" />
+              ) : (
+                <FaRegHeart className="text-4xl text-gray-400 hover:text-red-500" />
+              )}
+            </button>
+          )}
         </div>
         <p className="text-xl text-gray-700 mt-2 italic">
           ✨ 특별한 하루, 최고의 경험을 선사합니다 ✨

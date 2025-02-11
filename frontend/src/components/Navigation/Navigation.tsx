@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./Navigation.module.css";
 import { getRoleFromCookie, RoleData } from "@/lib/utils/CookieUtil";
@@ -14,6 +15,8 @@ interface UserState {
 }
 
 export default function Navigation() {
+  const router = useRouter();
+
   const [user, setUser] = useState<UserState>({
     isLoggedIn: false,
     userType: null,
@@ -62,6 +65,7 @@ export default function Navigation() {
         isLoggedIn: false,
         userType: "ANONYMOUS",
       });
+      router.push("/");
     } catch (error) {
       console.error("로그아웃 실패:", error);
     }

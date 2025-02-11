@@ -13,8 +13,8 @@ import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
 import com.ll.hotel.domain.hotel.option.entity.HotelOption;
-import com.ll.hotel.domain.hotel.option.repository.HotelOptionRepository;
 import com.ll.hotel.domain.hotel.option.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.repository.HotelOptionRepository;
 import com.ll.hotel.domain.hotel.option.repository.RoomOptionRepository;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
@@ -36,21 +36,18 @@ import com.ll.hotel.domain.review.review.entity.Review;
 import com.ll.hotel.domain.review.review.repository.ReviewRepository;
 import com.ll.hotel.global.exceptions.ServiceException;
 import jakarta.transaction.Transactional;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+
+import java.time.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Configuration
 //@Profile("!test")
@@ -110,11 +107,21 @@ public class BaseInit {
                 .role(Role.BUSINESS)
                 .build();
 
+        Member bMember3 = Member
+                .builder()
+                .birthDate(LocalDate.now())
+                .memberEmail("business3@gmail.com")
+                .memberName("business3")
+                .memberPhoneNumber("01022222222")
+                .memberStatus(MemberStatus.ACTIVE)
+                .role(Role.BUSINESS)
+                .build();
+
         // 손님
         Member customer1 = Member
                 .builder()
                 .birthDate(LocalDate.now())
-                .memberEmail("customer1@gmail.com")
+                .memberEmail("customer1@naver.com")
                 .memberName("customer1")
                 .memberPhoneNumber("01011111111")
                 .memberStatus(MemberStatus.ACTIVE)
@@ -154,6 +161,7 @@ public class BaseInit {
 
         memberRepository.save(bMember1);
         memberRepository.save(bMember2);
+        memberRepository.save(bMember3);
         memberRepository.save(customer1);
         memberRepository.save(customer2);
         memberRepository.save(customer3);
@@ -167,7 +175,7 @@ public class BaseInit {
                 .businessRegistrationNumber("1111111111")
                 .startDate(LocalDate.now())
                 .ownerName("사장일")
-                .approvalStatus(BusinessApprovalStatus.PENDING)
+                .approvalStatus(BusinessApprovalStatus.APPROVED)
                 .member(bMember1)
                 .hotel(null)
                 .build();
@@ -177,13 +185,24 @@ public class BaseInit {
                 .businessRegistrationNumber("2222222222")
                 .startDate(LocalDate.now())
                 .ownerName("사장이")
-                .approvalStatus(BusinessApprovalStatus.PENDING)
+                .approvalStatus(BusinessApprovalStatus.APPROVED)
                 .member(bMember2)
+                .hotel(null)
+                .build();
+
+        Business business3 = Business
+                .builder()
+                .businessRegistrationNumber("3333333333")
+                .startDate(LocalDate.now())
+                .ownerName("사장삼")
+                .approvalStatus(BusinessApprovalStatus.PENDING)
+                .member(bMember3)
                 .hotel(null)
                 .build();
 
         businessRepository.save(business1);
         businessRepository.save(business2);
+        businessRepository.save(business3);
 
         // 호텔옵션
         // ------------------------------------------------------------------
