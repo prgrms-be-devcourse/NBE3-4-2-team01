@@ -51,7 +51,7 @@ const Pagination = ({ currentPage, totalPages, basePath }: PaginationProps) => {
       {getPageRange().map((page) => (
         <Link
           key={page}
-          href={createLink(currentPage)}
+          href={createLink(page)}
           className={`${styles.pageLink} ${
             page === currentPage ? styles.active : ""
           }`}
