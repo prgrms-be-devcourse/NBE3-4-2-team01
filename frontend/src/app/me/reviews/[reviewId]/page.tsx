@@ -91,21 +91,27 @@ export default function CreatePage() {
       console.log('서버 응답:', response);
 
       setPresignedUrls(response.presignedUrls);
-      await submitImages();
       console.log('리뷰 내용, 레이팅이 성공적으로 수정되었습니다.');
+      
+      if (newImages.length === 0) {
+        console.log('이미지 없이 리뷰만 수정하였음');
+        alert('리뷰가 수정되었습니다.');
+        router.push('/me/reviews');
+      }
      } catch (error) {
        console.error('Error:', error);
        alert('리뷰 생성 또는 이미지 업로드 중 오류가 발생했습니다.');
     }
   };
 
-  const submitImages = async () => {
-    if (presignedUrls.length === 0) {
-      alert('리뷰가 수정되었습니다.');
-      router.push('/me/reviews/');
-      return;
+  useEffect(() => {
+    if (presignedUrls.length > 0) {
+      console.log("presignedUrls 설정됨:", presignedUrls);
+      submitImages();
     }
+  }, [presignedUrls]);
 
+  const submitImages = async () => {
     try {
       await uploadImagesToS3(presignedUrls, newImages);
       await saveImageUrls();
