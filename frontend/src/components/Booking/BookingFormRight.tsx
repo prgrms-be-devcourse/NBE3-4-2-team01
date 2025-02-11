@@ -6,16 +6,20 @@ import {
     CardTitle,
     CardFooter
   } from "@/components/ui/card";
-import { BookingFormRightProps, BookingProps } from "@/lib/types/Booking/BookingProps";
 import Payment from "./Payment/Payment";
 import { KakaoPaymentRequest } from "@/lib/types/Booking/Payment/KakaoPaymentRequest";
 import { book } from "@/lib/api/Booking/BookingApi";
 import { BookingRequest } from "@/lib/types/Booking/BookingRequest";
 import { useRouter } from "next/navigation";
+import { BookingFormResponse } from "@/lib/types/Booking/BookingFormResponse";
 
 const BookingFormRight = function(
-    {hotelName, roomName, amount, bookingProps: {hotelId, roomId, checkInDate, checkOutDate}} : BookingFormRightProps) {
-    const router = useRouter();
+  {checkInDate, checkOutDate, bookingFormData} 
+  : {checkInDate : string, checkOutDate : string, bookingFormData : BookingFormResponse}) {  
+  const hotelDetails = bookingFormData.hotel;
+  const roomDetails = bookingFormData.room;
+  const memberDetails = bookingFormData.member;
+  const router = useRouter();
 
     const createBookingAndRedirect = async (
         kakaoPaymentRequest: KakaoPaymentRequest
@@ -23,8 +27,8 @@ const BookingFormRight = function(
         try {
           // KakaoPaymentRequest와 나머지 정보를 합쳐서 BookingRequest 생성
           const bookingRequest: BookingRequest = {
-            hotelId: hotelId,
-            roomId: roomId,
+            hotelId: hotelDetails.hotelId,
+            roomId: roomDetails.id,
             checkInDate: checkInDate,
             checkOutDate: checkOutDate,
             merchantUid: kakaoPaymentRequest.merchantUid,
@@ -34,8 +38,12 @@ const BookingFormRight = function(
       
           // 예약 API 호출
           await book(bookingRequest);
-          router.push('/me/orders');
-          alert("예약에 성공했습니다.");
+          new Promise((resolve) => {
+              alert("예약에 성공했습니다.");
+              resolve(true);
+          }).then(() => {
+              router.push('/me/orders');
+          });
         } catch (error) {
           console.error(error);
         }
@@ -50,12 +58,12 @@ const BookingFormRight = function(
         <CardContent className="space-y-6">
           <div>
             <h3 className="text-sm font-medium text-gray-500">호텔명</h3>
-            <p className="text-lg font-medium mt-1">{hotelName}</p>
+            <p className="text-lg font-medium mt-1">{hotelDetails.hotelName}</p>
           </div>
 
           <div>
             <h3 className="text-sm font-medium text-gray-500">객실 유형</h3>
-            <p className="text-lg font-medium mt-1">{roomName}</p>
+            <p className="text-lg font-medium mt-1">{roomDetails.roomName}</p>
           </div>
 
           <div>
@@ -70,29 +78,29 @@ const BookingFormRight = function(
 
           <div>
             <h3 className="text-sm font-medium text-gray-500">투숙객 이름</h3>
-            <p className="text-lg font-medium mt-1">{"dummy"}</p>
+            <p className="text-lg font-medium mt-1">{memberDetails.memberName}</p>
           </div>
 
           <div>
             <h3 className="text-sm font-medium text-gray-500">투숙객 이메일</h3>
-            <p className="text-lg font-medium mt-1">{"dummy@gmail.com"}</p>
+            <p className="text-lg font-medium mt-1">{memberDetails.memberEmail}</p>
           </div>
 
           <div className="pt-4 border-t">
             <div className="flex justify-between items-center">
                 <span className="text-base font-medium">총 결제 금액</span>
                 <span className="text-xl font-bold text-blue-600">
-                {amount.toLocaleString()}원
+                {roomDetails.basePrice.toLocaleString()}원
                 </span>
             </div>
           </div>
         </CardContent>
         <CardFooter>
           <Payment 
-          buyerEmail="sete3683@gmail.com" 
-          buyerName="dummy" 
-          amount={amount} 
-          productName={roomName} 
+          buyerEmail={memberDetails.memberEmail}
+          buyerName={memberDetails.memberName}
+          amount={roomDetails.basePrice} 
+          productName={roomDetails.roomName} 
           onPaymentComplete={createBookingAndRedirect}></Payment>
         </CardFooter>
       </Card>

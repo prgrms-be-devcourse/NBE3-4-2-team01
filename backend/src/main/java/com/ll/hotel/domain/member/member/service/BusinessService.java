@@ -8,7 +8,6 @@ import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +19,7 @@ public class BusinessService {
     @Transactional
     public Business register(BusinessRequest.RegistrationInfo registrationInfo, Member member, String validationResult) {
 
-        BusinessApprovalStatus status;
-
         if (validationResult.equals("01")) {
-            status = BusinessApprovalStatus.APPROVED;
             member.setRole(Role.BUSINESS);
         } else {
             throw new ServiceException("400", "유효하지 않은 사업자입니다.");
@@ -34,7 +30,7 @@ public class BusinessService {
                 .businessRegistrationNumber(registrationInfo.businessRegistrationNumber())
                 .startDate(registrationInfo.startDate())
                 .ownerName(registrationInfo.ownerName())
-                .approvalStatus(status)
+                .approvalStatus(BusinessApprovalStatus.APPROVED)
                 .member(member)
                 .hotel(null)
                 .build();

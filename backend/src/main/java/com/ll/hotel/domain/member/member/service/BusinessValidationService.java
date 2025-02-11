@@ -22,7 +22,6 @@ public class BusinessValidationService {
 
     public String validateBusiness(BusinessRequest.RegistrationInfo registrationInfo) {
         String apiUrl = properties.getValidationUrl() + "?serviceKey=" + properties.getServiceKey();
-
         URI uri = URI.create(apiUrl);
 
         BusinessRequest.RegistrationApiForm registrationApiForm = BusinessRequest.RegistrationApiForm.from(registrationInfo);

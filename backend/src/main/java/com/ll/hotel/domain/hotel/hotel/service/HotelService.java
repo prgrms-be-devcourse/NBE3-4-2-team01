@@ -13,6 +13,7 @@ import com.ll.hotel.domain.hotel.room.dto.GetRoomRevenueResponse;
 import com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
+import com.ll.hotel.domain.hotel.room.type.RoomStatus;
 import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
@@ -23,6 +24,11 @@ import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import com.ll.hotel.global.annotation.BusinessOnly;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.standard.util.CookieUtil;
+import com.ll.hotel.standard.util.Ut;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -34,6 +40,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
@@ -79,6 +88,12 @@ public class HotelService {
     @BusinessOnly
     @Transactional
     public void saveImages(Member actor, ImageType imageType, long hotelId, List<String> urls) {
+        Hotel hotel = getHotelById(hotelId);
+
+        if (!hotel.isOwnedBy(actor)) {
+            throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
+        }
+
         this.imageService.saveImages(imageType, hotelId, urls);
     }
 
@@ -255,9 +270,10 @@ public class HotelService {
         return hotels.stream()
                 .map(dto -> {
                     Hotel hotel = dto.hotel();
+                    System.out.println("호텔이름 : " + hotel.getHotelName());
                     List<Room> availableRooms = hotel.getRooms().stream()
+                            .filter(room -> room.getRoomStatus() == RoomStatus.AVAILABLE)
                             .filter(room -> personal >= room.getStandardNumber() && personal <= room.getMaxNumber())
-//                            .filter(room -> this.roomIsAvailable(room, checkInDate, checkOutDate))
                             .map(room -> {
                                 room.setRoomNumber(
                                         this.countAvailableRoomNumber(room, checkInDate, checkOutDate, personal));
@@ -265,19 +281,19 @@ public class HotelService {
                             })
                             .filter(room -> room.getRoomNumber() > 0)
                             .toList();
-                    hotel.setRooms(availableRooms);
+
+                    if (availableRooms.isEmpty()) {
+                        return null;
+                    }
 
                     // 최저가 객실 찾기
                     Room minPriceRoom = availableRooms.stream()
                             .min(Comparator.comparing(Room::getBasePrice))
                             .orElse(null);
 
-                    if (minPriceRoom == null || hotel.getRooms().isEmpty()) {
-                        return new GetHotelResponse(dto, null);
-                    }
-
                     return new GetHotelResponse(dto, minPriceRoom.getBasePrice());
                 })
+                .filter(Objects::nonNull)
                 .toList();
     }
 
@@ -290,13 +306,15 @@ public class HotelService {
 
     // 호텔의 예약 가능한 객실 수 Count
     private int countAvailableRoomNumber(Room room, LocalDate checkInDate, LocalDate checkOutDate, int personal) {
+        System.out.println(room.getRoomName());
         if (personal < room.getStandardNumber() || personal > room.getMaxNumber()) {
             return 0;
         }
 
         long resolvedCount = room.getBookings().stream()
                 .filter(booking -> booking.getCheckInDate().isBefore(checkOutDate)
-                                   && booking.getCheckOutDate().isAfter(checkInDate))
+                                   && booking.getCheckOutDate().isAfter(checkInDate)
+                                   && booking.getBookingStatus() != BookingStatus.CANCELLED)
                 .count();
 
         return room.getRoomNumber() - (int) resolvedCount;
@@ -306,5 +324,34 @@ public class HotelService {
     @Transactional(readOnly = true)
     public GetAllHotelOptionsResponse findHotelOptions(Member actor) {
         return new GetAllHotelOptionsResponse(this.hotelOptionRepository.findAll());
+    }
+
+    public void updateRoleCookie(HttpServletRequest request, HttpServletResponse response, long hotelId) {
+        Optional<Cookie> roleCookieOpt = CookieUtil.getCookie(request, "role");
+        if (roleCookieOpt.isPresent()) {
+            try {
+                // URL 디코딩 후 JSON 파싱
+                String decodedValue = URLDecoder.decode(roleCookieOpt.get().getValue(), StandardCharsets.UTF_8);
+                Map<String, Object> roleData = Ut.json.toMap(decodedValue);
+
+                // 데이터 업데이트
+                roleData.put("hasHotel", true);
+                roleData.put("hotelId", hotelId); // 새로운 호텔 ID
+
+                // 다시 JSON으로 변환하고 URL 인코딩
+                String updatedEncodedData = URLEncoder.encode(Ut.json.toString(roleData), StandardCharsets.UTF_8);
+
+                // 새 쿠키 생성 및 설정
+                Cookie updatedCookie = new Cookie("role", updatedEncodedData);
+                updatedCookie.setSecure(true);
+                updatedCookie.setPath("/");
+
+                // 응답에 쿠키 추가
+                response.addCookie(updatedCookie);
+            } catch (Exception e) {
+                // 에러 처리
+                e.printStackTrace();
+            }
+        }
     }
 }

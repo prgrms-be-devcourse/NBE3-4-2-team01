@@ -134,16 +134,13 @@ class AdminBusinessServiceTest {
     void modifyTest() {
         // Given
         AdminBusinessRequest adminBusinessRequest = new AdminBusinessRequest(
-                "0123456789",
-                LocalDate.of(2020, 1, 1),
-                null,
                 BusinessApprovalStatus.APPROVED);
 
         // 기존 데이터 준비
         Business existingBusiness = adminBusinessService.findById(testBusinessId);
 
         // When: 승인 요청 실행
-        adminBusinessService.modify(existingBusiness, adminBusinessRequest);
+        adminBusinessService.approve(existingBusiness, adminBusinessRequest);
 
         // Then: 메모리 상의 데이터 검증
         assertThat(existingBusiness).isNotNull();
