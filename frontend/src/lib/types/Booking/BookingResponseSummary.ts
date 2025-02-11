@@ -1,14 +1,10 @@
-import { BookingHotelDto } from "./BookingHotelDto";
-import { BookingRoomDto } from "./BookingRoomDto";
-import { PaymentResponse } from "./Payment/PaymentResponse";
-
 export interface BookingResponseSummary {
     bookingId : number;
-    room : BookingRoomDto;
-    hotel : BookingHotelDto;
-    payment : PaymentResponse;
-    bookNumber : string;
+    hotelName : string;
+    roomName : string;
+    thumbnailUrl : string;
     bookingStatus : string;
+    amount : number;
     checkInDate : string;
     checkOutDate : string;
 }
