@@ -23,7 +23,6 @@ import Navigation from "@/components/navigation/Navigation";
 
 export default function CreateHotelPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
   const [hotelName, setHotelName] = useState("");
   const [hotelEmail, setHotelEmail] = useState("");
   const [hotelPhoneNumber, setHotelPhoneNumber] = useState("");
@@ -55,12 +54,7 @@ export default function CreateHotelPage() {
     };
 
     loadHotelOptions();
-    setIsLoading(false);
   }, []);
-
-  if (isLoading) {
-    return <div className="text-center text-lg font-semibold">로딩 중...</div>;
-  }
 
   const handleOptionChange = (option: string) => {
     setHotelOptions((prev) => {
@@ -163,6 +157,11 @@ export default function CreateHotelPage() {
 
   // PresignedUrls 를 사용하여 이미지 업로드
   const submitImages = async () => {
+    if (presigendUrls.length === 0) {
+      alert("이미지 업로드 URL을 가져오지 못했습니다.");
+      return;
+    }
+
     try {
       await uploadImagesToS3(presigendUrls, images);
       await saveImageUrls();
@@ -176,7 +175,6 @@ export default function CreateHotelPage() {
   // 사진 조회용 URL들 서버로 전달
   const saveImageUrls = async () => {
     const viewUrls = presigendUrls.map((presigendUrls) => {
-      console.log(presigendUrls);
       return presigendUrls.split("?")[0];
     });
 
