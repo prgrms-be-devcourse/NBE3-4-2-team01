@@ -2,7 +2,6 @@ package com.ll.hotel.domain.hotel.room.controller;
 
 import com.ll.hotel.domain.hotel.room.dto.GetAllRoomOptionsResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
@@ -89,15 +88,6 @@ public class RoomController {
                 "200-1",
                 "객실 정보를 정상적으로 조회했습니다.",
                 this.roomService.findRoomDetail(hotelId, roomId)
-        );
-    }
-
-    @GetMapping("/{roomId}/room-option")
-    public RsData<GetRoomOptionResponse> findRoomOptions(@PathVariable long hotelId, @PathVariable long roomId) {
-        return new RsData<>(
-                "200-1",
-                "객실의 옵션 정보를 정상적으로 조회했습니다.",
-                this.roomService.findRoomOptions(hotelId, roomId)
         );
     }
 
