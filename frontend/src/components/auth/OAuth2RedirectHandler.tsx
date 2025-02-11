@@ -39,6 +39,10 @@ const OAuth2RedirectHandler = ({ onLoginSuccess }: OAuth2RedirectProps) => {
             if (roleData?.role === "ADMIN") {
               router.push("/admin");
               break;
+            } else if (roleData?.role === "BUSINESS") {
+              if (roleData?.hasHotel) router.push("/business/hotel/management");
+              else router.push("/business/");
+              break;
             }
             router.push("/");
             break;
