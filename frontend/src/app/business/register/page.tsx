@@ -21,8 +21,10 @@ export default function RegisterBusiness() {
   const onSubmit = async (data: BusinessRegistrationForm) => {
     try {
       await registerBusiness(data);
-      alert("사업자 등록이 완료되었습니다!");
-      router.push("/");
+      alert("사업자 등록이 완료되었습니다. 다시 로그인 해주세요");
+      document.cookie =
+        "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+      router.push("/login");
     } catch (error) {
       console.error("등록 실패:", error);
       alert("사업자 등록에 실패했습니다.");
