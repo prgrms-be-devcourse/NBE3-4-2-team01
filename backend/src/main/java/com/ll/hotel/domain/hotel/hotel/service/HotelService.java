@@ -13,6 +13,7 @@ import com.ll.hotel.domain.hotel.room.dto.GetRoomRevenueResponse;
 import com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
+import com.ll.hotel.domain.hotel.room.type.RoomStatus;
 import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
@@ -256,8 +257,8 @@ public class HotelService {
                 .map(dto -> {
                     Hotel hotel = dto.hotel();
                     List<Room> availableRooms = hotel.getRooms().stream()
+                            .filter(room -> room.getRoomStatus() == RoomStatus.AVAILABLE)
                             .filter(room -> personal >= room.getStandardNumber() && personal <= room.getMaxNumber())
-//                            .filter(room -> this.roomIsAvailable(room, checkInDate, checkOutDate))
                             .map(room -> {
                                 room.setRoomNumber(
                                         this.countAvailableRoomNumber(room, checkInDate, checkOutDate, personal));
@@ -265,19 +266,19 @@ public class HotelService {
                             })
                             .filter(room -> room.getRoomNumber() > 0)
                             .toList();
-                    hotel.setRooms(availableRooms);
+
+                    if (availableRooms.isEmpty()) {
+                        return null;
+                    }
 
                     // 최저가 객실 찾기
                     Room minPriceRoom = availableRooms.stream()
                             .min(Comparator.comparing(Room::getBasePrice))
                             .orElse(null);
 
-                    if (minPriceRoom == null || hotel.getRooms().isEmpty()) {
-                        return new GetHotelResponse(dto, null);
-                    }
-
                     return new GetHotelResponse(dto, minPriceRoom.getBasePrice());
                 })
+                .filter(Objects::nonNull)
                 .toList();
     }
 
