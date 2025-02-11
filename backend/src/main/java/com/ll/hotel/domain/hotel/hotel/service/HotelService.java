@@ -80,6 +80,12 @@ public class HotelService {
     @BusinessOnly
     @Transactional
     public void saveImages(Member actor, ImageType imageType, long hotelId, List<String> urls) {
+        Hotel hotel = getHotelById(hotelId);
+
+        if (!hotel.isOwnedBy(actor)) {
+            throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
+        }
+
         this.imageService.saveImages(imageType, hotelId, urls);
     }
 
@@ -256,6 +262,7 @@ public class HotelService {
         return hotels.stream()
                 .map(dto -> {
                     Hotel hotel = dto.hotel();
+                    System.out.println("호텔이름 : " + hotel.getHotelName());
                     List<Room> availableRooms = hotel.getRooms().stream()
                             .filter(room -> room.getRoomStatus() == RoomStatus.AVAILABLE)
                             .filter(room -> personal >= room.getStandardNumber() && personal <= room.getMaxNumber())
@@ -291,6 +298,7 @@ public class HotelService {
 
     // 호텔의 예약 가능한 객실 수 Count
     private int countAvailableRoomNumber(Room room, LocalDate checkInDate, LocalDate checkOutDate, int personal) {
+        System.out.println(room.getRoomName());
         if (personal < room.getStandardNumber() || personal > room.getMaxNumber()) {
             return 0;
         }
