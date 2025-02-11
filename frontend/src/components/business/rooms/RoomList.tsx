@@ -18,24 +18,28 @@ const RoomList: React.FC<RoomListProps> = ({ rooms }) => {
   const [hotelId, setHotelId] = useState(cookie?.hotelId);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isBusinessUser, setIsBusinessUser] = useState<boolean>(false);
+  const [paramHotelId, setParamHotelId] = useState<number | null>(null);
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const searchParams = useSearchParams();
   const param = useParams();
   const router = useRouter();
+  const cookieHotelId = cookie?.hotelId ? Number(cookie.hotelId) : -1;
   const checkInDate = searchParams.get("checkInDate") || "";
   const checkoutDate = searchParams.get("checkoutDate") || "";
 
   useEffect(() => {
-    const cookieHotelId = cookie?.hotelId ? Number(cookie.hotelId) : -1;
-    const paramHotelId = param.hotelId ? Number(param.hotelId) : null;
+    const parsedParamHotelId = param.hotelId ? Number(param.hotelId) : null;
+
+    setParamHotelId(parsedParamHotelId);
+
     console.log("쿠키 호텔 ID : ", cookieHotelId);
     console.log("파람 호텔 ID : ", paramHotelId);
 
     setIsBusinessUser(cookie?.role == "BUSINESS");
 
-    if (paramHotelId !== null) {
-      setHotelId(paramHotelId);
-      setCanEdit(isBusinessUser && cookieHotelId === paramHotelId);
+    if (parsedParamHotelId !== null) {
+      setHotelId(parsedParamHotelId);
+      setCanEdit(isBusinessUser && cookieHotelId === parsedParamHotelId);
     } else if (isBusinessUser) {
       setHotelId(cookieHotelId);
       setCanEdit(true);
@@ -52,6 +56,8 @@ const RoomList: React.FC<RoomListProps> = ({ rooms }) => {
     if (!window.confirm("객실을 삭제하시겠습니까?")) return;
 
     try {
+      console.log("지우려는 호텔 ID: ", hotelId);
+      console.log("지우려는 객실 ID: ", roomId);
       await deleteRoom(hotelId ?? -1, roomId);
       alert("객실이 삭제되었습니다.");
       router.push("/business/hotel/management");
@@ -65,7 +71,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms }) => {
   const handleReservation = (roomId: number) => {
     const params = new URLSearchParams();
     params.set("hotel", (hotelId ?? "").toString());
-    params.set("room", roomId.toString());
+    params.set("rooms", roomId.toString());
     if (checkInDate) params.set("checkInDate", checkInDate);
     if (checkoutDate) params.set("checkoutDate", checkoutDate);
 
@@ -75,6 +81,27 @@ const RoomList: React.FC<RoomListProps> = ({ rooms }) => {
     );
     router.push(`/orders/payment?${params.toString()}`);
   };
+
+  const handleRoomClick = (roomId: number) => {
+    const params = new URLSearchParams();
+    if (isBusinessUser) {
+      if (paramHotelId !== cookieHotelId) {
+        params.set("checkInDate", checkInDate);
+        params.set("checkoutDate", checkoutDate);
+      }
+      router.push(`/hotels/${hotelId}/rooms/${roomId}?${params.toString()}`);
+    } else {
+      params.set("checkInDate", checkInDate);
+      params.set("checkoutDate", checkoutDate);
+      router.push(`/hotels/${hotelId}/rooms/${roomId}?${params.toString()}`);
+    }
+  };
+
+  const handleButtonClick =
+    (action: () => void) => (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      action();
+    };
 
   return (
     <div className="p-6">
@@ -86,7 +113,8 @@ const RoomList: React.FC<RoomListProps> = ({ rooms }) => {
           {rooms.map((room) => (
             <li
               key={room.roomId}
-              className="flex flex-col border rounded-lg shadow-md p-8 bg-white"
+              className="flex flex-col border rounded-lg shadow-md p-8 bg-white cursor-pointer duration-200 hover:scale-105"
+              onClick={() => handleRoomClick?.(room.roomId)}
             >
               {/* 이미지 & 정보 섹션 */}
               <div className="flex items-center">
@@ -137,13 +165,15 @@ const RoomList: React.FC<RoomListProps> = ({ rooms }) => {
                   <>
                     <Button
                       className="bg-blue-500 text-white"
-                      onClick={() => handleEdit(room.roomId)}
+                      onClick={handleButtonClick(() => handleEdit(room.roomId))}
                     >
                       수정
                     </Button>
                     <Button
                       variant="destructive"
-                      onClick={() => handleDelete(room.roomId)}
+                      onClick={handleButtonClick(() =>
+                        handleDelete(room.roomId)
+                      )}
                     >
                       삭제
                     </Button>
@@ -151,7 +181,9 @@ const RoomList: React.FC<RoomListProps> = ({ rooms }) => {
                 ) : (
                   <Button
                     className="bg-green-500 text-white"
-                    onClick={() => handleReservation(room.roomId)}
+                    onClick={handleButtonClick(() =>
+                      handleReservation(room.roomId)
+                    )}
                   >
                     예약하기
                   </Button>

@@ -43,7 +43,7 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
       setCanEdit(false);
     }
     hotel.hotelOptions = new Set(hotel.hotelOptions);
-  }, [cookie, param.hotelId]);
+  }, [cookie, hotelId]);
 
   const handleEdit = (hotelId: number) => {
     router.push(`/business/hotel/${hotelId}`);
