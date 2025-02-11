@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { join } from '@/lib/api/AuthApi';
+import { getRoleFromCookie } from '@/lib/utils/CookieUtil';
 
 export default function JoinPage() {
   const router = useRouter();
@@ -19,25 +21,36 @@ export default function JoinPage() {
     birthDate: ''
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    const response = await fetch('http://localhost:8080/api/users/join', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await join({
+        email: formData.email,
+        name: formData.name,
+        phoneNumber: formData.phoneNumber,
+        role: formData.role,
+        provider: formData.provider,
+        oauthId: formData.oauthId,
+        birthDate: formData.birthDate
+      });
 
-    const data = await response.json();
-    
-    if (data.resultCode === "200") {
-      router.push('/?message=회원가입이 완료되었습니다');
-    } else if (data.resultCode === "400" && data.msg.includes("이미 가입된")) {
-      router.push('/?message=기존 계정에 소셜 로그인이 연동되었습니다');
-    } else {
-      alert(data.msg);
+      if (response.resultCode === '200') {
+        // 회원가입 성공 후 쿠키 확인
+        const roleData = getRoleFromCookie();
+        if (roleData) {
+          // 로그인 상태로 홈으로 리다이렉트
+          router.push('/');
+        } else {
+          // 쿠키가 없으면 로그인 페이지로
+          router.push('/login');
+        }
+      } else {
+        alert(response.msg || '회원가입에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('회원가입 실패:', error);
+      alert('회원가입 중 오류가 발생했습니다.');
     }
   };
 
