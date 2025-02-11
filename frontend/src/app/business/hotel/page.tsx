@@ -23,6 +23,7 @@ import Navigation from "@/components/navigation/Navigation";
 
 export default function CreateHotelPage() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [hotelName, setHotelName] = useState("");
   const [hotelEmail, setHotelEmail] = useState("");
   const [hotelPhoneNumber, setHotelPhoneNumber] = useState("");
@@ -38,22 +39,28 @@ export default function CreateHotelPage() {
   const [presigendUrls, setPresignedUrls] = useState<string[]>([]);
   const [hotelId, setHotelId] = useState(0);
   const [hotelOptions, setHotelOptions] = useState<Set<string>>(new Set());
-  const [availableHotelOptions, setAvailableHotelOptions] = useState<
-    Set<string>
-  >(new Set());
+  const [availableHotelOptions, setAvailableHotelOptions] = useState<string[]>(
+    []
+  );
 
   // 호텔 옵션 전체 리스트 가져오기
   useEffect(() => {
     const loadHotelOptions = async () => {
       try {
         const options: GetAllHotelOptionResponse = await findAllHotelOptions();
-        setAvailableHotelOptions(new Set(options.hotelOptions));
+        setAvailableHotelOptions(options.hotelOptions.sort());
       } catch (error) {
         throw error;
       }
     };
+
     loadHotelOptions();
+    setIsLoading(false);
   }, []);
+
+  if (isLoading) {
+    return <div className="text-center text-lg font-semibold">로딩 중...</div>;
+  }
 
   const handleOptionChange = (option: string) => {
     setHotelOptions((prev) => {
