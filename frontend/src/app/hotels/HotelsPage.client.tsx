@@ -10,25 +10,25 @@ import { FilterName } from '@/lib/enum/FilterName';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { PageDto } from '@/lib/types/PageDto';
 import { GetHotelResponse } from '@/lib/types/hotel/GetHotelResponse';
+import SearchComponent from '@/components/Search/SearchComponent';
 
 interface HotelsPageClientProps {
   hotelData: PageDto<GetHotelResponse>;
   searchParams: {
-    page?: number;
-    pageSize?: number;
-    filterName?: FilterName;
-    streetAddress?: string;
-    checkInDate?: string;
-    checkoutDate?: string;
-    personal?: string;
-    filterDirection?: string;
+    page: number;
+    pageSize: number;
+    filterName: FilterName;
+    streetAddress: string;
+    checkInDate: string;
+    checkoutDate: string;
+    personal: string;
+    filterDirection: string;
   }
 }
 
 export default function HotelsPageClient({ hotelData, searchParams }: HotelsPageClientProps) {
   const router = useRouter();
 
-  // 클라이언트에서 searchParams를 상태로 관리
   const {
     page = 1,
     filterName = FilterName.LATEST
@@ -37,31 +37,46 @@ export default function HotelsPageClient({ hotelData, searchParams }: HotelsPage
   const [selectedFilter, setSelectedFilter] = useState<FilterName>(filterName);
 
   const handleFilterChange = (value: FilterName) => {
+    const stringifiedSearchParams: Record<string, string> = {
+      page: String(searchParams.page),
+      pageSize: String(searchParams.pageSize),
+      filterName: String(searchParams.filterName),
+      streetAddress: searchParams.streetAddress,
+      checkInDate: searchParams.checkInDate,
+      checkoutDate: searchParams.checkoutDate,
+      personal: searchParams.personal,
+      filterDirection: searchParams.filterDirection
+    };
+    
+    const params = new URLSearchParams(stringifiedSearchParams);
+    params.set('filterName', value);
+    
     setSelectedFilter(value);
-    router.push(`?filterName=${value}`);
+    router.push(`?${params.toString()}`);
     console.log(value);
   };
 
   return (
     <main className="container max-w-6xl mx-auto px-4 py-8">
       <Navigation />
-      <div className="content-wrapper flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold mb-6">호텔 목록</h1>
-        <div className="ml-auto flex items-center space-x-4"> {/* 가로로 배치되도록 flex와 spacing 적용 */}
-          <Select value={selectedFilter} onValueChange={handleFilterChange}>
-            <SelectTrigger className="px-4 py-2 border rounded-md bg-white">
-              <SelectValue placeholder="정렬 기준" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={FilterName.LATEST}>최신순</SelectItem>
-              <SelectItem value={FilterName.AVERAGE_RATING}>리뷰 점수순</SelectItem>
-              <SelectItem value={FilterName.REVIEW_COUNT}>리뷰 개수순</SelectItem>
-            </SelectContent>
-          </Select>
+      <div className="content-wrapper flex items-center justify-between gap-4 mb-6">
+        <h1 className="text-2xl font-bold whitespace-nowrap">호텔 목록</h1>
+        <div className="flex-grow">
+          <SearchComponent />
         </div>
+        <Select value={selectedFilter} onValueChange={handleFilterChange}>
+          <SelectTrigger className="w-40 px-4 py-2 border rounded-md bg-white whitespace-nowrap">
+            <SelectValue placeholder="정렬 기준" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={FilterName.LATEST}>최신순</SelectItem>
+            <SelectItem value={FilterName.AVERAGE_RATING}>리뷰 점수순</SelectItem>
+            <SelectItem value={FilterName.REVIEW_COUNT}>리뷰 개수순</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <Suspense fallback={<Loading />}>
-        <HotelList hotels={hotelData.items} />
+        <HotelList hotels={hotelData.items} checkInDate={searchParams.checkInDate} checkoutDate={searchParams.checkoutDate}/>
       </Suspense>
       <Pagination currentPage={page} totalPages={hotelData?.totalPages || 1} basePath="hotels" />
     </main>

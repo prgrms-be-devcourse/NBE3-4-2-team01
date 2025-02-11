@@ -3,13 +3,19 @@ import { GetHotelResponse } from '@/lib/types/hotel/GetHotelResponse';
 
 interface HotelListProps {
   hotels: GetHotelResponse[];
+  checkInDate: string;
+  checkoutDate: string;
 }
 
-export default function HotelList({ hotels }: HotelListProps) {
+export default function HotelList({ hotels, checkInDate, checkoutDate }: HotelListProps) {
   return (
     <div className="flex flex-col items-center space-y-4 w-full">
       {hotels.map((hotel) => (
-        <HotelInfo key={hotel.hotelId} {...hotel}/>
+        <HotelInfo 
+        key={hotel.hotelId} 
+        {...hotel}
+        checkInDate={checkInDate}
+        checkoutDate={checkoutDate}/>
       ))}
     </div>
   );

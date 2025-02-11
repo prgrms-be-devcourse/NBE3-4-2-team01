@@ -6,6 +6,11 @@ import type { GetHotelResponse } from '@/lib/types/hotel/GetHotelResponse';
 import { useRouter } from "next/navigation";
 import { Clock } from 'lucide-react';
 
+interface HotelInfoProps extends GetHotelResponse {
+    checkInDate: string;
+    checkoutDate: string;
+}
+
 export default function HotelInfo({
   hotelId,
   hotelName,
@@ -16,11 +21,16 @@ export default function HotelInfo({
   thumbnailUrl,
   checkInTime,
   price,
-}: GetHotelResponse) {
+  checkInDate,
+  checkoutDate
+}: HotelInfoProps) {
     const router = useRouter();
     
     const handleClick = () => {
-        router.push(`/hotels/${hotelId}`);
+        const params = new URLSearchParams();
+        params.set('checkInDate', checkInDate);
+        params.set('checkoutDate', checkoutDate);
+        router.push(`/hotels/${hotelId}?${params.toString()}`);
     };
 
     // 초 제거 (HH:mm:ss → HH:mm)
@@ -52,7 +62,7 @@ export default function HotelInfo({
                                     <span className="text-sm">/5</span>
                                 </div>
                                 <p className="text-sm text-gray-600 mt-1">
-                                    후기 {totalReviewCount.toLocaleString()}개
+                                    후기 {totalReviewCount && totalReviewCount.toLocaleString()}개
                                 </p>
                             </div>
                         </div>
@@ -67,7 +77,7 @@ export default function HotelInfo({
 
                         <div className="mt-auto text-right">
                             <p className="text-2xl font-bold text-blue-600">
-                                {price.toLocaleString()}원~
+                                {price && price.toLocaleString()}원~
                             </p>
                         </div>
                     </div>
