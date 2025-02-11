@@ -1,12 +1,12 @@
 "use client";
 
 import HotelDetail from "@/components/business/hotel/HotelDetail";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { findHotelDetail } from "@/lib/api/BusinessHotelApi";
 import { GetHotelDetailResponse } from "@/lib/types/hotel/GetHotelDetailResponse";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import RoomList from "@/components/business/room/RoomList";
+import RoomList from "@/components/business/rooms/RoomList";
 import HotelImages from "@/components/business/hotel/HotelImages";
 import Navigation from "@/components/navigation/Navigation";
 
@@ -17,6 +17,7 @@ const HotelDetailPage: React.FC = () => {
   );
   const [isLoading, setIsLoading] = useState(true);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const checkInDate = searchParams.get("checkInDate") || "";
   const checkoutDate = searchParams.get("checkoutDate") || "";
 

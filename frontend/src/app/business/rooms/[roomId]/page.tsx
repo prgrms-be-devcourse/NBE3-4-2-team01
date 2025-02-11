@@ -84,6 +84,8 @@ export default function ModifyRoomPage() {
   useEffect(() => {
     const fetchRoomData = async () => {
       try {
+        console.log("호텔 Id : ", Number(hotelId));
+        console.log("객실 Id : ", Number(roomId));
         const response = await findRoomDetail(hotelId, roomId);
         const bedTypeNumber = response.roomDto.bedTypeNumber;
         setRoomId(response.roomDto.id);
@@ -92,7 +94,7 @@ export default function ModifyRoomPage() {
         setBasePrice(response.roomDto.basePrice);
         setStandardNumber(response.roomDto.standardNumber);
         setMaxNumber(response.roomDto.maxNumber);
-        setBedTypeNumber(response.roomDto.bedTypeNumber);
+        setBedTypeNumber(bedTypeNumber);
         setExistingImages(response.roomImageUrls);
         setRoomOptions(new Set(response.roomDto.roomOptions || []));
         console.log("객실 정보: ", response);
