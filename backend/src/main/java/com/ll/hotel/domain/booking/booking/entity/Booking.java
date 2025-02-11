@@ -39,20 +39,30 @@ public class Booking extends BaseTime {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    @Column(unique = true)
-    private String bookingNumber;
+    @NotNull
+    @Column
+    @Builder.Default
+    private String bookingNumber = "";
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column
     @Builder.Default
     private BookingStatus bookingStatus = BookingStatus.CONFIRMED;
 
-    @Column
-    private int paymentPrice;
-
+    @NotNull
     @Column
     private LocalDate checkInDate;
 
+    @NotNull
     @Column
     private LocalDate checkOutDate;
+
+    public boolean isReservedBy(Member member) {
+        return this.member.equals(member);
+    }
+
+    public boolean isOwnedBy(Member member) {
+        return member.isBusiness() && hotel.isOwnedBy(member);
+    }
 }

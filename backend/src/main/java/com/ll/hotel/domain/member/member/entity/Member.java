@@ -1,13 +1,18 @@
 package com.ll.hotel.domain.member.member.entity;
 
+import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
+import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.jpa.entity.BaseTime;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Entity
@@ -16,35 +21,25 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "member")
-public class Member {
+@Table(
+    name = "member",
+    indexes = {
+        @Index(name = "idx_member_email", columnList = "memberEmail")
+    }
+)
+public class Member extends BaseTime {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
-    private Long memberId;
-
-    @Column(unique = true, nullable = false)
-    private String memberEmail; // 실제 로그인 ID
+    private String memberEmail;
 
     @Column(nullable = false)
-    private String password; // 민감한 정보에 접두사를 붙여야 할지 고민
-
-    @Column(nullable = false)
-    private String memberName; // 유저 닉네임
+    private String memberName;
 
     @Column(nullable = false)
     private String memberPhoneNumber;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate birthDate;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime modifiedAt;
-
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -54,11 +49,45 @@ public class Member {
     @Column(nullable = false)
     private MemberStatus memberStatus;
 
-    @OneToMany(mappedBy = "member")
-    private List<OAuth> oAuthList;
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<OAuth> oauths = new ArrayList<>();
+
+    @OneToOne(mappedBy="member", fetch = FetchType.LAZY)
+    private Business business;
+
+    @ManyToMany
+    @JoinTable(
+        name = "favorite",
+        joinColumns = @JoinColumn(name = "member_id"),
+        inverseJoinColumns = @JoinColumn(name = "hotel_id")
+    )
+    @Builder.Default
+    private Set<Hotel> favoriteHotels = new HashSet<>();
+
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
+    }
+
+    public boolean isBusiness() {
+        return this.role == Role.BUSINESS;
+    }
+
+    public boolean isUser() {
+        return this.role == Role.USER;
+    }
 
     public String getUserRole() {
         return this.role.name();
     }
 
+    public OAuth getFirstOAuth() {
+        return this.oauths.isEmpty() ? null : this.oauths.get(0);
+    }
+
+    public void checkBusiness() {
+        if (!this.isBusiness()) {
+            throw new ServiceException("403-1", "사업가만 관리할 수 있습니다.");
+        }
+    }
 }

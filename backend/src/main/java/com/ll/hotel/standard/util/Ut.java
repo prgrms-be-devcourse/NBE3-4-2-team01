@@ -1,34 +1,29 @@
 package com.ll.hotel.standard.util;
 
-import java.util.Date;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ll.hotel.domain.member.member.service.RefreshTokenService;
 import com.ll.hotel.global.app.AppConfig;
-import com.ll.hotel.global.initData.BaseInit;
-import com.ll.hotel.global.security.dto.GeneratedToken;
-import com.ll.hotel.global.security.dto.SecurityUserDto;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
-
+import com.ll.hotel.global.jwt.dto.JwtProperties;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import lombok.RequiredArgsConstructor;
+import io.jsonwebtoken.security.Keys;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.crypto.SecretKey;
+import java.security.SecureRandom;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 @Slf4j
-@Service
-@RequiredArgsConstructor
 public class Ut {
 
-    private final CustomOAuth2JwtProperties jwtProperties;
-    private final RefreshTokenService tokenService;
-    private final BaseInit baseInit;
+    private final SecretKey secretKey;
+
+    public Ut(JwtProperties jwtProperties) {
+        this.secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
+    }
 
     public static class str {
         public static boolean isBlank(String str) {
@@ -43,94 +38,63 @@ public class Ut {
         public static String toString(Object obj) {
             return om.writeValueAsString(obj);
         }
+
+        @SneakyThrows
+        public static Map<String, Object> toMap(String jsonStr) {
+            return om.readValue(jsonStr, new TypeReference<Map<String, Object>>() {});
+        }
     }
 
-
-    public GeneratedToken generateToken(String email, String role) {
-        String refreshToken = generateRefreshToken(email, role);
-        String accessToken = generateAccessToken(email, role);
-
-        // Redis 사용, 토큰 저장
-        tokenService.saveTokenInfo(email, refreshToken, accessToken);
-        return new GeneratedToken(accessToken, refreshToken);
-    }
-
-    public String generateRefreshToken(String email, String role) {
-        long refreshPeriod = jwtProperties.getRefreshTokenExpiration();
-
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("role", role);
-        Date now = new Date();
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + refreshPeriod))
-                .signWith(baseInit.getSecretKey())
-                .compact();
-    }
-
-
-    public String generateAccessToken(String email, String role) {
-        long tokenPeriod = jwtProperties.getAccessTokenExpiration();
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("role", role);
-
-        Date now = new Date();
-        return
-                Jwts.builder()
-                        .setClaims(claims)
-                        .setIssuedAt(now)
-                        .setExpiration(new Date(now.getTime() + tokenPeriod))
-                        .signWith(baseInit.getSecretKey())
-                        .compact();
-
-    }
-
-
-    public boolean verifyToken(String token) {
-        try {
-            // Bearer 접두사 제거
-            token = token.replace("Bearer ", "");
-
-            log.debug("Verifying token: {}", token);
-
-            Jws<Claims> claims = Jwts.parserBuilder()
-                    .setSigningKey(baseInit.getSecretKey())
-                    .build()
-                    .parseClaimsJws(token);
-
-            Date expiration = claims.getBody().getExpiration();
+    public static class jwt {
+        public static String toString(JwtProperties jwtProperties, Map<String, Object> claims) {
+            SecretKey secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
             Date now = new Date();
 
-            log.debug("Token expiration: {}, Current time: {}", expiration, now);
+            String tokenType = (String) claims.getOrDefault("type", "access");
+            long expiration = tokenType.equals("refresh")
+                    ? jwtProperties.getRefreshTokenExpiration()
+                    : jwtProperties.getAccessTokenExpiration(); // 토큰을 타입으로 구분하여 만료 시간 설정
 
-            return expiration.after(now);
-        } catch (Exception e) {
-            log.error("Token verification failed: {}", e.getMessage());
-            return false;
+            return Jwts.builder()
+                    .setClaims(claims)
+                    .setIssuedAt(now)
+                    .setExpiration(new Date(now.getTime() + expiration))
+                    .signWith(secretKey)
+                    .compact();
+        }
+
+        public static Claims getClaims(JwtProperties jwtProperties, String token) {
+            SecretKey secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
+            token = token.replace("Bearer ", "").trim();
+
+            return Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        }
+    }
+  
+    public static class random {
+        private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        private static final SecureRandom RANDOM = new SecureRandom();
+
+        public static String generateUID(int length) {
+            StringBuilder uid = new StringBuilder(length);
+
+            for (int i = 0; i < length; i++) {
+                int randomIndex = RANDOM.nextInt(CHARACTERS.length());
+                uid.append(CHARACTERS.charAt(randomIndex));
+            }
+
+            return uid.toString();
+
         }
     }
 
-    // Email 추출
-    public String getUid(String token) {
-        // Bearer 접두사 제거
-        token = token.replace("Bearer ", "");
-        return Jwts.parserBuilder().setSigningKey(baseInit.getSecretKey()).build().parseClaimsJws(token).getBody().getSubject();
-    }
-
-    // Role(권한) 추출
-    public String getRole(String token) {
-        // Bearer 접두사 제거
-        token = token.replace("Bearer ", "");
-        return Jwts.parserBuilder().setSigningKey(baseInit.getSecretKey()).build().parseClaimsJws(token).getBody().get("role", String.class);
-    }
-
-    public static SecurityUserDto getUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof SecurityUserDto securityUserDto) {
-            return securityUserDto;
+    public static class list {
+        public static boolean hasValue(List<?> list) {
+            return list != null && !list.isEmpty();
         }
-        return null;
     }
 }
