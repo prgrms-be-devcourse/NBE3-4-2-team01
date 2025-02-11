@@ -122,13 +122,23 @@ public class MemberService {
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         String accessToken = null;
+        String refreshToken = null;
         
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("access_token".equals(cookie.getName())) {
                     accessToken = cookie.getValue();
-                    break;
+                } else if ("refresh_token".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
                 }
+            }
+        }
+
+        // 액세스 토큰이 만료되었다면 리프레시 토큰으로 처리
+        if (accessToken == null && refreshToken != null) {
+            RsData<String> refreshResult = refreshAccessToken(refreshToken);
+            if (refreshResult.isSuccess()) {
+                accessToken = refreshResult.getData();
             }
         }
 
