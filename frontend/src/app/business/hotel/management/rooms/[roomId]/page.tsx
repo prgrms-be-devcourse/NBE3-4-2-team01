@@ -38,7 +38,7 @@ const RoomDetailPage: React.FC = () => {
   }, [hotelId, roomsId]);
 
   if (isLoading) {
-    return <div className="text-center">로딩 중...</div>;
+    return <div className="text-center text-lg font-semibold">로딩 중...</div>;
   }
 
   if (!roomDetail) {

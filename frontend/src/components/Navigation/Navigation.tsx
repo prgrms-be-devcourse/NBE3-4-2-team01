@@ -1,50 +1,53 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import styles from './Navigation.module.css';
-import { getRoleFromCookie, RoleData } from '@/lib/utils/CookieUtil';
-import { logout } from '@/lib/api/AuthApi';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import styles from "./Navigation.module.css";
+import { getRoleFromCookie, RoleData } from "@/lib/utils/CookieUtil";
+import { logout } from "@/lib/api/AuthApi";
 
 interface UserState {
   isLoggedIn: boolean;
-  userType: 'USER' | 'BUSINESS' | 'ADMIN' | 'ANONYMOUS' | null;
+  userType: "USER" | "BUSINESS" | "ADMIN" | "ANONYMOUS" | null;
   hasHotel?: boolean;
+  hotelId?: number;
 }
 
 export default function Navigation() {
   const [user, setUser] = useState<UserState>({
     isLoggedIn: false,
     userType: null,
-    hasHotel: false
+    hasHotel: false,
+    hotelId: -1,
   });
 
   useEffect(() => {
     const checkLoginStatus = () => {
-      const roleData : RoleData | null = getRoleFromCookie();      
+      const roleData: RoleData | null = getRoleFromCookie();
 
       console.log(roleData);
-      
+
       if (!roleData) {
         setUser({
           isLoggedIn: false,
-          userType: 'ANONYMOUS'
+          userType: "ANONYMOUS",
         });
-      } else if(roleData.role === 'USER') {
+      } else if (roleData.role === "USER") {
         setUser({
           isLoggedIn: true,
-          userType: 'USER'
+          userType: "USER",
         });
-      } else if(roleData.role === 'BUSINESS') {
+      } else if (roleData.role === "BUSINESS") {
         setUser({
           isLoggedIn: true,
-          userType: 'BUSINESS',
-          hasHotel: roleData.hasHotel
+          userType: "BUSINESS",
+          hasHotel: roleData.hasHotel,
+          hotelId: roleData.hotelId,
         });
-      } else if(roleData.role === 'ADMIN') {
+      } else if (roleData.role === "ADMIN") {
         setUser({
           isLoggedIn: true,
-          userType: 'ADMIN'
+          userType: "ADMIN",
         });
       }
     };
@@ -57,20 +60,23 @@ export default function Navigation() {
       await logout();
       setUser({
         isLoggedIn: false,
-        userType: 'ANONYMOUS'
+        userType: "ANONYMOUS",
       });
     } catch (error) {
-      console.error('로그아웃 실패:', error);
+      console.error("로그아웃 실패:", error);
     }
   };
 
   return (
     <nav className={styles.navigation}>
       <div className={styles.container}>
-        <Link href={user?.userType === 'ADMIN' ? '/admin' : '/'} className={styles.logo}>
+        <Link
+          href={user?.userType === "ADMIN" ? "/admin" : "/"}
+          className={styles.logo}
+        >
           서울호텔
         </Link>
-        
+
         <div className={styles.links}>
           {/* ANONYMOUS 상태 */}
           {!user.isLoggedIn ? (
@@ -82,7 +88,7 @@ export default function Navigation() {
           ) : (
             <>
               {/* USER 상태 */}
-              {user.userType === 'USER' && (
+              {user.userType === "USER" && (
                 <>
                   <Link href="/business/register" className={styles.link}>
                     사업자 등록
@@ -100,22 +106,37 @@ export default function Navigation() {
               )}
 
               {/* BUSINESS 상태 */}
-              {user.userType === 'BUSINESS' && (
-                user.hasHotel ? 
-                <>
-                  <Link href={`/business/hotel/management`} className={styles.link}>
-                    내 호텔 관리
-                  </Link>
-                  <Link href="/business/hotel/revenue" className={styles.link}>
-                    호텔 매출
-                  </Link>
-                </>
-                :
-                <></>
-              )}
+              {user.userType === "BUSINESS" &&
+                (user.hasHotel ? (
+                  <>
+                    <Link
+                      href={`/business/hotel/management`}
+                      className={styles.link}
+                    >
+                      내 호텔 관리
+                    </Link>
+                    <Link
+                      href={`/business/hotel/${user.hotelId}/reviews`}
+                      className={styles.link}
+                    >
+                      호텔 리뷰
+                    </Link>
+                    <Link href={`/business/bookings`} className={styles.link}>
+                      예약 관리
+                    </Link>
+                    <Link
+                      href="/business/hotel/revenue"
+                      className={styles.link}
+                    >
+                      호텔 매출
+                    </Link>
+                  </>
+                ) : (
+                  <></>
+                ))}
 
               {/* ADMIN 상태 */}
-              {user.userType === 'ADMIN' && (
+              {user.userType === "ADMIN" && (
                 <>
                   <Link href="/admin/business" className={styles.link}>
                     사업자 관리
@@ -133,10 +154,7 @@ export default function Navigation() {
               )}
 
               {/* 로그아웃 버튼 */}
-              <button 
-                onClick={handleLogout}
-                className={styles.logoutButton}
-              >
+              <button onClick={handleLogout} className={styles.logoutButton}>
                 로그아웃
               </button>
             </>

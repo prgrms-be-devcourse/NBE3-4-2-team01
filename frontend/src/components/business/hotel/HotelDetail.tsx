@@ -5,12 +5,20 @@ import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  addFavorite,
+  removeFavorite,
+  checkFavorite,
+} from "@/lib/api/FavoriteApi";
+import {
   FaEnvelope,
   FaPhone,
   FaMapMarkerAlt,
   FaClock,
   FaStar,
   FaCheckCircle,
+  FaHeart,
+  FaRegHeart,
+  FaCommentAlt,
 } from "react-icons/fa";
 
 interface HotelDetailProps {
@@ -19,13 +27,16 @@ interface HotelDetailProps {
 
 const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
   const cookie = getRoleFromCookie();
+  const hotelOptions = Array.from(hotel.hotelOptions).sort();
   const [hotelId, setHotelId] = useState(-1);
   const [isBusinessUser, setIsBusinessUser] = useState<boolean>(false);
   const [canEdit, setCanEdit] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
   const router = useRouter();
   const param = useParams();
 
   useEffect(() => {
+    console.log("호텔 옵션: ", hotelOptions);
     const cookieHotelId = cookie?.hotelId ? Number(cookie.hotelId) : -1;
     const paramHotelId = param.hotelId ? Number(param.hotelId) : null;
     console.log("쿠키 호텔 ID : ", cookieHotelId);
@@ -42,8 +53,33 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
     } else {
       setCanEdit(false);
     }
-    hotel.hotelOptions = new Set(hotel.hotelOptions);
-  }, [cookie, hotelId]);
+  }, [cookie, param.hotelId]);
+
+  useEffect(() => {
+    const fetchFavorite = async () => {
+      try {
+        const isFavorite: boolean = await checkFavorite(hotelId);
+        if (isFavorite) {
+          setIsLiked(true);
+        }
+      } catch (error) {
+        console.error("Error fetching favorites:", error);
+      }
+    };
+
+    if (cookie && cookie.role === "USER") {
+      fetchFavorite();
+    }
+  });
+
+  const handleLike = async () => {
+    if (!isLiked) {
+      await addFavorite(hotelId);
+    } else {
+      await removeFavorite(hotelId);
+    }
+    setIsLiked(!isLiked);
+  };
 
   const handleEdit = (hotelId: number) => {
     router.push(`/business/hotel/${hotelId}`);
@@ -67,13 +103,29 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
     }
   };
 
+  const handleReview = () => {
+    router.push(`/hotels/${hotelId}/reviews`);
+  };
+
   return (
     <div className="bg-white p-8 shadow-lg rounded-2xl border border-gray-200">
       {/* 호텔명 */}
       <div className="text-center mb-8">
-        <h2 className="text-6xl font-extrabold text-sky-500 drop-shadow-[2px_2px_5px_rgba(255,255,255,0.7)]">
-          {hotel.hotelName}
-        </h2>
+        <div className="flex justify-center items-center gap-4">
+          <h2 className="text-6xl font-extrabold text-sky-500 drop-shadow-[2px_2px_5px_rgba(255,255,255,0.7)]">
+            {hotel.hotelName}
+          </h2>
+          <button
+            onClick={handleLike}
+            className="transition-transform hover:scale-110 focus:outline-none"
+          >
+            {isLiked ? (
+              <FaHeart className="text-4xl text-red-500" />
+            ) : (
+              <FaRegHeart className="text-4xl text-gray-400 hover:text-red-500" />
+            )}
+          </button>
+        </div>
         <p className="text-xl text-gray-700 mt-2 italic">
           ✨ 특별한 하루, 최고의 경험을 선사합니다 ✨
         </p>
@@ -130,12 +182,23 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
         ))}
       </div>
 
+      {/* 리뷰 및 좋아요 버튼 섹션 */}
+      <div className="mt-8 flex justify-center gap-4">
+        <Button
+          onClick={handleReview}
+          className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 text-lg"
+        >
+          <FaCommentAlt />
+          리뷰 보기
+        </Button>
+      </div>
+
       {/* 호텔 옵션 */}
       <div className="mt-8 bg-gray-100 p-6 rounded-xl">
         <h3 className="text-xl font-bold text-gray-900 mb-4">호텔 옵션</h3>
         <div className="flex flex-wrap gap-4">
-          {hotel.hotelOptions && hotel.hotelOptions.size > 0 ? (
-            Array.from(hotel.hotelOptions).map((option) => (
+          {hotelOptions.length > 0 ? (
+            Array.from(hotelOptions).map((option) => (
               <span
                 key={option}
                 className="flex items-center gap-2 bg-white border px-4 py-2 rounded-full shadow-sm"
@@ -158,7 +221,7 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
         </p>
       </div>
 
-      {/* 수정/삭제 버튼 (객실 리스트 하단으로 이동) */}
+      {/* 수정/삭제 버튼 */}
       {isBusinessUser && canEdit && (
         <div className="mt-4 flex justify-between items-center">
           <Button

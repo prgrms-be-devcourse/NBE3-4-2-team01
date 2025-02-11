@@ -152,10 +152,15 @@ const RoomList: React.FC<RoomListProps> = ({ rooms }) => {
                     </span>
                   </p>
 
-                  {/* 가격 (우측 중앙 정렬) */}
-                  <p className="text-2xl font-bold text-blue-600 text-right">
-                    {room.basePrice.toLocaleString()}원~
-                  </p>
+                  {/* 가격 및 남은 객실 수 (우측 중앙 정렬) */}
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-blue-600">
+                      {room.basePrice.toLocaleString()}원~
+                    </p>
+                    <p className="text-lg font-semibold text-red-500">
+                      잔여 객실 : {room.roomNumber}
+                    </p>
+                  </div>
                 </div>
               </div>
 

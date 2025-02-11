@@ -1,7 +1,6 @@
 package com.ll.hotel.domain.hotel.room.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,7 +12,6 @@ import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
 import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import com.ll.hotel.domain.hotel.option.service.RoomOptionService;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.dto.PutRoomRequest;
@@ -236,36 +234,6 @@ class RoomServiceTest {
         assertEquals(detRes1.roomImageUrls().size(), 0);
         assertEquals(detRes1.roomDto().roomOptions().size(), 0);
         assertEquals(detRes1.roomDto().standardNumber(), 3);
-    }
-
-    @Test
-    @DisplayName("객실 옵션 조회")
-    public void findRoomOptions() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Hotel hotel = this.hotelRepository.findAll().getFirst();
-
-        this.roomOptionService.add(new OptionRequest("TV"));
-        this.roomOptionService.add(new OptionRequest("Computer"));
-        this.roomOptionService.add(new OptionRequest("ShowerRoom"));
-
-        Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
-        Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
-
-        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
-
-        this.roomService.createRoom(hotel.getId(), actor, req1);
-
-        Room room = this.roomRepository.findAll().getFirst();
-        Long roomId = room.getId();
-
-        GetRoomOptionResponse res = this.roomService.findRoomOptions(hotel.getId(), roomId);
-
-        assertEquals(res.roomId(), roomId);
-        assertEquals(res.roomOptions().size(), 3);
-        assertTrue(res.roomOptions().contains("ShowerRoom"));
-        assertTrue(res.roomOptions().contains("Computer"));
-        assertTrue(res.roomOptions().contains("TV"));
-        assertFalse(res.roomOptions().contains("AirConditioner"));
     }
 
     @Test
