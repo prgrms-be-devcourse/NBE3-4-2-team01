@@ -10,13 +10,15 @@ interface UserState {
   isLoggedIn: boolean;
   userType: 'USER' | 'BUSINESS' | 'ADMIN' | 'ANONYMOUS' | null;
   hasHotel?: boolean;
+  hotelId?: number;
 }
 
 export default function Navigation() {
   const [user, setUser] = useState<UserState>({
     isLoggedIn: false,
     userType: null,
-    hasHotel: false
+    hasHotel: false,
+    hotelId: -1,
   });
 
   useEffect(() => {
@@ -39,7 +41,8 @@ export default function Navigation() {
         setUser({
           isLoggedIn: true,
           userType: 'BUSINESS',
-          hasHotel: roleData.hasHotel
+          hasHotel: roleData.hasHotel,
+          hotelId: roleData.hotelId
         });
       } else if(roleData.role === 'ADMIN') {
         setUser({
@@ -105,6 +108,9 @@ export default function Navigation() {
                 <>
                   <Link href={`/business/hotel/management`} className={styles.link}>
                     내 호텔 관리
+                  </Link>
+                  <Link href={`/business/hotel/${user.hotelId}/reviews`} className={styles.link}>
+                    호텔 리뷰
                   </Link>
                   <Link href="/business/hotel/revenue" className={styles.link}>
                     호텔 매출
