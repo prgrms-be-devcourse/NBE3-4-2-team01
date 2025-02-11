@@ -1,27 +1,18 @@
-import { BusinessRegistrationForm } from "@/lib/types/business/BusinessRegistrationForm";
+import { FetchOptions } from "@/lib/types/global/FetchOption";
+import { BusinessRegistrationForm } from "@/lib/types/business/BusinessRequest";
+import { BusinessRegistrationResult } from "@/lib/types/business/BusinessResponse";
+import { fetchAPI } from "../global/FetchApi";
 
-export const registerBusiness = async (formData: BusinessRegistrationForm) => {
-  const response = await fetch(
+export const registerBusiness = async (
+  formData: BusinessRegistrationForm
+): Promise<BusinessRegistrationResult> => {
+  const options: FetchOptions = {
+    method: "POST",
+    body: formData,
+  };
+
+  return fetchAPI<BusinessRegistrationResult>(
     `http://localhost:8080/api/businesses/register`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.ACCESS_TOKEN}`, // JWT 토큰, 수정 필요
-      },
-      body: JSON.stringify(formData), // JSON.stringify : 객체를 JSON 으로 변환
-    }
+    options
   );
-
-  if (!response.ok) {
-    throw new Error(`HTTP 오류: ${response.status} ${response.statusText}`);
-  }
-
-  const rsData = await response.json();
-
-  if (rsData.resultCode !== "201") {
-    throw new Error(rsData.msg);
-  }
-
-  return rsData;
 };
