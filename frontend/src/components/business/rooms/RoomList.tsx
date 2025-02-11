@@ -70,10 +70,10 @@ const RoomList: React.FC<RoomListProps> = ({ rooms }) => {
 
   const handleReservation = (roomId: number) => {
     const params = new URLSearchParams();
-    params.set("hotel", (hotelId ?? "").toString());
-    params.set("rooms", roomId.toString());
+    params.set("hotelId", (hotelId ?? "").toString());
+    params.set("roomId", roomId.toString());
     if (checkInDate) params.set("checkInDate", checkInDate);
-    if (checkoutDate) params.set("checkoutDate", checkoutDate);
+    if (checkoutDate) params.set("checkOutDate", checkoutDate);
 
     console.log(
       "예약 페이지로 이동 URL : ",
