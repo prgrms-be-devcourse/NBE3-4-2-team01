@@ -60,20 +60,29 @@ export default function CreateReviewPage() {
       setPresignedUrls(presignedUrlResponse.presignedUrls);
       setReviewId(presignedUrlResponse.reviewId);
       console.log(presignedUrlResponse);
-      await submitImages();
+      
+      if (images.length === 0) {
+        console.log('이미지 없이 리뷰만 수정하였음');
+        alert('리뷰가 생성되었습니다.');
+        router.push('/me/reviews');
+      }
+
       console.log('리뷰가 성공적으로 생성되었습니다.');
     } catch (error) {
       alert('리뷰 생성 또는 이미지 업로드 중 오류가 발생했습니다.');
     }
   };
 
+  
+  useEffect(() => {
+    if (presignedUrls.length > 0) {
+      console.log("presignedUrls 설정됨:", presignedUrls);
+      submitImages();
+    }
+  }, [presignedUrls]); 
+
   // Presigned URLs을 사용하여 이미지 업로드
   const submitImages = async () => {
-    if (presignedUrls.length === 0) {
-      alert('이미지 업로드 URL을 가져오지 못했습니다.');
-      return;
-    }
-
     try {
       await uploadImagesToS3(presignedUrls, images);
       await saveImageUrls();
