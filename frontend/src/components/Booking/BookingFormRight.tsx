@@ -38,8 +38,12 @@ const BookingFormRight = function(
       
           // 예약 API 호출
           await book(bookingRequest);
-          router.push('/me/orders');
-          alert("예약에 성공했습니다.");
+          new Promise((resolve) => {
+              alert("예약에 성공했습니다.");
+              resolve(true);
+          }).then(() => {
+              router.push('/me/orders');
+          });
         } catch (error) {
           console.error(error);
         }
@@ -86,7 +90,7 @@ const BookingFormRight = function(
             <div className="flex justify-between items-center">
                 <span className="text-base font-medium">총 결제 금액</span>
                 <span className="text-xl font-bold text-blue-600">
-                {roomDetails.basePrice}원
+                {roomDetails.basePrice.toLocaleString()}원
                 </span>
             </div>
           </div>

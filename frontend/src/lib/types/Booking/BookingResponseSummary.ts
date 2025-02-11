@@ -4,6 +4,7 @@ export interface BookingResponseSummary {
     roomId : number;
     hotelName : string;
     roomName : string;
+    memberName : string;
     thumbnailUrl : string;
     bookingStatus : string;
     amount : number;

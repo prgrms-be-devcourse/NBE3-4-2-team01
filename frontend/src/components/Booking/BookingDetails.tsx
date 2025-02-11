@@ -96,10 +96,6 @@ const BookingDetails = function({bookingId} : {bookingId : number}) {
                       <TableCell className="text-right">{bookingDetails.room.roomName}</TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="font-medium">객실 번호</TableCell>
-                      <TableCell className="text-right">{bookingDetails.room.roomNumber}</TableCell>
-                    </TableRow>
-                    <TableRow>
                       <TableCell className="font-medium">예약 상태</TableCell>
                       <TableCell className="text-right">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
