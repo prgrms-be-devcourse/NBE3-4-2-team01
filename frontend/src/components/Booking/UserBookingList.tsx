@@ -86,16 +86,16 @@ const UserBookingList = function({ bookings }: { bookings: PageDto<BookingRespon
                   <div className="flex gap-6">
                     <div className="w-40 h-32">
                       <img
-                        src="https://cdn.pixabay.com/photo/2016/11/18/13/47/apple-1834639_1280.jpg"
+                        src={booking.thumbnailUrl}
                         alt="Booking"
                         className="w-full h-full object-cover rounded-lg"
                       />
                     </div>
                     <div className="flex flex-col justify-between h-32">
                       <div className="space-y-2">
-                        <h3 className="text-lg font-medium">{booking.hotel.hotelName}</h3>
+                        <h3 className="text-lg font-medium">{booking.hotelName}</h3>
                         <div className="text-sm text-gray-600">
-                          {booking.checkInDate} ~ {booking.checkOutDate} · {booking.room.roomName}
+                          {booking.checkInDate} ~ {booking.checkOutDate} · {booking.roomName}
                         </div>
                         <Badge 
                           variant="secondary"
@@ -105,7 +105,7 @@ const UserBookingList = function({ bookings }: { bookings: PageDto<BookingRespon
                         </Badge>
                       </div>
                       <div className="text-2xl font-bold">
-                        {formatPrice(booking.payment.amount)}
+                        {formatPrice(booking.amount)}
                       </div>
                     </div>
                   </div>
@@ -117,7 +117,7 @@ const UserBookingList = function({ bookings }: { bookings: PageDto<BookingRespon
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={(e) => handleReviewClick(booking.bookingId, booking.hotel.hotelId, booking.room.id, e)}>
+                      <DropdownMenuItem onClick={(e) => handleReviewClick(booking.bookingId, booking.hotelId, booking.roomId, e)}>
                         리뷰 작성
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={(e) => handleCancelClick(booking.bookingId, e)}>

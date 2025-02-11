@@ -76,6 +76,10 @@ const BookingDetails = function({bookingId} : {bookingId : number}) {
                       <TableCell className="text-right">{bookingDetails.hotel.hotelEmail}</TableCell>
                     </TableRow>
                     <TableRow>
+                      <TableCell className="font-medium">호텔 주소</TableCell>
+                      <TableCell className="text-right">{bookingDetails.hotel.streetAddress} ({bookingDetails.hotel.zipCode})</TableCell>
+                    </TableRow>
+                    <TableRow>
                       <TableCell className="font-medium">호텔 연락처</TableCell>
                       <TableCell className="text-right">{bookingDetails.hotel.hotelPhoneNumber}</TableCell>
                     </TableRow>
