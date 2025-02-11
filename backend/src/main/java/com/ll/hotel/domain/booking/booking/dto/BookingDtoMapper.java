@@ -60,6 +60,7 @@ public class BookingDtoMapper {
                 booking.getRoom().getId(),
                 hotelDetailResponse.hotelDetailDto().hotelName(),
                 roomDetailResponse.roomDto().roomName(),
+                booking.getMember().getMemberName(),
                 getThumbnailUrl(hotelDetailResponse.hotelImageUrls()),
                 booking.getBookingStatus(),
                 booking.getPayment().getAmount(),

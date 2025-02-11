@@ -9,6 +9,7 @@ public record BookingResponseSummary(
         long roomId,
         String hotelName,
         String roomName,
+        String memberName,
         String thumbnailUrl,
         BookingStatus bookingStatus,
         int amount,
