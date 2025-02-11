@@ -9,11 +9,13 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.jwt.dto.GeneratedToken;
 import com.ll.hotel.global.jwt.dto.JwtProperties;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import com.ll.hotel.global.security.oauth2.repository.OAuthRepository;
+import com.ll.hotel.standard.util.Ut;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,9 +27,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -251,7 +253,7 @@ public class MemberService {
             })
             .collect(Collectors.toList());
     }
-
+  
     public boolean isFavoriteHotel(long hotelId) {
         Member actor = rq.getActor();
 
@@ -261,7 +263,7 @@ public class MemberService {
 
         Set<Hotel> favorites = actor.getFavoriteHotels();
 
-       return favorites.stream()
+        return favorites.stream()
                 .anyMatch(hotel -> hotel.getId() == hotelId);
     }
 
@@ -270,5 +272,40 @@ public class MemberService {
         return oAuthRepository.findByProviderAndOauthIdWithMember(provider, oauthId)
             .orElseThrow(() -> new ServiceException("404-1", "해당 OAuth 정보를 찾을 수 없습니다."))
             .getMember();
+    }
+
+    @Transactional
+    public void oAuth2Login(Member member, HttpServletResponse response) {
+        GeneratedToken tokens = authTokenService.generateToken(
+            member.getMemberEmail(), 
+            member.getUserRole()
+        );
+        
+        addAuthCookies(response, tokens, member);
+    }
+
+    private void addAuthCookies(HttpServletResponse response, GeneratedToken tokens, Member member) {
+        // Access Token 쿠키
+        Cookie accessTokenCookie = new Cookie("access_token", tokens.accessToken());
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setHttpOnly(true);
+        response.addCookie(accessTokenCookie);
+
+        // Refresh Token 쿠키
+        Cookie refreshTokenCookie = new Cookie("refresh_token", tokens.refreshToken());
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setHttpOnly(true);
+        response.addCookie(refreshTokenCookie);
+
+        // Role 쿠키
+        Map<String, Object> roleData = new HashMap<>();
+        roleData.put("role", member.getUserRole());
+        roleData.put("hasHotel", member.getBusiness() != null && member.getBusiness().getHotel() != null);
+        roleData.put("hotelId", member.getBusiness() != null && member.getBusiness().getHotel() != null ? 
+            member.getBusiness().getHotel().getId() : -1);
+        
+        Cookie roleCookie = new Cookie("role", URLEncoder.encode(Ut.json.toString(roleData), StandardCharsets.UTF_8));
+        roleCookie.setPath("/");
+        response.addCookie(roleCookie);
     }
 }

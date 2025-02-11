@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { findHotelDetail } from "@/lib/api/BusinessHotelApi";
 import { GetHotelDetailResponse } from "@/lib/types/hotel/GetHotelDetailResponse";
 import { useEffect, useState } from "react";
-import RoomList from "@/components/business/room/RoomList";
+import RoomList from "@/components/business/rooms/RoomList";
 import HotelImages from "@/components/business/hotel/HotelImages";
 import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
 import Navigation from "@/components/navigation/Navigation";
