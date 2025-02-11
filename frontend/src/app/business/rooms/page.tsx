@@ -43,8 +43,8 @@ export default function CreateRoomPage() {
   const [hotelId, setHotelId] = useState(Number(cookie?.hotelId));
   const [roomId, setRoomId] = useState(-1);
   const [roomOptions, setRoomOptions] = useState<Set<string>>(new Set());
-  const [availableRoomOptions, setAvailableRoomOptions] = useState<Set<string>>(
-    new Set()
+  const [availableRoomOptions, setAvailableRoomOptions] = useState<string[]>(
+    []
   );
 
   // 객실 옵션 전체 리스트 가져오기
@@ -55,7 +55,7 @@ export default function CreateRoomPage() {
         const options: GetAllRoomOptionsResponse = await findAllRoomOptions(
           hotelId
         );
-        setAvailableRoomOptions(new Set(options.roomOptions));
+        setAvailableRoomOptions(options.roomOptions.sort());
       } catch (error) {
         alert("객실 옵션을 가져오는 중 오류가 발생했습니다.");
         console.error("객실 옵션을 가져오지 못했습니다.");

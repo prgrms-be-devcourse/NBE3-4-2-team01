@@ -38,11 +38,18 @@ const HotelDetailPage: React.FC = () => {
   }, [hotelId]);
 
   if (isLoading) {
-    return <div className="text-center">로딩 중...</div>;
+    return <div className="text-center text-lg font-semibold">로딩 중...</div>;
   }
 
   if (!hotelDetail) {
-    return <div className="text-center">호텔 정보를 불러올 수가 없습니다.</div>;
+    return (
+      <div className="text-center pt-[100px]">
+        <Navigation />
+        <p className="text-gray-500 text-center">
+          호텔 정보를 불러올 수가 없습니다.
+        </p>
+      </div>
+    );
   }
 
   return (

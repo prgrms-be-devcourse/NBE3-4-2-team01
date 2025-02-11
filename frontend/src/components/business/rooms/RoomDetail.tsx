@@ -14,6 +14,7 @@ interface RoomDetailProps {
 
 const RoomDetail: React.FC<RoomDetailProps> = ({ room }) => {
   const cookie = getRoleFromCookie();
+  const roomOptions = Array.from(room.roomDto.roomOptions).sort();
   const [hotelId, setHotelId] = useState(-1);
   const roomId = room.roomDto.id;
   const [isBusinessUser, setIsBusinessUser] = useState<boolean>(false);
@@ -45,7 +46,6 @@ const RoomDetail: React.FC<RoomDetailProps> = ({ room }) => {
     } else {
       setCanEdit(false);
     }
-    room.roomDto.roomOptions = new Set(room.roomDto.roomOptions);
   }, [cookie, hotelId, roomId]);
 
   const handleEdit = (roomId: number) => {
@@ -141,8 +141,8 @@ const RoomDetail: React.FC<RoomDetailProps> = ({ room }) => {
       <div className="mt-8 bg-gray-100 p-6 rounded-xl">
         <h3 className="text-xl font-bold text-gray-900 mb-4">객실 옵션</h3>
         <div className="flex flex-wrap gap-4">
-          {roomDto.roomOptions.size > 0 ? (
-            Array.from(roomDto.roomOptions).map((option) => (
+          {roomOptions.length > 0 ? (
+            Array.from(roomOptions).map((option) => (
               <span
                 key={option}
                 className="flex items-center gap-2 bg-white border px-4 py-2 rounded-full shadow-sm"

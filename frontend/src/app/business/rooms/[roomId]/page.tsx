@@ -49,8 +49,8 @@ export default function ModifyRoomPage() {
   const [imageExtensions, setImageExtensions] = useState<string[]>([]);
   const [presignedUrls, setPresignedUrls] = useState<string[]>([]);
   const [roomOptions, setRoomOptions] = useState<Set<string>>(new Set());
-  const [availableRoomOptions, setAvailableRoomOptions] = useState<Set<string>>(
-    new Set()
+  const [availableRoomOptions, setAvailableRoomOptions] = useState<string[]>(
+    []
   );
 
   // 객실 옵션 전체 리스트 가져오기
@@ -60,7 +60,7 @@ export default function ModifyRoomPage() {
         const options: GetAllRoomOptionsResponse = await findAllRoomOptions(
           hotelId
         );
-        setAvailableRoomOptions(new Set(options.roomOptions));
+        setAvailableRoomOptions(options.roomOptions.sort());
       } catch (error) {
         throw error;
       }

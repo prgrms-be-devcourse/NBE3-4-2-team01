@@ -44,9 +44,9 @@ export default function ModifyHotelPage() {
   const [imageExtensions, setImageExtensions] = useState<string[]>([]);
   const [presignedUrls, setPresignedUrls] = useState<string[]>([]);
   const [hotelOptions, setHotelOptions] = useState<Set<string>>(new Set());
-  const [availableHotelOptions, setAvailableHotelOptions] = useState<
-    Set<string>
-  >(new Set());
+  const [availableHotelOptions, setAvailableHotelOptions] = useState<string[]>(
+    []
+  );
 
   useEffect(() => {
     const fetchHotelData = async () => {
@@ -80,7 +80,7 @@ export default function ModifyHotelPage() {
     const loadHotelOptions = async () => {
       try {
         const options: GetAllHotelOptionResponse = await findAllHotelOptions();
-        setAvailableHotelOptions(new Set(options.hotelOptions));
+        setAvailableHotelOptions(options.hotelOptions.sort());
       } catch (error) {
         throw error;
       }
