@@ -11,6 +11,8 @@ import com.ll.hotel.global.validation.GlobalValidation;
 import com.ll.hotel.standard.base.Empty;
 import com.ll.hotel.standard.page.dto.PageDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -41,11 +43,14 @@ public class HotelController {
 
     @PostMapping("/{hotelId}/urls")
     public RsData<Empty> saveImageUrls(@PathVariable long hotelId,
-                                       @RequestBody List<String> urls
+                                       @RequestBody List<String> urls,
+                                       HttpServletRequest request,
+                                       HttpServletResponse response
     ) {
         Member actor = this.rq.getActor();
 
         this.hotelService.saveImages(actor, ImageType.HOTEL, hotelId, urls);
+        this.hotelService.updateRoleCookie(request, response, hotelId);
 
         return new RsData<>(
                 "201-1",
