@@ -56,6 +56,8 @@ public class BookingDtoMapper {
 
         return new BookingResponseSummary(
                 booking.getId(),
+                booking.getHotel().getId(),
+                booking.getRoom().getId(),
                 hotelDetailResponse.hotelDetailDto().hotelName(),
                 roomDetailResponse.roomDto().roomName(),
                 getThumbnailUrl(hotelDetailResponse.hotelImageUrls()),

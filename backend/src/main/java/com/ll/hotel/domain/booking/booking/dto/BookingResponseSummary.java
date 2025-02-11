@@ -5,6 +5,8 @@ import java.time.LocalDate;
 
 public record BookingResponseSummary(
         long bookingId,
+        long hotelId,
+        long roomId,
         String hotelName,
         String roomName,
         String thumbnailUrl,
