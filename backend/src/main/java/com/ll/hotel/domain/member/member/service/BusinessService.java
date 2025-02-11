@@ -6,7 +6,9 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
+import com.ll.hotel.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +26,7 @@ public class BusinessService {
             status = BusinessApprovalStatus.APPROVED;
             member.setRole(Role.BUSINESS);
         } else {
-            status = BusinessApprovalStatus.REJECTED;
+            throw new ServiceException("400", "유효하지 않은 사업자입니다.");
         }
 
         Business business = Business

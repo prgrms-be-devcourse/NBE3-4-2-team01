@@ -5,15 +5,13 @@ import com.ll.hotel.domain.member.member.dto.response.BusinessResponse;
 import com.ll.hotel.domain.member.member.type.BusinessApiProperties;
 import com.ll.hotel.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.util.Map;
 
 @Service
@@ -24,11 +22,15 @@ public class BusinessValidationService {
 
     public String validateBusiness(BusinessRequest.RegistrationInfo registrationInfo) {
         String apiUrl = properties.getValidationUrl() + "?serviceKey=" + properties.getServiceKey();
+
+        URI uri = URI.create(apiUrl);
+
         BusinessRequest.RegistrationApiForm registrationApiForm = BusinessRequest.RegistrationApiForm.from(registrationInfo);
 
         try {
-            ResponseEntity<BusinessResponse.Verification> responseEntity = restTemplate.postForEntity(
-                    apiUrl,
+            ResponseEntity<BusinessResponse.Verification> responseEntity = restTemplate.exchange(
+                    uri,
+                    HttpMethod.POST,
                     new HttpEntity<>(registrationApiForm, createHeaders()),
                     BusinessResponse.Verification.class
             );
