@@ -140,8 +140,6 @@ export default function CreateHotelPage() {
       const presignedUrlResponse: PresignedUrlsResponse = response.urlsResponse;
       setPresignedUrls(presignedUrlResponse.presignedUrls);
       setHotelId(presignedUrlResponse.reviewId);
-      alert("호텔이 성공적으로 등록되었습니다.");
-      router.push("/business/hotel/management");
     } catch (error) {
       console.error("Error: ", error);
       alert(error);
@@ -181,6 +179,8 @@ export default function CreateHotelPage() {
     try {
       await saveHotelImageUrls(hotelId, viewUrls);
       console.log("호텔 이미지가 성공적으로 저장되었습니다.");
+      alert("호텔이 성공적으로 등록되었습니다.");
+      router.push("/business/hotel/management");
     } catch (error) {
       console.error("Error: ", error);
       alert(error);
