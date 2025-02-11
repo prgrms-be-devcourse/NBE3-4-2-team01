@@ -2,8 +2,9 @@ package com.ll.hotel.domain.member.admin.service;
 
 import com.ll.hotel.domain.member.admin.dto.request.AdminBusinessRequest;
 import com.ll.hotel.domain.member.member.entity.Business;
+import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
-import com.ll.hotel.domain.member.member.service.BusinessService;
 import com.ll.hotel.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,9 @@ public class AdminBusinessService {
     @Transactional
     public void approve(Business business, AdminBusinessRequest adminBusinessRequest) {
         business.setApprovalStatus(adminBusinessRequest.businessApprovalStatus());
+
+        Member member = business.getMember();
+        member.setRole(Role.BUSINESS);
     }
 
     public void flush() {
