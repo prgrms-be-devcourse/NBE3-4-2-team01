@@ -21,6 +21,7 @@ const BookingDetailsPage = () => {
         setRoomId(Number(searchParams.get('roomId')));
         setCheckInDate(searchParams.get('checkInDate') ?? '');
         setCheckOutDate(searchParams.get('checkOutDate') ?? '');
+
         setIsLoading(false);
     }, [searchParams]);
 

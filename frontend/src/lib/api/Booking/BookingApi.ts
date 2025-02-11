@@ -1,7 +1,30 @@
+import { BookingFormResponse } from "@/lib/types/Booking/BookingFormResponse";
 import { BookingRequest } from "@/lib/types/Booking/BookingRequest";
 import { BookingResponseDetails } from "@/lib/types/Booking/BookingResponseDetails";
 import { BookingResponseSummary } from "@/lib/types/Booking/BookingResponseSummary";
 import { PageDto } from "@/lib/types/PageDto";
+
+// 예약 페이지 정보 조회
+export const preBook = async function(hotelId : number, roomId : number) : Promise<BookingFormResponse> {
+    try {
+        const params = new URLSearchParams();
+        params.append("hotelId", hotelId.toString());
+        params.append("roomId", roomId.toString());
+
+        const response = await fetch(`http://localhost:8080/api/bookings?${params.toString()}`, {
+            credentials: 'include',
+        });
+        const rsData = await response.json();
+        console.log(response);
+        if (rsData.resultCode.startsWith("2")) {
+            return rsData.data;
+        } else {
+            throw new Error(`${rsData.msg}`);
+        }
+    } catch (error) {
+        throw error;
+    }
+}
 
 // 예약 및 결제
 export const book = async function(bookingRequest : BookingRequest) {
