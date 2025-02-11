@@ -1,33 +1,29 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import {
+  createRoom,
   findAllRoomOptions,
-  findRoomDetail,
-  modifyRoom,
   saveRoomImageUrls,
 } from "@/lib/api/BusinessRoomApi";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { BED_TYPES, BedTypeNumber } from "@/lib/types/room/BedTypeNumber";
-import { PutRoomRequest } from "@/lib/types/room/PutRoomRequest";
-import { MoveLeft, XCircle } from "lucide-react";
-import { uploadImagesToS3 } from "@/lib/api/AwsS3Api";
-import { PutRoomResponse } from "../../../../lib/types/room/PutRoomResponse";
-import { PresignedUrlsResponse } from "@/lib/types/review/PresignedUrlsResponse";
+import { PostRoomResponse } from "@/lib/types/room/PostRoomResponse";
+import { PostRoomRequest } from "@/lib/types/room/PostRoomRequest";
 import { GetAllRoomOptionsResponse } from "@/lib/types/room/GetAllRoomOptionsResponse";
+import { uploadImagesToS3 } from "@/lib/api/AwsS3Api";
+import { PresignedUrlsResponse } from "@/lib/types/review/PresignedUrlsResponse";
+import { useRouter } from "next/navigation";
+import { MoveLeft, XCircle } from "lucide-react";
 import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
 import Navigation from "@/components/navigation/Navigation";
 
-export default function ModifyRoomPage() {
+export default function CreateRoomPage() {
   const cookie = getRoleFromCookie();
-  const hotelId = Number(cookie?.hotelId);
-  const params = useParams();
   const router = useRouter();
-  const [roomId, setRoomId] = useState(Number(params.roomId));
   const [roomName, setRoomName] = useState("");
   const [roomNumber, setRoomNumber] = useState(1);
   const [basePrice, setBasePrice] = useState(50000);
@@ -41,13 +37,11 @@ export default function ModifyRoomPage() {
     TWIN: 0,
     TRIPLE: 0,
   });
-  const [roomStatus, setRoomStatus] = useState("AVAILABLE");
-  const [existingImages, setExistingImages] = useState<string[]>([]);
-  const [deleteImageUrls, setDeleteImageUrls] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [imageExtensions, setImageExtensions] = useState<string[]>([]);
-  const [presignedUrls, setPresignedUrls] = useState<string[]>([]);
+  const [presigendUrls, setPresignedUrls] = useState<string[]>([]);
+  const [hotelId, setHotelId] = useState(Number(cookie?.hotelId));
+  const [roomId, setRoomId] = useState(-1);
   const [roomOptions, setRoomOptions] = useState<Set<string>>(new Set());
   const [availableRoomOptions, setAvailableRoomOptions] = useState<Set<string>>(
     new Set()
@@ -57,16 +51,19 @@ export default function ModifyRoomPage() {
   useEffect(() => {
     const loadRoomOptions = async () => {
       try {
+        setHotelId(Number(cookie?.hotelId));
         const options: GetAllRoomOptionsResponse = await findAllRoomOptions(
           hotelId
         );
         setAvailableRoomOptions(new Set(options.roomOptions));
       } catch (error) {
+        alert("객실 옵션을 가져오는 중 오류가 발생했습니다.");
+        console.error("객실 옵션을 가져오지 못했습니다.");
         throw error;
       }
     };
     loadRoomOptions();
-  }, [roomId]);
+  }, []);
 
   const handleOptionChange = (option: string) => {
     setRoomOptions((prev) => {
@@ -81,133 +78,92 @@ export default function ModifyRoomPage() {
     });
   };
 
-  useEffect(() => {
-    const fetchRoomData = async () => {
-      try {
-        const response = await findRoomDetail(hotelId, roomId);
-        const bedTypeNumber = response.roomDto.bedTypeNumber;
-        setRoomId(response.roomDto.id);
-        setRoomName(response.roomDto.roomName);
-        setRoomNumber(response.roomDto.roomNumber);
-        setBasePrice(response.roomDto.basePrice);
-        setStandardNumber(response.roomDto.standardNumber);
-        setMaxNumber(response.roomDto.maxNumber);
-        setBedTypeNumber(response.roomDto.bedTypeNumber);
-        setExistingImages(response.roomImageUrls);
-        setRoomOptions(new Set(response.roomDto.roomOptions || []));
-        console.log("객실 정보: ", response);
-      } catch (error) {
-        throw error;
-      }
-    };
-
-    fetchRoomData();
-  }, [params.hotelId, params.roomId]);
-
-  const handleImageDelete = (imageUrl: string) => {
-    console.log("Existing Image: ", existingImages);
-    setExistingImages(existingImages.filter((img) => img !== imageUrl));
-    setDeleteImageUrls([...deleteImageUrls, imageUrl]);
-  };
-
-  const handlenewImageDelete = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
-    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
-    setImageExtensions(imageExtensions.filter((_, i) => i !== index));
-  };
-
-  const handleNewImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setImages([...images, ...files]);
+      const selectedFiles = Array.from(e.target.files);
+      setImages(selectedFiles);
 
-      const newPreviews = files.map((file) => URL.createObjectURL(file));
-      setImagePreviews([...imagePreviews, ...newPreviews]);
-
-      const extensions = files.map((file) => {
-        const ext = file.name.split(".").pop()?.toLowerCase() || "";
-        return ext;
-      });
-
-      setImageExtensions([...imageExtensions, ...extensions]);
+      // 미리보기 업데이트
+      setImagePreviews(selectedFiles.map((file) => URL.createObjectURL(file)));
     }
   };
 
-  useEffect(() => {
-    return () => {
-      imagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
-    };
-  }, []);
+  const handleImageRemove = (index: number) => {
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    setImagePreviews((prevPreviews) =>
+      prevPreviews.filter((_, i) => i !== index)
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const requestBody: PutRoomRequest = {
+    const requestBody: PostRoomRequest = {
       roomName,
-      roomNumber,
-      basePrice,
-      standardNumber,
-      maxNumber,
+      roomNumber: Number(roomNumber),
+      basePrice: Number(basePrice),
+      standardNumber: Number(standardNumber),
+      maxNumber: Number(maxNumber),
       bedTypeNumber,
-      roomStatus,
-      deleteImageUrls,
-      imageExtensions: imageExtensions,
+      imageExtensions: images.map(
+        (file) => file.name.split(".").pop()?.toLowerCase() || ""
+      ),
       roomOptions: Array.from(roomOptions),
     };
 
     try {
-      const response: PutRoomResponse = await modifyRoom(
-        hotelId,
-        roomId,
+      setHotelId(Number(cookie?.hotelId));
+      const response: PostRoomResponse = await createRoom(
+        Number(hotelId),
         requestBody
       );
-      console.log("ModifyRoom response", response);
-      console.log("responseUrl", response.urlResponse);
 
-      const preSigendUrlsResponse: PresignedUrlsResponse = response.urlResponse;
-
-      console.log("ModifyRoom response", response);
-      console.log("PresignedUrlsResponse", presignedUrls);
-
-      setRoomId(response.roomId);
-      setPresignedUrls(preSigendUrlsResponse.presignedUrls);
-      console.log(presignedUrls);
-      alert("객실이 성공적으로 수정되었습니다.");
+      const presignedUrlResponse: PresignedUrlsResponse = response.urlsResponse;
+      setPresignedUrls(presignedUrlResponse.presignedUrls);
+      setRoomId(presignedUrlResponse.reviewId);
+      alert("객실이 성공적으로 등록되었습니다.");
       router.push("/business/hotel/management");
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error: ", error);
       alert(error);
     }
   };
 
   useEffect(() => {
-    if (presignedUrls.length > 0) {
-      console.log("✅ presignedUrls 설정됨:", presignedUrls);
+    if (presigendUrls.length > 0) {
+      console.log("✅ presignedUrls 설정됨:", presigendUrls);
       submitImages();
     }
-  }, [presignedUrls]);
+  }, [presigendUrls]);
 
+  // PresignedUrls 를 사용하여 이미지 업로드
   const submitImages = async () => {
+    if (presigendUrls.length === 0) {
+      alert("이미지 업로드 URL을 가져오지 못했습니다.");
+      return;
+    }
+
     try {
-      await uploadImagesToS3(presignedUrls, images);
+      await uploadImagesToS3(presigendUrls, images);
       await saveImageUrls();
-      console.log("이미지가 성공적으로 업로드되었습니다.");
+      console.log("이미지가 성공적으로 업로드 되었습니다.");
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error: ", error);
       alert(error);
     }
   };
 
+  // 사진 조회용 URL들 서버로 전달
   const saveImageUrls = async () => {
-    const urls = presignedUrls.map((presignedUrls) => {
-      return presignedUrls.split("?")[0];
+    const viewUrls = presigendUrls.map((presigendUrls) => {
+      return presigendUrls.split("?")[0];
     });
 
     try {
-      saveRoomImageUrls(hotelId, roomId, urls);
+      await saveRoomImageUrls(hotelId, roomId, viewUrls);
       console.log("객실 이미지가 성공적으로 저장되었습니다.");
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error: ", error);
       alert(error);
     }
   };
@@ -229,7 +185,7 @@ export default function ModifyRoomPage() {
               </Button>
             </div>
             <CardTitle className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-semibold">
-              객실 수정
+              객실 추가
             </CardTitle>
           </div>
         </CardHeader>
@@ -324,52 +280,12 @@ export default function ModifyRoomPage() {
             </div>
 
             <div>
-              <Label htmlFor="roomStatus">객실 상태</Label>
-              <select
-                id="roomStatus"
-                value={roomStatus}
-                onChange={(e) => setRoomStatus(e.target.value)}
-                className="border p-2 w-full"
-              >
-                <option value="AVAILABLE">사용 가능</option>
-                <option value="IN_BOOKING">예약 중</option>
-                <option value="UNAVAILABLE">사용 불가</option>
-              </select>
-            </div>
-
-            {existingImages.length > 0 && (
-              <div className="space-y-2">
-                <Label>기존 이미지</Label>
-                <div className="mt-4 grid grid-cols-3 gap-4">
-                  {existingImages.map((img, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={img}
-                        alt={`객실 이미지 ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-md"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handleImageDelete(img)}
-                      >
-                        <XCircle className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div>
               <Label>새 이미지 업로드</Label>
               <Input
                 type="file"
                 multiple
                 accept="image/*"
-                onChange={handleNewImageUpload}
+                onChange={handleImageUpload}
                 className="cursor-pointer border p-2 w-full"
               />
               <div className="grid grid-cols-3 gap-4 mt-4">
@@ -377,14 +293,14 @@ export default function ModifyRoomPage() {
                   <div key={index} className="relative group">
                     <img
                       src={preview}
-                      alt="새 객실 이미지"
+                      alt="객실 이미지"
                       className="w-full h-32 object-cover rounded-md"
                     />
                     <Button
                       type="button"
                       size="icon"
                       className="absolute top-2 right-2 bg-white text-red-500 p-1 rounded-full"
-                      onClick={() => handlenewImageDelete(index)}
+                      onClick={() => handleImageRemove(index)}
                     >
                       <XCircle className="w-4 h-4" />
                     </Button>
@@ -419,7 +335,7 @@ export default function ModifyRoomPage() {
               type="submit"
               className="w-full bg-blue-500 text-white mt-4"
             >
-              수정 완료
+              등록
             </Button>
           </form>
         </CardContent>
