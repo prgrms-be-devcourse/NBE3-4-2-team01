@@ -7,7 +7,7 @@ import { BookingResponseSummary } from "@/lib/types/Booking/BookingResponseSumma
 import { PageDto } from "@/lib/types/PageDto";
 import { getHotelBookings, getMyBookings } from "@/lib/api/Booking/BookingApi";
 import { BookingListProps, View } from "@/lib/types/Booking/BookingProps";
-import Pagination from "../Pagination/Pagination";
+import Pagination from "../pagination/Pagination";
 
 const BookingList = function({view, page = 1, pageSize} : BookingListProps) {
     const [bookings, setBookings] = useState<PageDto<BookingResponseSummary> | null>(null);
@@ -47,13 +47,13 @@ const BookingList = function({view, page = 1, pageSize} : BookingListProps) {
         case View.User: return (
             <div>
                 <UserBookingList bookings={bookings}/>
-                <Pagination currentPage={page} totalPages={bookings?.totalPages || 1} basePath="me/orders" />;
+                <Pagination currentPage={page} totalPages={bookings?.totalPages || 1} basePath="me/orders" />
             </div>
         );
         case View.Hotel: return (
             <div>
                 <HotelBookingList bookings={bookings}/>
-                <Pagination currentPage={page} totalPages={bookings?.totalPages || 1} basePath="business/bookings" />;
+                <Pagination currentPage={page} totalPages={bookings?.totalPages || 1} basePath="business/bookings" />
             </div>
         );
         default: return <div>예약을 불러올 수 없습니다.</div>

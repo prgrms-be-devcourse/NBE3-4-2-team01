@@ -12,11 +12,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cancelBooking } from "@/lib/api/Booking/BookingApi";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const UserBookingList = function({ bookings }: { bookings: PageDto<BookingResponseSummary> }) {
     const [bookingList, setBookingList] = useState<BookingResponseSummary[]>(bookings.items);
     const [isStatusChanged, setIsStatusChanged] = useState(false);
-  
+    const router = useRouter();
+
     const openBookingDetailsPopup = function(bookingId: number) {
     window.open(
       `/orders/${bookingId}`,
@@ -24,7 +26,13 @@ const UserBookingList = function({ bookings }: { bookings: PageDto<BookingRespon
       "width=500,height=600,left=200,top=200"
     );
   };
-  
+
+
+  const handleReviewClick = async (bookingId: number, hotelId: number, roomId: number, e: React.MouseEvent) => {
+      e.stopPropagation();
+      router.push(`/me/orders/${bookingId}?hotelId=${hotelId}&roomId=${roomId}`);
+  };
+
   const handleCancelClick = async (bookingId: number, e: React.MouseEvent) => {
     e.stopPropagation(); // 부모 요소의 클릭 이벤트 전파 방지
     
@@ -109,6 +117,9 @@ const UserBookingList = function({ bookings }: { bookings: PageDto<BookingRespon
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={(e) => handleReviewClick(booking.bookingId, booking.hotel.hotelId, booking.room.id, e)}>
+                        리뷰 작성
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={(e) => handleCancelClick(booking.bookingId, e)}>
                         예약 취소
                       </DropdownMenuItem>

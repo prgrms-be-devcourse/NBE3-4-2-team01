@@ -1,3 +1,5 @@
+import { GetHotelDetailResponse } from "../hotel/GetHotelDetailResponse";
+import { GetRoomDetailResponse } from "../room/GetRoomDetailResponse";
 import { KakaoPaymentRequest } from "./Payment/KakaoPaymentRequest";
 
 export const enum View {
@@ -17,6 +19,18 @@ export type BookingProps = {
     roomId : number;
     checkInDate : string;
     checkOutDate : string;
+}
+
+export type BookingFormLeftProps = {
+    hotelDetails : GetHotelDetailResponse;
+    roomDetails : GetRoomDetailResponse;
+}
+
+export type BookingFormRightProps = {
+    hotelName : string;
+    roomName : string;
+    amount : number;
+    bookingProps : BookingProps;
 }
 
 export type PaymentProps = {

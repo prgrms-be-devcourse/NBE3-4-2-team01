@@ -6,15 +6,15 @@ import {
     CardTitle,
     CardFooter
   } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { BookingProps } from "@/lib/types/Booking/BookingProps";
+import { BookingFormRightProps, BookingProps } from "@/lib/types/Booking/BookingProps";
 import Payment from "./Payment/Payment";
 import { KakaoPaymentRequest } from "@/lib/types/Booking/Payment/KakaoPaymentRequest";
 import { book } from "@/lib/api/Booking/BookingApi";
 import { BookingRequest } from "@/lib/types/Booking/BookingRequest";
 import { useRouter } from "next/navigation";
 
-const BookingFormRight = function({hotelId, roomId, checkInDate, checkOutDate} : BookingProps) {
+const BookingFormRight = function(
+    {hotelName, roomName, amount, bookingProps: {hotelId, roomId, checkInDate, checkOutDate}} : BookingFormRightProps) {
     const router = useRouter();
 
     const createBookingAndRedirect = async (
@@ -34,8 +34,8 @@ const BookingFormRight = function({hotelId, roomId, checkInDate, checkOutDate} :
       
           // 예약 API 호출
           await book(bookingRequest);
-          alert("예약에 성공했습니다.");
           router.push('/me/orders');
+          alert("예약에 성공했습니다.");
         } catch (error) {
           console.error(error);
         }
@@ -49,13 +49,13 @@ const BookingFormRight = function({hotelId, roomId, checkInDate, checkOutDate} :
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <h3 className="text-sm font-medium text-gray-500">호텔 ID</h3>
-            <p className="text-lg font-medium mt-1">{hotelId}</p>
+            <h3 className="text-sm font-medium text-gray-500">호텔명</h3>
+            <p className="text-lg font-medium mt-1">{hotelName}</p>
           </div>
 
           <div>
-            <h3 className="text-sm font-medium text-gray-500">객실 ID</h3>
-            <p className="text-lg font-medium mt-1">{roomId}</p>
+            <h3 className="text-sm font-medium text-gray-500">객실 유형</h3>
+            <p className="text-lg font-medium mt-1">{roomName}</p>
           </div>
 
           <div>
@@ -80,17 +80,19 @@ const BookingFormRight = function({hotelId, roomId, checkInDate, checkOutDate} :
 
           <div className="pt-4 border-t">
             <div className="flex justify-between items-center">
-              <span className="text-base font-medium">총 결제 금액</span>
-              <span className="text-xl font-bold text-blue-600">308,000원</span>
+                <span className="text-base font-medium">총 결제 금액</span>
+                <span className="text-xl font-bold text-blue-600">
+                {amount.toLocaleString()}원
+                </span>
             </div>
           </div>
         </CardContent>
         <CardFooter>
           <Payment 
-          buyerEmail="dummy@gmail.com" 
+          buyerEmail="sete3683@gmail.com" 
           buyerName="dummy" 
-          amount={1234} 
-          productName="dummy room"
+          amount={amount} 
+          productName={roomName} 
           onPaymentComplete={createBookingAndRedirect}></Payment>
         </CardFooter>
       </Card>

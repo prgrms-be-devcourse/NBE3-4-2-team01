@@ -46,8 +46,6 @@ const Payment = ({buyerEmail, buyerName, amount, productName, onPaymentComplete}
           },
           async function (rsp: any) {
             if (rsp.success) {
-              alert("결제에 성공했습니다.");
-  
               //예약 데이터 생성
               const kakaoPaymentRequest: KakaoPaymentRequest = {
                 merchantUid: merchantUid,

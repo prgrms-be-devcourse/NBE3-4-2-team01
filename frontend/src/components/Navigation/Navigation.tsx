@@ -106,6 +106,9 @@ export default function Navigation() {
                   <Link href={`/business/hotel/management`} className={styles.link}>
                     내 호텔 관리
                   </Link>
+                  <Link href={`/business/bookings`} className={styles.link}>
+                    예약 관리
+                  </Link>
                   <Link href="/business/hotel/revenue" className={styles.link}>
                     호텔 매출
                   </Link>

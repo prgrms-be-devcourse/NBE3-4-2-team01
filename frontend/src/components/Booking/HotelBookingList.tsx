@@ -172,7 +172,7 @@ const HotelBookingList = function({ bookings }: { bookings: PageDto<BookingRespo
             ) : (
               <TableRow>
                 <TableCell colSpan={7} className="text-center p-4">
-                  예약이 없습니다.
+                  예약 내역이 없습니다.
                 </TableCell>
               </TableRow>
             )}
