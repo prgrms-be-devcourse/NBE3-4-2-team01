@@ -1,5 +1,6 @@
 package com.ll.hotel.standard.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ll.hotel.global.app.AppConfig;
 import com.ll.hotel.global.jwt.dto.JwtProperties;
@@ -8,10 +9,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+
 import javax.crypto.SecretKey;
-import java.util.Date;
 import java.security.SecureRandom;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,11 @@ public class Ut {
         @SneakyThrows
         public static String toString(Object obj) {
             return om.writeValueAsString(obj);
+        }
+
+        @SneakyThrows
+        public static Map<String, Object> toMap(String jsonStr) {
+            return om.readValue(jsonStr, new TypeReference<Map<String, Object>>() {});
         }
     }
 

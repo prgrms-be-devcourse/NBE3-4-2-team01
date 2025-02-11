@@ -24,6 +24,11 @@ import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import com.ll.hotel.global.annotation.BusinessOnly;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.standard.util.CookieUtil;
+import com.ll.hotel.standard.util.Ut;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -35,6 +40,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
@@ -316,5 +324,34 @@ public class HotelService {
     @Transactional(readOnly = true)
     public GetAllHotelOptionsResponse findHotelOptions(Member actor) {
         return new GetAllHotelOptionsResponse(this.hotelOptionRepository.findAll());
+    }
+
+    public void updateRoleCookie(HttpServletRequest request, HttpServletResponse response, long hotelId) {
+        Optional<Cookie> roleCookieOpt = CookieUtil.getCookie(request, "role");
+        if (roleCookieOpt.isPresent()) {
+            try {
+                // URL 디코딩 후 JSON 파싱
+                String decodedValue = URLDecoder.decode(roleCookieOpt.get().getValue(), StandardCharsets.UTF_8);
+                Map<String, Object> roleData = Ut.json.toMap(decodedValue);
+
+                // 데이터 업데이트
+                roleData.put("hasHotel", true);
+                roleData.put("hotelId", hotelId); // 새로운 호텔 ID
+
+                // 다시 JSON으로 변환하고 URL 인코딩
+                String updatedEncodedData = URLEncoder.encode(Ut.json.toString(roleData), StandardCharsets.UTF_8);
+
+                // 새 쿠키 생성 및 설정
+                Cookie updatedCookie = new Cookie("role", updatedEncodedData);
+                updatedCookie.setSecure(true);
+                updatedCookie.setPath("/");
+
+                // 응답에 쿠키 추가
+                response.addCookie(updatedCookie);
+            } catch (Exception e) {
+                // 에러 처리
+                e.printStackTrace();
+            }
+        }
     }
 }
