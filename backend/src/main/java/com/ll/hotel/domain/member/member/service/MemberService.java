@@ -252,6 +252,19 @@ public class MemberService {
             .collect(Collectors.toList());
     }
 
+    public boolean isFavoriteHotel(long hotelId) {
+        Member actor = rq.getActor();
+
+        if (actor == null) {
+            throw new ServiceException("401-1", "로그인이 필요합니다.");
+        }
+
+        Set<Hotel> favorites = actor.getFavoriteHotels();
+
+       return favorites.stream()
+                .anyMatch(hotel -> hotel.getId() == hotelId);
+    }
+
     @Transactional(readOnly = true)
     public Member findByProviderAndOauthId(String provider, String oauthId) {
         return oAuthRepository.findByProviderAndOauthIdWithMember(provider, oauthId)

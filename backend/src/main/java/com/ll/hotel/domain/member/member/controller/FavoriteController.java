@@ -36,4 +36,13 @@ public class FavoriteController {
 
         return new RsData<>("200-1", "즐겨찾기 목록을 조회했습니다.", favorites);
     }
+
+    @GetMapping("/me/{hotelId}")
+    public RsData<Boolean> checkFavorite(
+            @PathVariable("hotelId")long hotelId
+    ) {
+        boolean isFavorite = memberService.isFavoriteHotel(hotelId);
+
+        return new RsData<>("200-1", "즐겨찾기 아이디들을 조회했습니다.", isFavorite);
+    }
 } 
