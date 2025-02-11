@@ -12,10 +12,9 @@ export interface AdminBusinessApprovalReponse {
 
 export interface AdminBusinessSummaryReponse {
   businessId: number;
-  businessRegistrationNumber: string;
   ownerName: string;
+  contact: string;
   approvalStatus: BusinessApprovalStatus;
-  hotelId?: number | null;
   hotelName?: string | null;
 }
 
@@ -23,16 +22,17 @@ export interface AdminBusinessDetailResponse {
   businessId: number;
   businessRegistrationNumber: string;
   ownerName: string;
-  approvalStatus: BusinessApprovalStatus;
+  startDate: string;
 
-  userId: number;
-  name: string;
-  email: string;
-  phoneNumber: string;
-  birth: string;
+  memberEmail: string;
+  memberName: string;
+  memberPhoneNumber: string;
   memberStatus: MemberStatus;
 
+  approvalStatus: BusinessApprovalStatus;
+
   hotelId?: number | null;
+  hotelName?: string | null;
   streetAddress?: string | null;
   hotelStatus?: HotelStatus | null;
 }

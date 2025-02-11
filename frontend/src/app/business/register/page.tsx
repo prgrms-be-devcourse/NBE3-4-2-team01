@@ -6,6 +6,9 @@ import { BusinessRegistrationForm } from "@/lib/types/business/BusinessRequest";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Loading from "@/components/hotellist/Loading";
+import { Building2, Calendar, User } from "lucide-react";
+import Navigation from "@/components/navigation/Navigation";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function RegisterBusiness() {
   const {
@@ -24,77 +27,153 @@ export default function RegisterBusiness() {
     }
   };
 
+  const inputStyle =
+    "bg-white h-[42px] px-10 text-lg placeholder:text-lg [&::-webkit-calendar-picker-indicator]:hidden w-full";
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">사업자 등록</h2>
+    <div className="relative min-h-screen bg-background">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-100 to-white" />
 
-        {isSubmitting ? (
-          <Loading />
-        ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* 사업자 등록번호 입력 */}
-            <div>
-              <label className="block font-medium">사업자 등록번호</label>
-              <Input
-                {...register("businessRegistrationNumber", {
-                  required: "사업자 등록 번호는 필수입니다.",
-                  pattern: {
-                    value: /^[0-9]{10}$/,
-                    message: "사업자 등록 번호는 10자리 숫자여야 합니다.",
-                  },
-                })}
-                placeholder="사업자 등록번호"
-              />
-              {errors.businessRegistrationNumber && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.businessRegistrationNumber.message}
-                </p>
-              )}
-            </div>
+      {/* Decorative circles */}
+      <div className="absolute top-20 right-20 w-64 h-64 bg-blue-200 rounded-full blur-3xl opacity-20" />
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-300 rounded-full blur-3xl opacity-10" />
 
-            {/* 개업 일자 입력 */}
-            <div>
-              <label className="block font-medium">개업 일자</label>
-              <Input
-                type="date"
-                {...register("startDate", {
-                  required: "개업 일자는 필수입니다.",
-                })}
-              />
-              {errors.startDate && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.startDate.message}
-                </p>
-              )}
-            </div>
+      <div className="relative z-10">
+        <Navigation />
 
-            {/* 대표자명 입력 */}
-            <div>
-              <label className="block font-medium">대표자명</label>
-              <Input
-                {...register("ownerName", {
-                  required: "대표자명은 필수입니다.",
-                  maxLength: {
-                    value: 30,
-                    message: "최대 30자까지 가능합니다.",
-                  },
-                })}
-                placeholder="대표자명"
-              />
-              {errors.ownerName && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.ownerName.message}
-                </p>
-              )}
-            </div>
+        <div className="container mx-auto px-4 pt-32">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              사업자 등록
+            </h1>
+            <p className="text-xl text-gray-600">
+              호텔 등록을 위한 첫 단계를 시작해보세요
+            </p>
+          </div>
 
-            {/* 등록 버튼 */}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "등록 중..." : "등록"}
-            </Button>
-          </form>
-        )}
+          <div className="max-w-2xl mx-auto">
+            <Card className="bg-white/50 shadow-lg">
+              <CardContent className="p-8">
+                {isSubmitting ? (
+                  <div className="flex justify-center">
+                    <Loading />
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                    {/* 사업자 등록번호 입력 */}
+                    <div>
+                      <label
+                        htmlFor="businessRegistrationNumber"
+                        className="block font-medium text-gray-700 text-lg mb-2"
+                      >
+                        사업자 등록번호
+                      </label>
+                      <Input
+                        id="businessRegistrationNumber"
+                        type="text"
+                        {...register("businessRegistrationNumber", {
+                          required: "사업자 등록 번호는 필수입니다.",
+                          pattern: {
+                            value: /^[0-9]{10}$/,
+                            message:
+                              "사업자 등록 번호는 10자리 숫자여야 합니다.",
+                          },
+                        })}
+                        className={`${inputStyle} w-full h-12 ${
+                          errors?.businessRegistrationNumber
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                        placeholder="사업자 등록번호 (10자리)"
+                      />
+                      {errors.businessRegistrationNumber && (
+                        <p
+                          className="mt-2 text-sm text-red-600"
+                          id="businessRegistrationNumber-error"
+                        >
+                          {errors.businessRegistrationNumber.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* 개업 일자 입력 */}
+                    <div>
+                      <label
+                        htmlFor="startDate"
+                        className="block font-medium text-gray-700 text-lg mb-2"
+                      >
+                        개업 일자
+                      </label>
+                      <Input
+                        id="startDate"
+                        type="date"
+                        {...register("startDate", {
+                          required: "개업 일자는 필수입니다.",
+                        })}
+                        className={`${inputStyle} w-full h-12 ${
+                          errors?.startDate ? "border-red-500" : ""
+                        }`}
+                      />
+                      {errors.startDate && (
+                        <p
+                          className="mt-2 text-sm text-red-600"
+                          id="startDate-error"
+                        >
+                          {errors.startDate.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* 대표자명 입력 */}
+                    <div>
+                      <label
+                        htmlFor="ownerName"
+                        className="block font-medium text-gray-700 text-lg mb-2"
+                      >
+                        대표자명
+                      </label>
+                      <Input
+                        id="ownerName"
+                        type="text"
+                        {...register("ownerName", {
+                          required: "대표자명은 필수입니다.",
+                          maxLength: {
+                            value: 30,
+                            message: "최대 30자까지 가능합니다.",
+                          },
+                        })}
+                        className={`${inputStyle} w-full h-12 ${
+                          errors?.ownerName ? "border-red-500" : ""
+                        }`}
+                        placeholder="대표자명을 입력해주세요"
+                      />
+                      {errors.ownerName && (
+                        <p
+                          className="mt-2 text-sm text-red-600"
+                          id="ownerName-error"
+                        >
+                          {errors.ownerName.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* 등록 버튼 */}
+                    <div className="pt-4">
+                      <Button
+                        type="submit"
+                        className="w-full h-14 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-lg font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "등록 중..." : "사업자 등록하기"}
+                      </Button>
+                    </div>
+                  </form>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

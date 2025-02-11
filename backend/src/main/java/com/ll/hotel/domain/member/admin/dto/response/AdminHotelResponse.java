@@ -3,7 +3,10 @@ package com.ll.hotel.domain.member.admin.dto.response;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
+import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
+
+import java.time.LocalDate;
 
 public class AdminHotelResponse {
     public record ApprovalResult(
@@ -19,34 +22,19 @@ public class AdminHotelResponse {
     }
 
     public record Summary(
-            Long id,
+            Long hotelId,
             String name,
             String streetAddress,
-            Integer zipCode,
-            Integer grade,
-            HotelStatus status,
-            Double averageRating,
-            Long totalReviewRatingSum,
-            Long totalReviewCount,
-            String ownerName,
-            String ownerEmail,
-            String ownerPhoneNumber
+            String ownerName
     ) {
         public static Summary from(Hotel hotel) {
-            Member owner = hotel.getBusiness().getMember();
+            Business business = hotel.getBusiness();
+            Member owner = business.getMember();
             return new Summary(
                     hotel.getId(),
                     hotel.getHotelName(),
                     hotel.getStreetAddress(),
-                    hotel.getZipCode(),
-                    hotel.getHotelGrade(),
-                    hotel.getHotelStatus(),
-                    hotel.getAverageRating(),
-                    hotel.getTotalReviewRatingSum(),
-                    hotel.getTotalReviewCount(),
-                    owner.getMemberName(),
-                    owner.getMemberEmail(),
-                    owner.getMemberPhoneNumber()
+                    owner.getMemberName()
             );
         }
     }
@@ -56,23 +44,23 @@ public class AdminHotelResponse {
 
             Long ownerId,
             String ownerName,
-            String ownerEmail,
-            String ownerPhoneNumber,
+            String buinessRegistrationNumber,
+            LocalDate startDate,
 
             Double averageRating,
-            Long totalReviewRatingSum,
             Long totalReviewCount
     ) {
         public static Detail from(Hotel hotel) {
-            Member owner = hotel.getBusiness().getMember();
+            Business business = hotel.getBusiness();
             return new Detail(
                     new HotelDto(hotel),
-                    owner.getId(),
-                    owner.getMemberName(),
-                    owner.getMemberEmail(),
-                    owner.getMemberPhoneNumber(),
+
+                    business.getId(),
+                    business.getOwnerName(),
+                    business.getBusinessRegistrationNumber(),
+                    business.getStartDate(),
+
                     hotel.getAverageRating(),
-                    hotel.getTotalReviewRatingSum(),
                     hotel.getTotalReviewCount()
             );
         }
