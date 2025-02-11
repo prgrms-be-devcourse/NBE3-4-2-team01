@@ -8,10 +8,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record BookingResponse(
-        Long bookingId,
-        Long roomId,
-        Long hotelId,
-        Long memberId,
+        long bookingId,
+        long roomId,
+        long hotelId,
+        long memberId,
         Payment payment,
         String bookNumber,
         BookingStatus bookingStatus,

@@ -1,82 +1,72 @@
 package com.ll.hotel.domain.booking.payment.service;
 
 import com.ll.hotel.domain.booking.booking.dto.BookingRequest;
-import com.ll.hotel.domain.booking.payment.dto.PaymentRequest;
-import com.ll.hotel.domain.booking.payment.dto.TokenRequest;
-import com.ll.hotel.domain.booking.payment.dto.TokenResponse;
+import com.ll.hotel.domain.booking.payment.dto.*;
 import com.ll.hotel.domain.booking.payment.entity.Payment;
 import com.ll.hotel.domain.booking.payment.repository.PaymentRepository;
 import com.ll.hotel.domain.booking.payment.type.PaymentStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
-import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
 import com.ll.hotel.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
-    private final String CREATE_ERROR_MESSAGE = "결제 정보 저장에 실패했습니다. 관리자에게 문의하세요.";
-    private final PaymentRepository paymentRepository;
+    /*
+     * portone api 호출에 필요한 keys
+     * application-api-keys.yml에 저장된 값을 가져옴
+     */
     @Value("${api-keys.portone.impKey}")
     private String impKey;
     @Value("${api-keys.portone.impSecret}")
     private String impSecret;
+    @Value("${api-keys.portone.apiId}")
+    private String apiId;
+    @Value("${api-keys.portone.channel-key}")
+    private String channelKey;
+
+    private final String CREATE_ERROR_MESSAGE = "결제 정보 저장에 실패했습니다.";
+    private final int MAX_GENERATE_COUNT = 10;
+    private final int UID_GENERATE_LENGTH = 10;
+    private final PaymentRepository paymentRepository;
 
     public long count() {
         return paymentRepository.count();
     }
 
     // Uid 생성
-    public String generateMerchantUid() {
-        int genCount = 10;
-        int uidLength = 10;
-
-        //10번 이내애 중복되지 않는 merchantUid를 생성해야 함, 그렇지 않으면 예외 처리
-        while (genCount-- > 0) {
-            String merchantUid = Ut.random.generateUID(uidLength);
+    public UidResponse generateMerchantUid() {
+        //MAX_GENERATE_COUNT번 이내애 중복되지 않는 merchantUid를 생성해야 함, 리팩토링 예정
+        for (int i = 0; i < MAX_GENERATE_COUNT; i++) {
+            String merchantUid = Ut.random.generateUID(UID_GENERATE_LENGTH);
             if (!paymentRepository.existsByMerchantUid(merchantUid)) {
-                return merchantUid;
+                return new UidResponse(apiId, channelKey, merchantUid);
             }
         }
 
-        throw new ServiceException("400", "merchantUid 생성에 실패했습니다.");
+        throw new ServiceException("500", "merchantUid 생성에 실패했습니다.");
     }
 
     /*
      * 결제 정보 저장
      * BookingService에서 호출하여 예약 정보 저장과 동시에 발생하도록 함
-     * 결제 오류 코드는 500-1, 500-2, 500-3
-     * 예약 오류 코드는 500-4, 500-5, 500-6 (BookingService 코드 참고)
-     * 코드 500-1: paymentRequest 생성 중 에러
-     * 코드 500-2: DateTime 관련 에러
-     * 코드 500-3: 결제 생성 및 저장 중 에러
      */
     @Transactional
     public Payment create(BookingRequest bookingRequest) {
-        PaymentRequest paymentRequest;
-
-        // bookingRequest에서 paymentRequest를 추출
         try {
-            paymentRequest = PaymentRequest.from(bookingRequest);
-        } catch (Exception e) {
-            throw new ServiceException("500-1", CREATE_ERROR_MESSAGE);
-        }
+            PaymentRequest paymentRequest = PaymentRequest.from(bookingRequest);
 
-        return create(paymentRequest);
-    }
-
-    @Transactional
-    public Payment create(PaymentRequest paymentRequest) {
-        try {
             // Unix Timestamp를 LocalDateTime으로 변환
             LocalDateTime paidAt = LocalDateTime.ofInstant(
                     Instant.ofEpochSecond(paymentRequest.paidAtTimestamp()),
@@ -90,23 +80,20 @@ public class PaymentService {
                     .build();
 
             return paymentRepository.save(payment);
-        } catch (DateTimeException e) {
-            throw new ServiceException("500-2", CREATE_ERROR_MESSAGE);
+        } catch (ServiceException e) {
+            throw e;
         } catch (Exception e) {
-            throw new ServiceException("500-3", CREATE_ERROR_MESSAGE);
+            log.error("결제 처리 중 에러 발생", e);
+            throw new ServiceException("500", "결제 정보 저장에 실패했습니다.");
         }
     }
 
     /*
      * 결제 취소
      * access token 발급 후 결제 취소 api 호출
-     * portone api를 통해 결제는 취소하지만 row는 삭제하지 않음 (soft delete)
+     * portone api를 통해 결제는 취소하지만 데이터를 삭제하지는 않음 (soft delete)
      * paymentStatus를 CANCELLED로 변경하여 취소로 처리
      */
-    public Payment softDelete(Long paymentId) {
-        return softDelete(findById(paymentId));
-    }
-
     @Transactional
     public Payment softDelete(Payment payment) {
         // 이미 취소되었을 경우
@@ -136,13 +123,14 @@ public class PaymentService {
             } else {
                 throw new ServiceException(
                         tokenResponse.getStatusCode().toString(),
-                        "토큰 발급 권한이 없습니다. 관리자에게 문의하세요."
+                        "토큰 발급 권한이 없습니다."
                 );
             }
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            throw new ServiceException("500-1", "토큰 발급 중 오류가 발생했습니다. 관리자에게 문의하세요.");
+            log.error("결제 토큰 발급 중 에러 발생", e);
+            throw new ServiceException("500", "토큰 발급에 실패했습니다.");
         }
     }
 
@@ -167,16 +155,18 @@ public class PaymentService {
             } else {
                 throw new ServiceException(
                         response.getStatusCode().toString(),
-                        "결제 취소 권한이 없습니다. 관리자에게 문의하세요."
+                        "결제 취소 권한이 없습니다."
                 );
             }
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            throw new ServiceException("500-2", "결제 취소 중 오류가 발생했습니다. 관리자에게 문의하세요.");
+            log.error("결제 취소 중 에러 발생", e);
+            throw new ServiceException("500", "결제 취소에 실패했습니다.");
         }
     }
 
+    // 기본 조회 메서드
     public Payment findById(Long paymentId) {
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ServiceException("404", "결제 정보를 찾을 수 없습니다."));
