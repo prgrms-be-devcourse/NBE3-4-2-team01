@@ -6,7 +6,6 @@ import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import com.ll.hotel.domain.hotel.option.repository.RoomOptionRepository;
 import com.ll.hotel.domain.hotel.room.dto.GetAllRoomOptionsResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
@@ -122,15 +121,6 @@ public class RoomService {
                 .toList();
 
         return new GetRoomDetailResponse(new RoomDto(room), imageUrls);
-    }
-
-    @Transactional(readOnly = true)
-    public GetRoomOptionResponse findRoomOptions(long hotelId, long roomId) {
-        this.checkHotelExists(hotelId);
-
-        Room room = this.getRoomById(roomId);
-
-        return new GetRoomOptionResponse(room);
     }
 
     @BusinessOnly
