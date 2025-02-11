@@ -49,6 +49,10 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
     router.push(`/business/hotel/${hotelId}`);
   };
 
+  const handleRoomCreate = () => {
+    router.push("/business/rooms");
+  };
+
   const handleDelete = async (hotelId: number) => {
     if (!window.confirm("호텔을 삭제하시겠습니까?")) return;
 
@@ -67,7 +71,7 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
     <div className="bg-white p-8 shadow-lg rounded-2xl border border-gray-200">
       {/* 호텔명 */}
       <div className="text-center mb-8">
-        <h2 className="text-6xl font-extrabold text-pink-500 drop-shadow-[2px_2px_5px_rgba(255,255,255,0.7)]">
+        <h2 className="text-6xl font-extrabold text-sky-500 drop-shadow-[2px_2px_5px_rgba(255,255,255,0.7)]">
           {hotel.hotelName}
         </h2>
         <p className="text-xl text-gray-700 mt-2 italic">
@@ -156,16 +160,24 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
 
       {/* 수정/삭제 버튼 (객실 리스트 하단으로 이동) */}
       {isBusinessUser && canEdit && (
-        <div className="mt-4 flex justify-end gap-2">
+        <div className="mt-4 flex justify-between items-center">
           <Button
-            className="bg-blue-500 text-white"
-            onClick={() => handleEdit(hotelId)}
+            className="bg-green-500 text-white"
+            onClick={handleRoomCreate}
           >
-            수정
+            객실 추가
           </Button>
-          <Button variant="destructive" onClick={() => handleDelete(hotelId)}>
-            삭제
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              className="bg-blue-500 text-white"
+              onClick={() => handleEdit(hotelId)}
+            >
+              수정
+            </Button>
+            <Button variant="destructive" onClick={() => handleDelete(hotelId)}>
+              삭제
+            </Button>
+          </div>
         </div>
       )}
     </div>

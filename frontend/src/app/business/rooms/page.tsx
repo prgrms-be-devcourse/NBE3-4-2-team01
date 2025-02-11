@@ -185,7 +185,7 @@ export default function CreateRoomPage() {
               </Button>
             </div>
             <CardTitle className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-semibold">
-              객실 생성
+              객실 추가
             </CardTitle>
           </div>
         </CardHeader>

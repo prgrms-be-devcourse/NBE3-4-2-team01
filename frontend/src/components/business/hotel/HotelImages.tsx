@@ -18,8 +18,8 @@ const HotelImages: React.FC<HotelImagesProps> = ({ images }) => {
     <div className="container mx-auto px-6">
       {/* 호텔 이미지 제목 */}
       <div className="text-center mb-8">
-        <h2 className="text-4xl font-bold text-gray-900">
-          <span className="border-b-4 border-pink-400 inline-block px-4">
+        <h2 className="text-4xl font-bold text-sky-500">
+          <span className="border-b-4 border-yellow-300 inline-block px-4">
             호텔 이미지 갤러리
           </span>
         </h2>
