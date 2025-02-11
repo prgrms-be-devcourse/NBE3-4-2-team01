@@ -68,8 +68,8 @@ const RoomDetail: React.FC<RoomDetailProps> = ({ room }) => {
 
   const handleReservation = (roomId: number) => {
     const params = new URLSearchParams();
-    params.set("hotel", (hotelId ?? "").toString());
-    params.set("rooms", roomId.toString());
+    params.set("hotelId", (hotelId ?? "").toString());
+    params.set("roomId", roomId.toString());
     if (checkInDate) params.set("checkInDate", checkInDate);
     if (checkoutDate) params.set("checkoutDate", checkoutDate);
 
@@ -173,7 +173,10 @@ const RoomDetail: React.FC<RoomDetailProps> = ({ room }) => {
           </>
         ) : (
           <Button
-            className="bg-green-500 text-white"
+            className={`bg-green-500 text-white ${
+              roomDto.roomNumber === 0 ? "pointer-events-none opacity-50" : ""
+            }`}
+            disabled={roomDto.roomNumber === 0}
             onClick={() => handleReservation(roomId)}
           >
             예약하기
