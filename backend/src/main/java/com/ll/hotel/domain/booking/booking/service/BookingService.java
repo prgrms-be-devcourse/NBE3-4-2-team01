@@ -1,7 +1,6 @@
 package com.ll.hotel.domain.booking.booking.service;
 
-import com.ll.hotel.domain.booking.booking.dto.BookingRequest;
-import com.ll.hotel.domain.booking.booking.dto.BookingResponse;
+import com.ll.hotel.domain.booking.booking.dto.*;
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.booking.booking.repository.BookingRepository;
 import com.ll.hotel.domain.booking.booking.type.BookingStatus;
@@ -31,11 +30,17 @@ public class BookingService {
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
     private final PaymentService paymentService;
+    private final BookingDtoMapper bookingDtoMapper;
 
     /*
      * 예약, 결제 정보 저장
+     * preCreate : 예약 페이지를 생성하기 위한 api
      * 결제 -> 예약 순으로 진행
      */
+    public BookingFormResponse preCreate(long hotelId, long roomId, Member member) {
+        return bookingDtoMapper.getForm(hotelId, roomId, member);
+    }
+
     @Transactional
     public void create(Member member, BookingRequest bookingRequest) {
         try {
@@ -74,12 +79,12 @@ public class BookingService {
      */
 
     // 사용자측 예약 조회 (사업자, 관리자도 조회는 가능)
-    public Page<BookingResponse> tryGetMyBookings(Member member, int page, int pageSize) {
-        return findByMember(member, page, pageSize).map(BookingResponse::from);
+    public Page<BookingResponseSummary> tryGetMyBookings(Member member, int page, int pageSize) {
+        return findByMember(member, page, pageSize).map((booking) -> bookingDtoMapper.getSummary(booking));
     }
 
     // 호텔(사업자)측 예약 조회
-    public Page<BookingResponse> tryGetHotelBookings(Member member, int page, int pageSize) {
+    public Page<BookingResponseSummary> tryGetHotelBookings(Member member, int page, int pageSize) {
         // 호텔 사업자만 조회 가능
         if (!member.isBusiness()) {
             throw new ServiceException("401", "예약 조회 권한이 없습니다.");
@@ -92,11 +97,11 @@ public class BookingService {
             throw new ServiceException("404", "등록된 호텔이 없습니다.");
         }
 
-        return findByHotel(myHotel, page, pageSize).map(BookingResponse::from);
+        return findByHotel(myHotel, page, pageSize).map((booking) -> bookingDtoMapper.getSummary(booking));
     }
 
     // 예약 상세 조회
-    public BookingResponse tryGetBookingDetails(Member member, long bookingId) {
+    public BookingResponseDetails tryGetBookingDetails(Member member, long bookingId) {
         Booking booking = findById(bookingId);
 
         // 관리자, 예약자, 호텔 사업자만 조회 가능
@@ -104,7 +109,7 @@ public class BookingService {
             throw new ServiceException("401", "예약 조회 권한이 없습니다.");
         }
 
-        return BookingResponse.from(booking);
+        return bookingDtoMapper.getDetails(booking);
     }
 
     /*

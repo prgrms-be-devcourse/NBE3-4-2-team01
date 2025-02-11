@@ -2,6 +2,7 @@
 
 import Navigation from "@/components/navigation/Navigation";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   addRoomOption,
@@ -9,6 +10,7 @@ import {
   modifyRoomOption,
 } from "@/lib/api/Admin/RoomOptionApi";
 import { OptionResponse } from "@/lib/types/admin/response/OptionResponse";
+import { Pencil, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function RoomOptionsPage() {
@@ -67,68 +69,109 @@ export default function RoomOptionsPage() {
       console.error("객실 옵션 추가 중 오류 발생:", error);
     }
   };
-
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Navigation /> {/* 네비게이션 추가 */}
-      {/* 컨테이너 */}
-      <div className="max-w-3xl mx-auto pt-24 p-6">
-        <h1 className="text-2xl font-bold mb-6 text-center">객실 옵션 관리</h1>
+    <div className="relative min-h-screen bg-background">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-100 to-white" />
 
-        {/* 옵션 추가 박스 */}
-        <div className="bg-white p-4 rounded-lg shadow-md flex gap-2">
-          <Input
-            type="text"
-            placeholder="새 옵션 입력"
-            value={newOption}
-            onChange={(e) => setNewOption(e.target.value)}
-          />
-          <Button onClick={onAddOption}>추가</Button>
-        </div>
+      {/* Decorative circles */}
+      <div className="absolute top-20 right-20 w-64 h-64 bg-blue-200 rounded-full blur-3xl opacity-20" />
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-300 rounded-full blur-3xl opacity-10" />
 
-        {/* 옵션 목록 */}
-        <div className="mt-6 space-y-4">
-          {options.map((option, index) => (
-            <div
-              key={option.optionId ?? `option-${index}`}
-              className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center"
-            >
-              {editingOptions[option.optionId] !== undefined ? (
-                <Input
-                  value={editingOptions[option.optionId]}
-                  onChange={(e) =>
-                    setEditingOptions({
-                      ...editingOptions,
-                      [option.optionId]: e.target.value,
-                    })
-                  }
-                />
-              ) : (
-                <span className="text-gray-700">{option.name}</span>
-              )}
+      <div className="relative z-10">
+        <Navigation />
 
-              {editingOptions[option.optionId] !== undefined ? (
-                <Button
-                  onClick={() => onModify(option.optionId)}
-                  variant="default"
-                >
-                  저장
-                </Button>
-              ) : (
-                <Button
-                  onClick={() =>
-                    setEditingOptions({
-                      ...editingOptions,
-                      [option.optionId]: option.name,
-                    })
-                  }
-                  variant="secondary"
-                >
-                  수정
-                </Button>
-              )}
-            </div>
-          ))}
+        <div className="container mx-auto px-4 pt-44">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              객실 옵션 관리
+            </h1>
+            <p className="text-lg text-gray-600">
+              객실에서 제공하는 옵션을 추가하고 관리하세요
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <Card className="bg-white/50 shadow-lg">
+              <CardContent className="p-8">
+                {/* 옵션 추가 박스 */}
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                      <Plus size={24} />
+                    </div>
+                    <Input
+                      type="text"
+                      placeholder="새로운 객실 옵션을 입력하세요"
+                      value={newOption}
+                      onChange={(e) => setNewOption(e.target.value)}
+                      className="h-[52px] pl-12 pr-4 text-xl bg-white placeholder:text-xl"
+                    />
+                  </div>
+                  <Button
+                    onClick={onAddOption}
+                    className="bg-blue-500 hover:bg-blue-600 text-white h-[52px] px-8 text-xl min-w-[120px]"
+                  >
+                    추가
+                  </Button>
+                </div>
+
+                {/* 옵션 목록 */}
+                <div className="mt-8 space-y-4">
+                  {options.map((option, index) => (
+                    <div
+                      key={option.optionId ?? `option-${index}`}
+                      className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3"
+                    >
+                      {editingOptions[option.optionId] !== undefined ? (
+                        <div className="relative flex-1">
+                          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                            <Pencil size={20} />
+                          </div>
+                          <Input
+                            value={editingOptions[option.optionId]}
+                            onChange={(e) =>
+                              setEditingOptions({
+                                ...editingOptions,
+                                [option.optionId]: e.target.value,
+                              })
+                            }
+                            className="h-[42px] pl-10 pr-4 text-lg bg-white"
+                          />
+                        </div>
+                      ) : (
+                        <span className="flex-1 text-lg text-gray-700 pl-3">
+                          {option.name}
+                        </span>
+                      )}
+
+                      {editingOptions[option.optionId] !== undefined ? (
+                        <Button
+                          onClick={() => onModify(option.optionId)}
+                          className="bg-blue-500 hover:bg-blue-600 text-white h-[42px] px-6 text-lg min-w-[100px]"
+                        >
+                          저장
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() =>
+                            setEditingOptions({
+                              ...editingOptions,
+                              [option.optionId]: option.name,
+                            })
+                          }
+                          variant="outline"
+                          className="h-[42px] px-6 text-lg min-w-[100px]"
+                        >
+                          수정
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
