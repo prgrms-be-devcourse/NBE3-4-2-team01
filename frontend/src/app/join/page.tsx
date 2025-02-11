@@ -1,29 +1,29 @@
-'use client';
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { join } from '@/lib/api/AuthApi';
-import { getRoleFromCookie } from '@/lib/utils/CookieUtil';
+"use client";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { join } from "@/lib/api/AuthApi";
+import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
 
 export default function JoinPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  const provider = decodeURIComponent(searchParams.get('provider') || '');
-  const oauthId = searchParams.get('oauthId') || '';
+
+  const provider = decodeURIComponent(searchParams.get("provider") || "");
+  const oauthId = searchParams.get("oauthId") || "";
 
   const [formData, setFormData] = useState({
-    email: '',
-    name: '',
-    phoneNumber: '',
+    email: "",
+    name: "",
+    phoneNumber: "",
     provider,
     oauthId,
-    role: 'USER',
-    birthDate: ''
+    role: "USER",
+    birthDate: "",
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     try {
       const response = await join({
         email: formData.email,
@@ -32,25 +32,37 @@ export default function JoinPage() {
         role: formData.role,
         provider: formData.provider,
         oauthId: formData.oauthId,
-        birthDate: formData.birthDate
+        birthDate: formData.birthDate,
       });
 
-      if (response.resultCode === '200') {
+      if (response.resultCode === "200") {
         // 회원가입 성공 후 쿠키 확인
         const roleData = getRoleFromCookie();
         if (roleData) {
+          if (roleData.role === "ADMIN") {
+            router.push("/admin");
+            return;
+          } else if (roleData.role === "BUSINESS") {
+            if (roleData?.hasHotel) {
+              router.push("/business/hotel/management");
+              return;
+            } else {
+              router.push("/business/");
+              return;
+            }
+          }
           // 로그인 상태로 홈으로 리다이렉트
-          router.push('/');
+          router.push("/");
         } else {
           // 쿠키가 없으면 로그인 페이지로
-          router.push('/login');
+          router.push("/login");
         }
       } else {
-        alert(response.msg || '회원가입에 실패했습니다.');
+        alert(response.msg || "회원가입에 실패했습니다.");
       }
     } catch (error) {
-      console.error('회원가입 실패:', error);
-      alert('회원가입 중 오류가 발생했습니다.');
+      console.error("회원가입 실패:", error);
+      alert("회원가입 중 오류가 발생했습니다.");
     }
   };
 
@@ -75,16 +87,19 @@ export default function JoinPage() {
                 value={formData.email}
                 onChange={(e) => {
                   const value = e.target.value;
-                  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+                  const emailRegex =
+                    /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
                   const isValid = emailRegex.test(value);
-                  
+
                   setFormData({ ...formData, email: value });
-                  
+
                   const emailInput = e.target;
-                  if (!isValid && value !== '') {
-                    emailInput.setCustomValidity('올바른 이메일 형식이 아닙니다.');
+                  if (!isValid && value !== "") {
+                    emailInput.setCustomValidity(
+                      "올바른 이메일 형식이 아닙니다."
+                    );
                   } else {
-                    emailInput.setCustomValidity('');
+                    emailInput.setCustomValidity("");
                   }
                 }}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
@@ -98,28 +113,34 @@ export default function JoinPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">이름</label>
+              <label className="block text-sm font-medium text-gray-700">
+                이름
+              </label>
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">전화번호</label>
+              <label className="block text-sm font-medium text-gray-700">
+                전화번호
+              </label>
               <input
                 type="tel"
                 value={formData.phoneNumber}
                 onChange={(e) => {
                   const value = e.target.value;
                   const formattedNumber = value
-                    .replace(/[^0-9]/g, '')
+                    .replace(/[^0-9]/g, "")
                     .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3")
                     .replace(/(\-{1,2})$/g, "");
-                  
+
                   setFormData({ ...formData, phoneNumber: formattedNumber });
                 }}
                 pattern="01[0-9]-[0-9]{3,4}-[0-9]{4}"
@@ -127,16 +148,18 @@ export default function JoinPage() {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
-              <p className="mt-1 text-sm text-gray-500">
-                예시: 010-1234-5678
-              </p>
+              <p className="mt-1 text-sm text-gray-500">예시: 010-1234-5678</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">회원 유형</label>
+              <label className="block text-sm font-medium text-gray-700">
+                회원 유형
+              </label>
               <select
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, role: e.target.value })
+                }
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="USER">일반 사용자</option>
@@ -151,10 +174,12 @@ export default function JoinPage() {
               <input
                 type="date"
                 value={formData.birthDate}
-                onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, birthDate: e.target.value })
+                }
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 required
-                max={new Date().toISOString().split('T')[0]}
+                max={new Date().toISOString().split("T")[0]}
               />
             </div>
           </div>
@@ -169,4 +194,4 @@ export default function JoinPage() {
       </div>
     </div>
   );
-} 
+}
