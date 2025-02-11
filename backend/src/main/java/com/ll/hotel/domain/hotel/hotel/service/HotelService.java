@@ -297,7 +297,8 @@ public class HotelService {
 
         long resolvedCount = room.getBookings().stream()
                 .filter(booking -> booking.getCheckInDate().isBefore(checkOutDate)
-                                   && booking.getCheckOutDate().isAfter(checkInDate))
+                                   && booking.getCheckOutDate().isAfter(checkInDate)
+                                   && booking.getBookingStatus() != BookingStatus.CANCELLED)
                 .count();
 
         return room.getRoomNumber() - (int) resolvedCount;
