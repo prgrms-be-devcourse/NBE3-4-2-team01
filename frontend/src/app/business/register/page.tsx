@@ -6,11 +6,12 @@ import { BusinessRegistrationForm } from "@/lib/types/business/BusinessRequest";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Loading from "@/components/hotellist/Loading";
-import { Building2, Calendar, User } from "lucide-react";
 import Navigation from "@/components/navigation/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 export default function RegisterBusiness() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -21,6 +22,7 @@ export default function RegisterBusiness() {
     try {
       await registerBusiness(data);
       alert("사업자 등록이 완료되었습니다!");
+      router.push("/");
     } catch (error) {
       console.error("등록 실패:", error);
       alert("사업자 등록에 실패했습니다.");
