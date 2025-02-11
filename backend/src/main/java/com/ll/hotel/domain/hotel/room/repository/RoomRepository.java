@@ -32,6 +32,32 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     List<RoomWithImageDto> findAllRooms(@Param("hotelId") long hotelId, @Param("imageType") ImageType imageType);
 
     @Query("""
+            SELECT new com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto(r, i)
+            FROM Room r
+            LEFT JOIN Image i
+            ON i.referenceId = r.id
+            AND i.imageType = :imageType
+            WHERE r.hotel.id = :hotelId
+            AND r.roomStatus <> 'UNAVAILABLE'
+            AND (
+            r.standardNumber <= :personal
+            AND r.maxNumber >= :personal
+            )
+            AND (
+            i.createdAt = (
+                SELECT MIN(i2.createdAt)
+                FROM Image i2
+                WHERE i2.referenceId = r.id
+                AND i2.imageType = :imageType
+            )
+            OR i is NULL
+            )
+            """)
+    List<RoomWithImageDto> findAllAvailableRooms(@Param("hotelId") long hotelId,
+                                                 @Param("imageType") ImageType imageType,
+                                                 @Param("personal") int personal);
+
+    @Query("""
             SELECT r
             FROM Room r
             WHERE r.hotel.id = :hotelId
