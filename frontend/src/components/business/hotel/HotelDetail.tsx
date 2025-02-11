@@ -27,6 +27,7 @@ interface HotelDetailProps {
 
 const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
   const cookie = getRoleFromCookie();
+  const hotelOptions = Array.from(hotel.hotelOptions).sort();
   const [hotelId, setHotelId] = useState(-1);
   const [isBusinessUser, setIsBusinessUser] = useState<boolean>(false);
   const [canEdit, setCanEdit] = useState<boolean>(false);
@@ -35,6 +36,7 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
   const param = useParams();
 
   useEffect(() => {
+    console.log("호텔 옵션: ", hotelOptions);
     const cookieHotelId = cookie?.hotelId ? Number(cookie.hotelId) : -1;
     const paramHotelId = param.hotelId ? Number(param.hotelId) : null;
     console.log("쿠키 호텔 ID : ", cookieHotelId);
@@ -51,8 +53,7 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
     } else {
       setCanEdit(false);
     }
-    hotel.hotelOptions = new Set(hotel.hotelOptions);
-  }, [cookie, hotelId]);
+  }, [cookie, param.hotelId]);
 
   useEffect(() => {
     const fetchFavorite = async () => {
@@ -196,8 +197,8 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
       <div className="mt-8 bg-gray-100 p-6 rounded-xl">
         <h3 className="text-xl font-bold text-gray-900 mb-4">호텔 옵션</h3>
         <div className="flex flex-wrap gap-4">
-          {hotel.hotelOptions && hotel.hotelOptions.size > 0 ? (
-            Array.from(hotel.hotelOptions).map((option) => (
+          {hotelOptions.length > 0 ? (
+            Array.from(hotelOptions).map((option) => (
               <span
                 key={option}
                 className="flex items-center gap-2 bg-white border px-4 py-2 rounded-full shadow-sm"

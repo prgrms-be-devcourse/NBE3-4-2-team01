@@ -38,7 +38,14 @@ const HotelDetailPage: React.FC = () => {
   }
 
   if (!hotelDetail) {
-    return <div className="text-center">호텔 정보를 불러올 수가 없습니다.</div>;
+    return (
+      <div className="text-center pt-[100px]">
+        <Navigation />
+        <p className="text-gray-500 text-center">
+          호텔 정보를 불러올 수가 없습니다.
+        </p>
+      </div>
+    );
   }
 
   return (

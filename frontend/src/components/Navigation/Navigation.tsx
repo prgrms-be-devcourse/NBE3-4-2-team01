@@ -111,6 +111,8 @@ export default function Navigation() {
                   </Link>
                   <Link href={`/business/hotel/${user.hotelId}/reviews`} className={styles.link}>
                     호텔 리뷰
+                  <Link href={`/business/bookings`} className={styles.link}>
+                    예약 관리
                   </Link>
                   <Link href="/business/hotel/revenue" className={styles.link}>
                     호텔 매출

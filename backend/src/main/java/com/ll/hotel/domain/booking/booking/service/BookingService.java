@@ -124,6 +124,11 @@ public class BookingService {
             throw new ServiceException("400", "이미 취소된 예약입니다.");
         }
 
+        // 완료된 예약일 경우
+        if (booking.getBookingStatus() == BookingStatus.COMPLETED) {
+            throw new ServiceException("400", "완료된 예약은 취소할 수 없습니다.");
+        }
+
         cancel(booking);
     }
 
@@ -158,6 +163,11 @@ public class BookingService {
         // 이미 완료 처리된 예약일 경우
         if (booking.getBookingStatus() == BookingStatus.COMPLETED) {
             throw new ServiceException("400", "이미 완료된 예약입니다.");
+        }
+
+        // 취소된 예약일 경우
+        if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
+            throw new ServiceException("400", "취소된 예약은 완료 처리할 수 없습니다.");
         }
 
         setCompleted(booking);
