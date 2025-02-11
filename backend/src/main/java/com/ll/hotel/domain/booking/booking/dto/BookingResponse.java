@@ -4,8 +4,10 @@ import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.booking.booking.type.BookingStatus;
 import com.ll.hotel.domain.booking.payment.dto.PaymentResponse;
 import com.ll.hotel.domain.booking.payment.entity.Payment;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelDetailDto;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
+import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.RoomDto;
 import com.ll.hotel.domain.member.member.dto.MemberDTO;
 
@@ -15,8 +17,8 @@ import java.util.ArrayList;
 
 public record BookingResponse(
         long bookingId,
-        RoomDto room,
-        HotelDetailDto hotel,
+        long roomId,
+        long hotelId,
         MemberDTO member,
         PaymentResponse payment,
         String bookNumber,
@@ -29,8 +31,8 @@ public record BookingResponse(
     public static BookingResponse from(Booking booking) {
         return new BookingResponse(
                 booking.getId(),
-                new RoomDto(booking.getRoom()),
-                new HotelDetailDto(booking.getHotel(), new ArrayList<>()),
+                booking.getRoom().getId(),
+                booking.getHotel().getId(),
                 MemberDTO.from(booking.getMember()),
                 PaymentResponse.from(booking.getPayment()),
                 booking.getBookingNumber(),
