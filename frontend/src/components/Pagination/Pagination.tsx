@@ -29,10 +29,10 @@ const Pagination = ({ currentPage, totalPages, basePath }: PaginationProps) => {
     return range;
   };
 
-  // 경로가 '/me/reviews' 같은 절대 경로라면, 상대경로를 만들어줍니다.
   const createLink = (page: number) => {
-    // basePath가 '/'로 시작하지 않으면 '/'를 추가하여 절대경로를 만듦
-    return `${basePath.startsWith("/") ? basePath : `/${basePath}`}?page=${page}`;
+    let path = basePath.startsWith("/") ? basePath : `/${basePath}`;
+
+    return `${path}${path.includes("?") ? "&" : "?"}page=${page}`;
   };
 
   return (

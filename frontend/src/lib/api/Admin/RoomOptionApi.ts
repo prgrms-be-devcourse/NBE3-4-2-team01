@@ -54,6 +54,7 @@ export const deleteRoomOption = async (roomOptionId: number): Promise<void> => {
   };
 
   return fetchAPI<void>(
-    `http://localhost:8080/api/admin/room-options/${roomOptionId}`
+    `http://localhost:8080/api/admin/room-options/${roomOptionId}`,
+    options
   );
 };

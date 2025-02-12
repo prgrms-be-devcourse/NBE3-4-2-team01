@@ -7,6 +7,7 @@ import { PutHotelRequest } from "@/lib/types/hotel/PutHotelRequest";
 import { PutHotelResponse } from "@/lib/types/hotel/PutHotelResponse";
 import { PostHotelRequest } from "@/lib/types/hotel/PostHotelRequest";
 import { RsData } from "./../types/RsData";
+import { useParams } from "next/navigation";
 
 const BASE_URL = "http://localhost:8080/api/hotels";
 
@@ -82,7 +83,7 @@ export const findHotelDetailWithAvailableRooms = async (
   hotelId: number,
   checkIndate?: string,
   checkoutDate?: string,
-  personal?: number
+  personal?: string
 ): Promise<GetHotelDetailResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}`);

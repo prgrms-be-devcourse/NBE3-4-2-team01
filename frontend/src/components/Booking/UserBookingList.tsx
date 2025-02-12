@@ -75,8 +75,8 @@ const UserBookingList = function({ bookings }: { bookings: PageDto<BookingRespon
   return (
     <div className="max-w-screen-lg mx-auto">
       <div className="space-y-4">
-        {bookings.items.length > 0 ? (
-          bookings.items.map((booking) => (
+        {bookingList.length > 0 ? (
+          bookingList.map((booking) => (
             <Card key={booking.bookingId} className="overflow-hidden">
               <div 
                 className="bg-white hover:bg-gray-50 cursor-pointer p-6 transition-colors"
@@ -117,9 +117,11 @@ const UserBookingList = function({ bookings }: { bookings: PageDto<BookingRespon
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      {booking.bookingStatus === 'COMPLETED' && (
                       <DropdownMenuItem onClick={(e) => handleReviewClick(booking.bookingId, booking.hotelId, booking.roomId, e)}>
                         리뷰 작성
                       </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem onClick={(e) => handleCancelClick(booking.bookingId, e)}>
                         예약 취소
                       </DropdownMenuItem>

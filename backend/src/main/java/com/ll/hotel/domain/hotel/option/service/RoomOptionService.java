@@ -44,6 +44,10 @@ public class RoomOptionService {
     }
 
     public void delete(RoomOption roomOption) {
+        if (!roomOption.getRooms().isEmpty()) {
+            throw new ServiceException("400", "이미 사용 중인 객실 옵션은 삭제할 수 없습니다.");
+        }
+
         roomOptionRepository.delete(roomOption);
     }
 }
