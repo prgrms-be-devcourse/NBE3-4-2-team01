@@ -88,6 +88,7 @@ export default function HotelsPageClient({
           hotels={hotelData.items}
           checkInDate={searchParams.checkInDate}
           checkoutDate={searchParams.checkoutDate}
+          personal={searchParams.personal}
         />
       </Suspense>
       <Pagination
