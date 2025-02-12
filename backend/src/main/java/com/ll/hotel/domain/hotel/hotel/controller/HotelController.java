@@ -84,6 +84,20 @@ public class HotelController {
     }
 
     @GetMapping("/{hotelId}")
+    public RsData<GetHotelDetailResponse> findHotelDetailWithAvailableRooms(@PathVariable long hotelId,
+                                                          @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}") @DateTimeFormat(iso = ISO.DATE)
+                                                          LocalDate checkInDate,
+                                                          @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().plusDays(1)}") @DateTimeFormat(iso = ISO.DATE)
+                                                              LocalDate checkoutDate,
+                                                          @RequestParam(defaultValue = "2") int personal) {
+        return new RsData<>(
+                "200-1",
+                "호텔 정보를 정상적으로 조회했습니다.",
+                this.hotelService.findHotelDetailWithAvailableRooms(hotelId, checkInDate, checkoutDate, personal)
+        );
+    }
+
+    @GetMapping("/{hotelId}/business")
     public RsData<GetHotelDetailResponse> findHotelDetail(@PathVariable long hotelId) {
         return new RsData<>(
                 "200-1",

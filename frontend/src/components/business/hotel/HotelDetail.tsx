@@ -151,7 +151,7 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
           {
             icon: FaMapMarkerAlt,
             label: "주소",
-            value: `${hotel.streetAddress}, ${hotel.zipCode}`,
+            value: `${hotel.streetAddress} (${hotel.zipCode})`,
             color: "text-red-500",
           },
           {

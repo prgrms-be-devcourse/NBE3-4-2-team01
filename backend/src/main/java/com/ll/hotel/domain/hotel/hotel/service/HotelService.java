@@ -131,7 +131,7 @@ public class HotelService {
         return new PageImpl<>(availableHotels, pageRequest, availableHotels.size());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public GetHotelDetailResponse findHotelDetail(long hotelId) {
         Hotel hotel = this.hotelRepository.findHotelDetail(hotelId)
                 .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
@@ -141,6 +141,28 @@ public class HotelService {
                 .toList();
 
         List<RoomWithImageDto> roomDtos = this.roomRepository.findAllRooms(hotelId, ImageType.ROOM);
+
+        return new GetHotelDetailResponse(new HotelDetailDto(hotel, roomDtos), imageUrls);
+    }
+
+    @Transactional(readOnly = true)
+    public GetHotelDetailResponse findHotelDetailWithAvailableRooms(long hotelId, LocalDate checkInDate,
+                                                                    LocalDate checkoutDate, int personal) {
+        Hotel hotel = this.hotelRepository.findHotelDetail(hotelId)
+                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
+
+        List<String> imageUrls = this.imageService.findImagesById(ImageType.HOTEL, hotelId).stream()
+                .map(Image::getImageUrl)
+                .toList();
+
+        List<RoomWithImageDto> roomDtos = this.roomRepository.findAllAvailableRooms(hotelId, ImageType.ROOM, personal)
+                .stream()
+                .map(dto -> {
+                    Room room = dto.room();
+                    room.setRoomNumber(this.countAvailableRoomNumber(room, checkInDate, checkoutDate, personal));
+                    return dto;
+                })
+                .toList();
 
         return new GetHotelDetailResponse(new HotelDetailDto(hotel, roomDtos), imageUrls);
     }
@@ -170,7 +192,7 @@ public class HotelService {
 
         if (request.hotelStatus() != null) {
             try {
-                hotel.setHotelStatus(HotelStatus.fromValue(request.hotelStatus().toUpperCase()));
+                hotel.setHotelStatus(HotelStatus.valueOf(request.hotelStatus().toUpperCase()));
             } catch (Exception e) {
                 throw new ServiceException("404-2", "호텔 상태 정보를 정확히 입력해주세요.");
             }
@@ -306,7 +328,6 @@ public class HotelService {
 
     // 호텔의 예약 가능한 객실 수 Count
     private int countAvailableRoomNumber(Room room, LocalDate checkInDate, LocalDate checkOutDate, int personal) {
-        System.out.println(room.getRoomName());
         if (personal < room.getStandardNumber() || personal > room.getMaxNumber()) {
             return 0;
         }
