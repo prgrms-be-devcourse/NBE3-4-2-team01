@@ -54,10 +54,11 @@ export default function HotelsPageClient({
   };
 
   const params = new URLSearchParams(stringifiedSearchParams);
+  params.delete("page");
 
   const handleFilterChange = (value: FilterName) => {
     params.set("filterName", value);
-
+    params.set("page", stringifiedSearchParams.page);
     setSelectedFilter(value);
     router.push(`?${params.toString()}`);
     console.log(value);
