@@ -26,7 +26,10 @@ const HotelDetailPage: React.FC = () => {
     const fetchHotelDetail = async () => {
       try {
         const response = await findHotelDetailWithAvailableRooms(
-          Number(hotelId)
+          Number(hotelId),
+          checkInDate,
+          checkoutDate,
+          personal
         );
         setHotelDetail(response);
       } catch (error) {
