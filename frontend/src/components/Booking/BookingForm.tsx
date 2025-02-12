@@ -18,6 +18,7 @@ const BookingForm = ({hotelId, roomId, checkInDate, checkOutDate}: BookingProps)
             try {
                 data = await preBook(hotelId, roomId);
             } catch (error) {
+                alert(error);
                 console.error(error);
             } finally {
                 setBookingFormData(data);

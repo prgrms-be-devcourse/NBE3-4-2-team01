@@ -1,5 +1,4 @@
 'use client'
-
 import { useEffect, useState } from "react"
 import { getHotelRevenue } from "@/lib/api/Booking/Revenue/RevenueApi"
 import { HotelRevenueResponse } from "@/lib/types/Booking/Revenue/HotelRevenueResponse"
@@ -32,16 +31,16 @@ const HotelRevenue = function({ hotelId }: { hotelId: number }) {
       }
     }
     fetchBooking()
-  }, [hotelId]) // Added hotelId to dependency array
+  }, [hotelId])
 
   if (isLoading) {
     return (
-      <Card className="w-full">
+      <Card className="w-3/4 mx-auto min-h-96">
         <CardHeader>
           <Skeleton className="h-8 w-64" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-80 w-full" />
         </CardContent>
       </Card>
     )
@@ -49,8 +48,8 @@ const HotelRevenue = function({ hotelId }: { hotelId: number }) {
 
   if (!hotelRevenue) {
     return (
-      <Card className="w-full">
-        <CardContent className="flex items-center justify-center h-48">
+      <Card className="w-3/4 mx-auto min-h-96">
+        <CardContent className="flex items-center justify-center h-80">
           <p className="text-muted-foreground">매출 통계를 불러올 수 없습니다.</p>
         </CardContent>
       </Card>
@@ -58,13 +57,13 @@ const HotelRevenue = function({ hotelId }: { hotelId: number }) {
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-3/4 mx-auto min-h-96">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">
           총 매출: {hotelRevenue.revenue.toLocaleString()}원
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-80 overflow-auto">
         <Table>
           <TableHeader>
             <TableRow>
