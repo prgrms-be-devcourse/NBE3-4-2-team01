@@ -1,7 +1,9 @@
 package com.ll.hotel.domain.member.member.dto;
 
+import com.ll.hotel.domain.member.member.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
@@ -15,14 +17,21 @@ public record JoinRequest(
     String name,
 
     @NotBlank(message = "전화번호는 필수입니다.")
-    @Pattern(regexp = "^\\d{3}-\\d{3,4}-\\d{4}$", message = "올바른 전화번호 형식이 아닙니다.")
+    @Pattern(
+        regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$",
+        message = "전화번호는 010-XXXX-XXXX 형식으로 입력해주세요."
+    )
     String phoneNumber,
 
-    LocalDate birthDate,
+    @NotNull(message = "회원 유형은 필수입니다.") 
+    Role role,
 
     @NotBlank(message = "OAuth 제공자는 필수입니다.")
     String provider,
     
     @NotBlank(message = "OAuth ID는 필수입니다.")
-    String oauthId
+    String oauthId,
+
+    @NotNull(message = "생년월일은 필수입니다.")
+    LocalDate birthDate
 ) {}

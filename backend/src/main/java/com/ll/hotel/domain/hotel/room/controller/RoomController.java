@@ -1,7 +1,7 @@
 package com.ll.hotel.domain.hotel.room.controller;
 
+import com.ll.hotel.domain.hotel.room.dto.GetAllRoomOptionsResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
 import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
@@ -10,7 +10,6 @@ import com.ll.hotel.domain.hotel.room.dto.PutRoomResponse;
 import com.ll.hotel.domain.hotel.room.service.RoomService;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
@@ -36,23 +35,15 @@ public class RoomController {
     private final Rq rq;
 
     @PostMapping
-    public RsData<PostRoomResponse> roomCreate(@PathVariable long hotelId,
+    public RsData<PostRoomResponse> createRoom(@PathVariable long hotelId,
                                                @RequestBody @Valid PostRoomRequest postRoomRequest)
     {
         Member actor = this.rq.getActor();
 
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인 해주세요.");
-        }
-
-        if (!actor.isBusiness()) {
-            throw new ServiceException("403-1", "사업가만 객실을 등록할 수 있습니다.");
-        }
-
         return new RsData<>(
                 "201-1",
                 "객실을 정상적으로 등록하였습니다.",
-                this.roomService.create(hotelId, actor, postRoomRequest)
+                this.roomService.createRoom(hotelId, actor, postRoomRequest)
         );
     }
 
@@ -62,15 +53,7 @@ public class RoomController {
     ) {
         Member actor = this.rq.getActor();
 
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인 해주세요.");
-        }
-
-        if (!actor.isBusiness()) {
-            throw new ServiceException("403-1", "사업가만 객실 사진을 등록할 수 있습니다.");
-        }
-
-        this.roomService.saveImages(ImageType.ROOM, roomId, urls);
+        this.roomService.saveImages(actor, ImageType.ROOM, roomId, urls);
 
         return new RsData<>(
                 "201-1",
@@ -82,15 +65,7 @@ public class RoomController {
     public RsData<Empty> deleteRoom(@PathVariable long hotelId, @PathVariable long roomId) {
         Member actor = this.rq.getActor();
 
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인 해주세요.");
-        }
-
-        if (!actor.isBusiness()) {
-            throw new ServiceException("403-1", "사업가만 객실을 삭제할 수 있습니다.");
-        }
-
-        this.roomService.delete(hotelId, roomId, actor);
+        this.roomService.deleteRoom(hotelId, roomId, actor);
 
         return new RsData<>(
                 "200-1",
@@ -116,15 +91,6 @@ public class RoomController {
         );
     }
 
-    @GetMapping("/{roomId}/room-option")
-    public RsData<GetRoomOptionResponse> findRoomOptions(@PathVariable long hotelId, @PathVariable long roomId) {
-        return new RsData<>(
-                "200-1",
-                "객실의 옵션 정보를 정상적으로 조회했습니다.",
-                this.roomService.findRoomOptions(hotelId, roomId)
-        );
-    }
-
     @PutMapping("{roomId}")
     public RsData<PutRoomResponse> modify(@PathVariable long hotelId,
                                           @PathVariable long roomId,
@@ -132,17 +98,20 @@ public class RoomController {
     {
         Member actor = this.rq.getActor();
 
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인 해주세요.");
-        }
-
-        if (!actor.isBusiness()) {
-            throw new ServiceException("403-1", "사업가만 객실을 수정할 수 있습니다.");
-        }
-
         return new RsData<>(
                 "200-1",
                 "객실 정보를 수정에 성공하였습니다.",
-                this.roomService.modify(hotelId, roomId, actor, request));
+                this.roomService.modifyRoom(hotelId, roomId, actor, request));
+    }
+
+    @GetMapping("/room-option")
+    public RsData<GetAllRoomOptionsResponse> findAllRoomOptions(@PathVariable long hotelId) {
+        Member actor = this.rq.getActor();
+
+        return new RsData<>(
+                "200-1",
+                "객실 옵션 조회에 성공했습니다.",
+                this.roomService.findAllRoomOptions(actor)
+        );
     }
 }
