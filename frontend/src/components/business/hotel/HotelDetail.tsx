@@ -115,7 +115,7 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
           <h2 className="text-6xl font-extrabold text-sky-500 drop-shadow-[2px_2px_5px_rgba(255,255,255,0.7)]">
             {hotel.hotelName}
           </h2>
-          {!isBusinessUser && (
+          {cookie && cookie.role === "USER" && (
             <button
               onClick={handleLike}
               className="transition-transform hover:scale-110 focus:outline-none"
