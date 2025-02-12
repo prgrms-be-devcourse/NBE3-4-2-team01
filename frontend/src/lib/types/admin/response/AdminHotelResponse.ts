@@ -17,7 +17,16 @@ export interface AdminHotelSummaryReponse {
 }
 
 export interface AdminHotelDetailResponse {
-  hotelDto: HotelDto;
+  hotelName: string;
+  streetAddress: string;
+  zipCode: number;
+  hotelGrade: string;
+  checkInTime: string;
+  checkOutTime: string;
+  hotelStatus: HotelStatus;
+
+  hotelEmail: string;
+  hotelPhoneNumber: string;
 
   ownerId: number;
   ownerName: string;
@@ -26,4 +35,6 @@ export interface AdminHotelDetailResponse {
 
   averageRating: number;
   totalReviewCount: number;
+
+  hotelOptions: Set<string>;
 }
