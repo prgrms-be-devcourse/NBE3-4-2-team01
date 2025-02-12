@@ -44,6 +44,11 @@ public class HotelOptionService {
     }
 
     public void delete(HotelOption hotelOption) {
+
+        if (!hotelOption.getHotels().isEmpty()) {
+            throw new ServiceException("400", "이미 사용 중인 호텔 옵션은 삭제할 수 없습니다.");
+        }
+
         hotelOptionRepository.delete(hotelOption);
     }
 }
