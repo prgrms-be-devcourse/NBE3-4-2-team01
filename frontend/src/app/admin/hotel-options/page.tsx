@@ -6,11 +6,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   addHotelOption,
+  deleteHotelOption,
   getAllHotelOptions,
   modifyHotelOption,
 } from "@/lib/api/Admin/HotelOptionApi";
 import { OptionResponse } from "@/lib/types/admin/response/OptionResponse";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function HotelOptionsPage() {
@@ -60,6 +61,17 @@ export default function HotelOptionsPage() {
       fetchOptions();
     } catch (error) {
       console.error("옵션 추가 중 오류 발생:", error);
+    }
+  };
+
+  const onDelete = async (optionId: number) => {
+    if (!confirm("정말 이 옵션을 삭제하시겠습니까?")) return;
+    try {
+      await deleteHotelOption(optionId);
+      fetchOptions();
+    } catch (error: any) {
+      console.error("옵션 삭제 중 오류 발생:", error);
+      alert(error.response?.data?.msg || "옵션 삭제 중 오류가 발생했습니다.");
     }
   };
 
@@ -159,6 +171,14 @@ export default function HotelOptionsPage() {
                           수정
                         </Button>
                       )}
+                      {/* 삭제 버튼 */}
+                      <Button
+                        onClick={() => onDelete(option.optionId)}
+                        variant="destructive"
+                        className="h-[42px] px-6 text-lg"
+                      >
+                        삭제
+                      </Button>
                     </div>
                   ))}
                 </div>

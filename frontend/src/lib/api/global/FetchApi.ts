@@ -15,13 +15,22 @@ export const fetchAPI = async <T>(
       body: options.body ? JSON.stringify(options.body) : null,
     });
 
-    if (![200, 201].includes(response.status)) {
-      throw new Error(`HTTP 오류: ${response.status} ${response.statusText}`);
+    let rsData;
+
+    try {
+      rsData = await response.json();
+    } catch {
+      throw new Error(
+        `JSON 파싱 오류: ${response.status} ${response.statusText}`
+      );
     }
 
-    const rsData = await response.json();
-    if (!rsData || !["200", "201"].includes(rsData.resultCode)) {
-      throw new Error(rsData?.msg || "서버에서 올바른 응답을 받지 못했습니다.");
+    if (
+      !response.ok ||
+      !rsData ||
+      !["200", "201"].includes(rsData.resultCode)
+    ) {
+      throw { response: { status: response.status, data: rsData } };
     }
 
     return rsData.data as T;
