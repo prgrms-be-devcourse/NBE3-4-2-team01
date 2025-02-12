@@ -29,6 +29,7 @@ const BookingDetails = function({bookingId} : {bookingId : number}) {
             try {
                 data = await getBookingDetails(bookingId);
             } catch (error) {
+                alert(error);
                 console.error(error);
             } finally {
                 setBookingDetails(data);
