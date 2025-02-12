@@ -42,19 +42,20 @@ export default function HotelsPageClient({
 
   const [selectedFilter, setSelectedFilter] = useState<FilterName>(filterName);
 
-  const handleFilterChange = (value: FilterName) => {
-    const stringifiedSearchParams: Record<string, string> = {
-      page: String(searchParams.page),
-      pageSize: String(searchParams.pageSize),
-      filterName: String(searchParams.filterName),
-      streetAddress: searchParams.streetAddress,
-      checkInDate: searchParams.checkInDate,
-      checkoutDate: searchParams.checkoutDate,
-      personal: searchParams.personal,
-      filterDirection: searchParams.filterDirection,
-    };
+  const stringifiedSearchParams: Record<string, string> = {
+    page: String(searchParams.page),
+    pageSize: String(searchParams.pageSize),
+    filterName: String(searchParams.filterName),
+    streetAddress: searchParams.streetAddress,
+    checkInDate: searchParams.checkInDate,
+    checkoutDate: searchParams.checkoutDate,
+    personal: searchParams.personal,
+    filterDirection: searchParams.filterDirection,
+  };
 
-    const params = new URLSearchParams(stringifiedSearchParams);
+  const params = new URLSearchParams(stringifiedSearchParams);
+
+  const handleFilterChange = (value: FilterName) => {
     params.set("filterName", value);
 
     setSelectedFilter(value);
@@ -94,7 +95,7 @@ export default function HotelsPageClient({
       <Pagination
         currentPage={page}
         totalPages={hotelData?.totalPages || 1}
-        basePath="hotels"
+        basePath={`hotels?${params.toString()}`}
       />
     </main>
   );
