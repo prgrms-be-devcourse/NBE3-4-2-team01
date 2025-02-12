@@ -18,7 +18,7 @@ export const getAllHotelsForAdmin = async (
   return {
     ...data,
     items: data.items
-      ? data.items.sort((a, b) => (b.id ?? 0) - (a.id ?? 0))
+      ? data.items.sort((a, b) => (b.hotelId ?? 0) - (a.hotelId ?? 0))
       : [],
   };
 };

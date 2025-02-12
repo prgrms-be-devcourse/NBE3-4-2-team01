@@ -27,8 +27,9 @@ export default function AdminHotelDetailPage() {
       if (!hotelId) return;
       try {
         const data = await getHotelForAdmin(Number(hotelId));
+        console.log(data);
         setHotel(data);
-        setStatus(data.hotelDto.hotelStatus as HotelStatus);
+        setStatus(data.hotelStatus as HotelStatus);
       } catch (error) {
         console.error("호텔 상세 정보를 불러오는 중 오류 발생:", error);
         setError("호텔 데이터를 불러오는 중 오류가 발생했습니다.");
@@ -116,27 +117,21 @@ export default function AdminHotelDetailPage() {
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 <p className="text-base text-gray-700 font-semibold">이름</p>
-                <p className="text-base text-gray-700">
-                  {hotel.hotelDto.hotelName}
-                </p>
+                <p className="text-base text-gray-700">{hotel.hotelName}</p>
                 <p className="text-base text-gray-700 font-semibold">주소</p>
                 <p className="text-base text-gray-700">
-                  {hotel.hotelDto.streetAddress}, {hotel.hotelDto.zipCode}
+                  {hotel.streetAddress}, {hotel.zipCode}
                 </p>
                 <p className="text-base text-gray-700 font-semibold">등급</p>
                 <p className="text-base text-gray-700">
-                  {hotel.hotelDto.hotelGrade}성급
+                  {hotel.hotelGrade}성급
                 </p>
                 <p className="text-base text-gray-700 font-semibold">체크인</p>
-                <p className="text-base text-gray-700">
-                  {hotel.hotelDto.checkInTime}
-                </p>
+                <p className="text-base text-gray-700">{hotel.checkInTime}</p>
                 <p className="text-base text-gray-700 font-semibold">
                   체크아웃
                 </p>
-                <p className="text-base text-gray-700">
-                  {hotel.hotelDto.checkOutTime}
-                </p>
+                <p className="text-base text-gray-700">{hotel.checkOutTime}</p>
               </div>
             </div>
             {/* 호텔 상태 변경 */}
@@ -179,32 +174,29 @@ export default function AdminHotelDetailPage() {
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 <p className="text-base text-gray-700 font-semibold">이메일</p>
-                <p className="text-base text-gray-700">
-                  {hotel.hotelDto.hotelEmail}
-                </p>
+                <p className="text-base text-gray-700">{hotel.hotelEmail}</p>
                 <p className="text-base text-gray-700 font-semibold">
                   전화번호
                 </p>
                 <p className="text-base text-gray-700">
-                  {hotel.hotelDto.hotelPhoneNumber}
+                  {hotel.hotelPhoneNumber}
                 </p>
               </div>
             </div>
 
             {/* 호텔 옵션 정보 */}
-            {hotel.hotelDto.hotelOptions &&
-              hotel.hotelDto.hotelOptions.size > 0 && (
-                <div className="bg-white/50 p-6 rounded-lg shadow-sm">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                    호텔 옵션
-                  </h2>
-                  <ul className="text-base text-gray-700 list-disc list-inside">
-                    {[...hotel.hotelDto.hotelOptions].map((option) => (
-                      <li key={option}>{option}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            {hotel.hotelOptions && hotel.hotelOptions.size > 0 && (
+              <div className="bg-white/50 p-6 rounded-lg shadow-sm">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  호텔 옵션
+                </h2>
+                <ul className="text-base text-gray-700 list-disc list-inside">
+                  {[...hotel.hotelOptions].map((option) => (
+                    <li key={option}>{option}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* 사업자 정보 */}
             <div className="bg-white/50 p-6 rounded-lg shadow-sm">
@@ -229,7 +221,7 @@ export default function AdminHotelDetailPage() {
               </div>
               {/* 사업자 상세 정보 보기 버튼 */}
               <div className="flex justify-end mt-4">
-                <Link href={`/admin/businesses/${hotel.ownerId}`}>
+                <Link href={`/admin/business/${hotel.ownerId}`}>
                   <Button className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 text-lg rounded">
                     사업자 상세 정보 보기
                   </Button>
