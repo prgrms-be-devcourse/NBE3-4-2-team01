@@ -117,7 +117,7 @@ export default function AdminBusinessesPage() {
                 <Pagination
                   currentPage={currentPage + 1}
                   totalPages={businesses.totalPages}
-                  basePath="/admin/businesses"
+                  basePath="/admin/business"
                 />
               </div>
             )}
