@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   addRoomOption,
+  deleteRoomOption,
   getAllRoomOptions,
   modifyRoomOption,
 } from "@/lib/api/Admin/RoomOptionApi";
@@ -69,6 +70,18 @@ export default function RoomOptionsPage() {
       console.error("객실 옵션 추가 중 오류 발생:", error);
     }
   };
+
+  const onDelete = async (optionId: number) => {
+    if (!confirm("정말 이 옵션을 삭제하시겠습니까?")) return;
+    try {
+      await deleteRoomOption(optionId);
+      fetchOptions();
+    } catch (error: any) {
+      console.error("옵션 삭제 중 오류 발생:", error);
+      alert(error.response?.data?.msg || "옵션 삭제 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-background">
       {/* Background gradient */}
@@ -166,6 +179,14 @@ export default function RoomOptionsPage() {
                           수정
                         </Button>
                       )}
+                      {/* 삭제 버튼 */}
+                      <Button
+                        onClick={() => onDelete(option.optionId)}
+                        variant="destructive"
+                        className="h-[42px] px-6 text-lg"
+                      >
+                        삭제
+                      </Button>
                     </div>
                   ))}
                 </div>

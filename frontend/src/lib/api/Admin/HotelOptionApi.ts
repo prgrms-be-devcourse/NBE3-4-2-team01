@@ -2,6 +2,7 @@ import { OptionResponse } from "@/lib/types/admin/response/OptionResponse";
 import { fetchAPI } from "../global/FetchApi";
 import { OptionRequest } from "@/lib/types/admin/request/OptionRequest";
 import { FetchOptions } from "@/lib/types/global/FetchOption";
+import { RsData } from "@/lib/types/RsData";
 
 export const addHotelOption = async (
   formData: OptionRequest
@@ -50,12 +51,13 @@ export const modifyHotelOption = async (
 
 export const deleteHotelOption = async (
   hotelOptionId: number
-): Promise<void> => {
+): Promise<RsData<void>> => {
   const options: FetchOptions = {
     method: "DELETE",
   };
 
-  return fetchAPI<void>(
-    `http://localhost:8080/api/admin/hotel-options/${hotelOptionId}`
+  return fetchAPI<RsData<void>>(
+    `http://localhost:8080/api/admin/hotel-options/${hotelOptionId}`,
+    options
   );
 };
