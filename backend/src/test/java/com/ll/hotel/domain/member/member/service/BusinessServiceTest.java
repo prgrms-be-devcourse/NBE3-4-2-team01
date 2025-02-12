@@ -1,13 +1,16 @@
 package com.ll.hotel.domain.member.member.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import com.ll.hotel.domain.member.member.dto.request.BusinessRequest;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
-import com.ll.hotel.domain.member.member.service.BusinessService;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,11 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -69,7 +67,7 @@ public class BusinessServiceTest {
         Member member = memberRepository.findById(testId).get();
 
         // When
-        Business result = businessService.register(businessRequest, member);
+        Business result = businessService.register(businessRequest, member, "01");
 
         // Then
         assertThat(result).isNotNull();

@@ -123,12 +123,16 @@ public class HotelService {
         Sort sort = Sort.by(direction, sortField);
         PageRequest pageRequest = PageRequest.of(page - 1, pageSize, sort);
 
-        Page<HotelWithImageDto> hotels = this.hotelRepository.findAllHotels(ImageType.HOTEL, streetAddress,
-                pageRequest);
+        List<HotelWithImageDto> hotels = this.hotelRepository.findAllHotels(ImageType.HOTEL, streetAddress);
 
         List<GetHotelResponse> availableHotels = this.getAvailableHotels(checkInDate, checkOutDate, personal, hotels);
 
-        return new PageImpl<>(availableHotels, pageRequest, availableHotels.size());
+        int start = (int) pageRequest.getOffset();
+        int end = Math.min((start + pageRequest.getPageSize()), availableHotels.size());
+
+        List<GetHotelResponse> paginatedHotels = availableHotels.subList(start, end);
+
+        return new PageImpl<>(paginatedHotels, pageRequest, availableHotels.size());
     }
 
     @Transactional(readOnly = true)
@@ -288,7 +292,7 @@ public class HotelService {
     // 첫 번째 filter 는 중복으로 인해 제거 상태. 문제 시 아래의 메서드와 함께 주석 해제
     // 배포 시 마지막 filter 부분 주석 해제 (예약 가능한 Room 이 없으면 호텔을 보여주지 않는 부분)
     private List<GetHotelResponse> getAvailableHotels(LocalDate checkInDate, LocalDate checkOutDate,
-                                                      int personal, Page<HotelWithImageDto> hotels) {
+                                                      int personal, List<HotelWithImageDto> hotels) {
         return hotels.stream()
                 .map(dto -> {
                     Hotel hotel = dto.hotel();
