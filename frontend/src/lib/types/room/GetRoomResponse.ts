@@ -8,5 +8,5 @@ export interface GetRoomResponse {
   maxNumber: number;
   bedTypeNumber: BedTypeNumber;
   thumbnailUrl: string;
-  roomNumber: string;
+  roomNumber: number;
 }

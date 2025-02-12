@@ -61,7 +61,7 @@ public record HotelDetailDto(
                 hotel.getCheckInTime(),
                 hotel.getCheckOutTime(),
                 hotel.getHotelExplainContent(),
-                hotel.getHotelStatus().getValue(),
+                hotel.getHotelStatus().name(),
                 dtos.stream()
                         .map(GetRoomResponse::new)
                         .toList(),

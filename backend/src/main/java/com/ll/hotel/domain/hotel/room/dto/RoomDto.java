@@ -48,7 +48,7 @@ public record RoomDto(
                 room.getStandardNumber(),
                 room.getMaxNumber(),
                 room.getBedTypeNumber(),
-                room.getRoomStatus().getValue(),
+                room.getRoomStatus().name(),
                 room.getRoomOptions() != null
                         ? room.getRoomOptions().stream()
                         .map(RoomOption::getName)

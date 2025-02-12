@@ -114,7 +114,11 @@ const RoomList: React.FC<RoomListProps> = ({ rooms }) => {
             <li
               key={room.roomId}
               className="flex flex-col border rounded-lg shadow-md p-8 bg-white cursor-pointer duration-200 hover:scale-105"
-              onClick={() => handleRoomClick?.(room.roomId)}
+              onClick={() => {
+                if (room.roomNumber !== 0) {
+                  handleRoomClick?.(room.roomId);
+                }
+              }}
             >
               {/* 이미지 & 정보 섹션 */}
               <div className="flex items-center">
@@ -186,9 +190,16 @@ const RoomList: React.FC<RoomListProps> = ({ rooms }) => {
                 ) : (
                   <Button
                     className="bg-green-500 text-white"
-                    onClick={handleButtonClick(() =>
-                      handleReservation(room.roomId)
-                    )}
+                    disabled={room.roomNumber === 0}
+                    onClick={(e) => {
+                      if (room.roomNumber === 0) {
+                        e.preventDefault(); // 예약하기 버튼이 비활성화 되어도 클릭 시 아무 동작도 안함
+                      } else {
+                        handleButtonClick(() => handleReservation(room.roomId))(
+                          e
+                        );
+                      }
+                    }}
                   >
                     예약하기
                   </Button>

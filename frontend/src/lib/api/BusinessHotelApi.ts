@@ -64,6 +64,27 @@ export const findHotelDetail = async (
   hotelId: number
 ): Promise<GetHotelDetailResponse> => {
   try {
+    const response = await fetch(`${BASE_URL}/${hotelId}/business`);
+    const rsData: RsData<GetHotelDetailResponse> = await response.json();
+
+    if (rsData.resultCode !== "200-1") {
+      throw new Error(rsData.msg);
+    }
+
+    return rsData.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// 예약 가능한 객실이 존재하는 호텔 상세 조회
+export const findHotelDetailWithAvailableRooms = async (
+  hotelId: number,
+  checkIndate?: string,
+  checkoutDate?: string,
+  personal?: number
+): Promise<GetHotelDetailResponse> => {
+  try {
     const response = await fetch(`${BASE_URL}/${hotelId}`);
     const rsData: RsData<GetHotelDetailResponse> = await response.json();
 

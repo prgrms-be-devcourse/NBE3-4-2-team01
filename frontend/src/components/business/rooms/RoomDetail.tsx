@@ -15,7 +15,7 @@ interface RoomDetailProps {
 const RoomDetail: React.FC<RoomDetailProps> = ({ room }) => {
   const cookie = getRoleFromCookie();
   const roomOptions = Array.from(room.roomDto.roomOptions).sort();
-  const [hotelId, setHotelId] = useState(-1);
+  const [hotelId, setHotelId] = useState(cookie?.hotelId);
   const roomId = room.roomDto.id;
   const [isBusinessUser, setIsBusinessUser] = useState<boolean>(false);
   const [canEdit, setCanEdit] = useState<boolean>(false);
@@ -56,6 +56,8 @@ const RoomDetail: React.FC<RoomDetailProps> = ({ room }) => {
     if (!window.confirm("객실을 삭제하시겠습니까?")) return;
 
     try {
+      console.log("호텔 Id : ", hotelId);
+      console.log("객실 Id : ", roomId);
       await deleteRoom(hotelId, roomId);
       alert("객실이 삭제되었습니다.");
       router.push("/business/hotel/management");
@@ -68,8 +70,8 @@ const RoomDetail: React.FC<RoomDetailProps> = ({ room }) => {
 
   const handleReservation = (roomId: number) => {
     const params = new URLSearchParams();
-    params.set("hotel", (hotelId ?? "").toString());
-    params.set("rooms", roomId.toString());
+    params.set("hotelId", (hotelId ?? "").toString());
+    params.set("roomId", roomId.toString());
     if (checkInDate) params.set("checkInDate", checkInDate);
     if (checkoutDate) params.set("checkoutDate", checkoutDate);
 
@@ -167,13 +169,19 @@ const RoomDetail: React.FC<RoomDetailProps> = ({ room }) => {
             >
               수정
             </Button>
-            <Button variant="destructive" onClick={() => handleDelete(roomId)}>
+            <Button
+              variant="destructive"
+              onClick={() => handleDelete(Number(hotelId))}
+            >
               삭제
             </Button>
           </>
         ) : (
           <Button
-            className="bg-green-500 text-white"
+            className={`bg-green-500 text-white ${
+              roomDto.roomNumber === 0 ? "pointer-events-none opacity-50" : ""
+            }`}
+            disabled={roomDto.roomNumber === 0}
             onClick={() => handleReservation(roomId)}
           >
             예약하기
