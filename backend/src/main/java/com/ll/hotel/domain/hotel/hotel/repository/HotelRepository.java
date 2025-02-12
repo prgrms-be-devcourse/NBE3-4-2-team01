@@ -3,13 +3,11 @@ package com.ll.hotel.domain.hotel.hotel.repository;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelWithImageDto;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.image.type.ImageType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.Optional;
 
 public interface HotelRepository extends JpaRepository<Hotel, Long> {
     @Query("""
@@ -28,9 +26,8 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             OR i is NULL)
             AND h.streetAddress LIKE %:streetAddress%
             """)
-    Page<HotelWithImageDto> findAllHotels(@Param("imageType") ImageType imageType,
-                                          @Param("streetAddress") String streetAddress,
-                                          PageRequest pageRequest);
+    List<HotelWithImageDto> findAllHotels(@Param("imageType") ImageType imageType,
+                                          @Param("streetAddress") String streetAddress);
 
     @Query("""
             SELECT h
