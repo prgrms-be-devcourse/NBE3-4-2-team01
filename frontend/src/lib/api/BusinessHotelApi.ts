@@ -7,6 +7,7 @@ import { PutHotelRequest } from "@/lib/types/hotel/PutHotelRequest";
 import { PutHotelResponse } from "@/lib/types/hotel/PutHotelResponse";
 import { PostHotelRequest } from "@/lib/types/hotel/PostHotelRequest";
 import { RsData } from "./../types/RsData";
+import { useParams } from "next/navigation";
 
 const BASE_URL = "http://localhost:8080/api/hotels";
 
@@ -80,16 +81,12 @@ export const findHotelDetail = async (
 // 예약 가능한 객실이 존재하는 호텔 상세 조회
 export const findHotelDetailWithAvailableRooms = async (
   hotelId: number,
-  checkInDate?: string,
+  checkIndate?: string,
   checkoutDate?: string,
   personal?: string
 ): Promise<GetHotelDetailResponse> => {
   try {
-    const params = new URLSearchParams();
-    if (checkInDate) params.set("checkInDate", checkInDate);
-    if (checkoutDate) params.set("checkoutDate", checkoutDate);
-    if (personal) params.set("personal", personal);
-    const response = await fetch(`${BASE_URL}/${hotelId}?${params.toString()}`);
+    const response = await fetch(`${BASE_URL}/${hotelId}`);
     const rsData: RsData<GetHotelDetailResponse> = await response.json();
 
     if (rsData.resultCode !== "200-1") {
