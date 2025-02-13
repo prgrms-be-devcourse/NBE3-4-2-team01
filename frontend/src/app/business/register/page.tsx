@@ -9,6 +9,7 @@ import Loading from "@/components/hotellist/Loading";
 import Navigation from "@/components/navigation/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function RegisterBusiness() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function RegisterBusiness() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<BusinessRegistrationForm>();
+  const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (data: BusinessRegistrationForm) => {
     try {
@@ -25,11 +27,17 @@ export default function RegisterBusiness() {
       document.cookie =
         "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       router.push("/login");
-    } catch (error) {
-      console.error("등록 실패:", error);
-      alert("사업자 등록에 실패했습니다.");
+    } catch (error: any) {
+      const msg = error.response?.data?.msg;
+      if (msg) {
+        alert(msg);
+      } else {
+        setError("사업자 등록에 실패했습니다.");
+      }
     }
   };
+
+  if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
   const inputStyle =
     "bg-white h-[42px] px-10 text-lg placeholder:text-lg [&::-webkit-calendar-picker-indicator]:hidden w-full";
