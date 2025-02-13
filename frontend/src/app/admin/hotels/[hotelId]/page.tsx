@@ -3,7 +3,6 @@
 import { approveHotel, getHotelForAdmin } from "@/lib/api/Admin/AdminHotelApi";
 import { AdminHotelRequest } from "@/lib/types/admin/request/AdminHotelRequest";
 import { HotelStatus } from "@/lib/types/hotel/HotelStatus";
-import { HotelDto } from "@/lib/types/HotelDto";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -27,11 +26,9 @@ export default function AdminHotelDetailPage() {
       if (!hotelId) return;
       try {
         const data = await getHotelForAdmin(Number(hotelId));
-        console.log(data);
         setHotel(data);
         setStatus(data.hotelStatus as HotelStatus);
       } catch (error) {
-        console.error("호텔 상세 정보를 불러오는 중 오류 발생:", error);
         setError("호텔 데이터를 불러오는 중 오류가 발생했습니다.");
       } finally {
         setLoading(false);
@@ -56,9 +53,7 @@ export default function AdminHotelDetailPage() {
       alert(
         `호텔 상태가 저장되었습니다: ${response.name} - ${response.status}`
       );
-      window.location.href = "/admin/hotels";
     } catch (error) {
-      console.error("호텔 상태 저장 중 오류 발생:", error);
       setError("호텔 상태를 저장하는 중 오류가 발생했습니다.");
     }
   };

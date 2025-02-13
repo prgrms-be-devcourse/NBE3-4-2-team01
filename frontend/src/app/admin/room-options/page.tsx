@@ -1,5 +1,6 @@
 "use client";
 
+import Loading from "@/components/hotellist/Loading";
 import Navigation from "@/components/navigation/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,8 @@ export default function RoomOptionsPage() {
     {}
   );
   const [newOption, setNewOption] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchOptions();
@@ -30,8 +33,10 @@ export default function RoomOptionsPage() {
       const data = await getAllRoomOptions();
       setOptions(data);
       setEditingOptions({});
-    } catch (error) {
-      console.error("객실 옵션을 불러오는 중 오류 발생:", error);
+    } catch (err) {
+      setError("옵션을 불러오는 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,8 +59,8 @@ export default function RoomOptionsPage() {
         delete updatedEditingOptions[id];
         return updatedEditingOptions;
       });
-    } catch (error) {
-      console.error("객실 옵션 수정 중 오류 발생:", error);
+    } catch (err) {
+      setError("객실 옵션 수정 중 오류가 발생했습니다.");
     }
   };
 
@@ -67,7 +72,7 @@ export default function RoomOptionsPage() {
       setNewOption("");
       fetchOptions();
     } catch (error) {
-      console.error("객실 옵션 추가 중 오류 발생:", error);
+      setError("객실 옵션 추가 중 오류가 발생헀습니다.");
     }
   };
 
@@ -77,10 +82,17 @@ export default function RoomOptionsPage() {
       await deleteRoomOption(optionId);
       fetchOptions();
     } catch (error: any) {
-      console.error("옵션 삭제 중 오류 발생:", error);
-      alert(error.response?.data?.msg || "옵션 삭제 중 오류가 발생했습니다.");
+      const msg = error.response?.data?.msg;
+      if (msg) {
+        alert(error.response?.data?.msg);
+      } else {
+        setError("옵션 삭제 중 오류가 발생했습니다.");
+      }
     }
   };
+
+  if (loading) return <Loading />;
+  if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
   return (
     <div className="relative min-h-screen bg-background">
