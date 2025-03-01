@@ -5,10 +5,10 @@ spring:
   cloud:
     aws:
       s3:
-        bucket: ${BUCKET_NAME}
+        bucket: test-bucket
       credentials:
-        access-key: ${IAM_ACCESS_KEY}
-        secret-key: ${IAM_SECRET_KEY}
+        access-key: test-access-key
+        secret-key: test-secret-key
       region:
         static: us-east-1
 
@@ -20,6 +20,7 @@ spring:
   # API keys
   profiles:
     include:
+      - dev
       - secret
       - api-keys
       - business-api
