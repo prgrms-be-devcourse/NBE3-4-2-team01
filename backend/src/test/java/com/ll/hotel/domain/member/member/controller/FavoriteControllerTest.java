@@ -32,9 +32,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// TODO: 즐겨찾기 양방향 NPE 문제를 어떻게 해결해야?
-// TODO: 리플렉션을 통한 의존성 주입 테스트 방식?
-// TODO: 인증 우회는 어떻게? 가짜 객체 주입?
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
