@@ -14,7 +14,7 @@ import com.ll.hotel.domain.review.review.dto.ReviewDto;
 import com.ll.hotel.domain.review.review.dto.response.*;
 import com.ll.hotel.domain.review.review.entity.Review;
 import com.ll.hotel.domain.review.review.repository.ReviewRepository;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -41,13 +41,13 @@ public class ReviewService {
     // 리뷰 생성
     public long createReview(Long hotelId, Long roomId, Long memberId, Long bookingId, String content, int rating) {
         Hotel hotel = hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ServiceException("400-1", "존재하지 않는 호텔입니다."));
+                .orElseThrow(ErrorCode.HOTEL_NOT_FOUND::throwServiceException);
         Member member = entityManager.getReference(Member.class, memberId);
         Room room = entityManager.getReference(Room.class, roomId);
         Booking booking = entityManager.getReference(Booking.class, bookingId);
 
         if(!booking.isReservedBy(member)) {
-            throw new ServiceException("403-1", "예약자만 리뷰 생성이 가능합니다.");
+            ErrorCode.REVIEW_CREATION_FORBIDDEN.throwServiceException();
         }
 
         // 호텔 평균 리뷰 수정
@@ -69,10 +69,10 @@ public class ReviewService {
     // 리뷰의 content, rating 수정
     public void updateReviewContentAndRating(Member actor, long reviewId, String content, int rating){
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ServiceException("400-1", "수정할 리뷰가 존재하지 않습니다."));
+                .orElseThrow(ErrorCode.REVIEW_NOT_FOUND::throwServiceException);
 
         if(!review.isWrittenBy(actor)) {
-            throw new ServiceException("403-1", "리뷰 작성자만 리뷰 수정 가능합니다.");
+            ErrorCode.REVIEW_UPDATE_FORBIDDEN.throwServiceException();
         }
 
         // 호텔 평균 리뷰 수정
@@ -85,10 +85,10 @@ public class ReviewService {
     // 리뷰 삭제
     public void deleteReview(Member actor, long reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ServiceException("400-1", "삭제할 리뷰가 존재하지 않습니다."));
+                .orElseThrow(ErrorCode.REVIEW_NOT_FOUND::throwServiceException);
 
         if(!review.isWrittenBy(actor)) {
-            throw new ServiceException("403-1", "리뷰 작성자만 리뷰 삭제 가능합니다.");
+            ErrorCode.REVIEW_DELETE_FORBIDDEN.throwServiceException();
         }
 
         // 호텔 평균 리뷰 수정
@@ -100,10 +100,10 @@ public class ReviewService {
     // 리뷰 단건 조회
     public GetReviewResponse getReviewResponse(Member actor, long reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ServiceException("400-1", "해당 리뷰가 존재하지 않습니다."));
+                .orElseThrow(ErrorCode.REVIEW_NOT_FOUND::throwServiceException);
 
         if(!review.isWrittenBy(actor)) {
-            throw new ServiceException("403-1", "리뷰 작성자만 단건 리뷰 조회 가능합니다.");
+            ErrorCode.REVIEW_ACCESS_FORBIDDEN.throwServiceException();
         }
 
         List<String> imageUrls = imageRepository.findByImageTypeAndReferenceId(ImageType.REVIEW, reviewId)
@@ -118,7 +118,7 @@ public class ReviewService {
     public Page<MyReviewResponse> getMyReviewResponses(Member actor, int page) {
 
         if (!actor.isUser()) {
-            throw new ServiceException("403-1", "관리자, 사업자는 리뷰 목록 조회가 불가능합니다.");
+            ErrorCode.USER_REVIEW_ACCESS_FORBIDDEN.throwServiceException();
         }
 
         int size = 10;
@@ -151,7 +151,7 @@ public class ReviewService {
 
     public Review getReview(long reviewId) {
         return reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ServiceException("400-1", "존재하지 않는 리뷰입니다"));
+                .orElseThrow(ErrorCode.REVIEW_NOT_FOUND::throwServiceException);
     }
 
     // 리뷰 생성의 평균 리뷰 수정

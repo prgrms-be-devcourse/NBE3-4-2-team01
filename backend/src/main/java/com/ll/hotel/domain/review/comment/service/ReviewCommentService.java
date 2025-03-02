@@ -7,7 +7,7 @@ import com.ll.hotel.domain.review.comment.entity.ReviewComment;
 import com.ll.hotel.domain.review.comment.repository.ReviewCommentRepository;
 import com.ll.hotel.domain.review.review.entity.Review;
 import com.ll.hotel.domain.review.review.repository.ReviewRepository;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class ReviewCommentService {
 
     public ReviewComment createReviewComment(Member actor, long reviewId, String content) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ServiceException("400-1", "리뷰가 존재하지 않습니다."));
+                .orElseThrow(ErrorCode.REVIEW_NOT_FOUND::throwServiceException);
 
         ReviewComment reviewComment = ReviewComment.builder()
                 .review(review)
@@ -32,7 +32,7 @@ public class ReviewCommentService {
                 .build();
 
         if(!review.getHotel().isOwnedBy(actor)) {
-            throw new ServiceException("403-1", "이 호텔 사업자만 리뷰 답변 작성이 가능합니다.");
+            ErrorCode.REVIEW_COMMENT_CREATION_FORBIDDEN.throwServiceException();
         }
 
         return reviewCommentRepository.save(reviewComment);
@@ -40,10 +40,10 @@ public class ReviewCommentService {
 
     public void updateReviewComment(Member actor, long reviewCommentId, String content) {
         ReviewComment reviewComment = reviewCommentRepository.findById(reviewCommentId)
-                .orElseThrow(() -> new ServiceException("400-1", "수정할 리뷰 답변이 존재하지 않습니다."));
+                .orElseThrow(ErrorCode.REVIEW_COMMENT_NOT_FOUND::throwServiceException);
 
         if(!reviewComment.getReview().getHotel().isOwnedBy(actor)) {
-            throw new ServiceException("403-1", "답변 작성자만 리뷰 답변 수정 가능합니다.");
+            ErrorCode.REVIEW_COMMENT_UPDATE_FORBIDDEN.throwServiceException();
         }
 
         reviewComment.setContent(content);
@@ -51,10 +51,10 @@ public class ReviewCommentService {
 
     public void deleteReviewComment(Member actor, long reviewCommentId) {
         ReviewComment reviewComment = reviewCommentRepository.findById(reviewCommentId)
-                .orElseThrow(() -> new ServiceException("400-1", "삭제할 리뷰 답변이 존재하지 않습니다."));
+                .orElseThrow(ErrorCode.REVIEW_COMMENT_NOT_FOUND::throwServiceException);
 
         if(!reviewComment.getReview().getHotel().isOwnedBy(actor)) {
-            throw new ServiceException("403-1", "답변 작성자만 리뷰 답변 삭제 가능합니다.");
+            ErrorCode.REVIEW_COMMENT_DELETE_FORBIDDEN.throwServiceException();
         }
 
         reviewComment.getReview().setReviewComment(null);
@@ -62,7 +62,7 @@ public class ReviewCommentService {
 
     public ReviewCommentDto getReviewComment(long reviewCommentId) {
         ReviewComment reviewComment = reviewCommentRepository.findById(reviewCommentId)
-                .orElseThrow(() -> new ServiceException("400-1", "존재하지 않는 리뷰 답변입니다."));
+                .orElseThrow(ErrorCode.REVIEW_COMMENT_NOT_FOUND::throwServiceException);
 
         return new ReviewCommentDto(reviewComment);
     }

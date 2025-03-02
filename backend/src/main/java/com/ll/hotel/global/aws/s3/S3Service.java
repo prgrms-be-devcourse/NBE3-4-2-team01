@@ -1,7 +1,7 @@
 package com.ll.hotel.global.aws.s3;
 
 import com.ll.hotel.domain.image.type.ImageType;
-import com.ll.hotel.global.exceptions.CustomS3Exception;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +36,8 @@ public class S3Service {
                     .map(fileType -> createPresignedUrlResponse(imageType, id, fileType))
                     .toList();
         } catch (SdkException e) {
-            throw new CustomS3Exception("500-1", "Presigned URL 생성 실패", e);
+            ErrorCode.S3_PRESIGNED_GENERATION_FAIL.throwS3Exception(e);
+            return List.of();
         }
     }
 
@@ -53,7 +54,8 @@ public class S3Service {
 
             return presignedRequest.url();
         } catch (SdkException e) {
-            throw new CustomS3Exception("500-2", "Presigned URL 생성 실패", e);
+            ErrorCode.S3_PRESIGNED_GENERATION_FAIL.throwS3Exception(e);
+            return null;
         }
     }
 
@@ -76,7 +78,7 @@ public class S3Service {
             s3Client.deleteObjects(deleteRequest);
 
         } catch (SdkException e) {
-            throw new CustomS3Exception("500-3", "S3 객체 삭제 실패", e);
+            ErrorCode.S3_OBJECT_DELETE_FAIL.throwS3Exception(e);
         }
     }
 
@@ -114,7 +116,7 @@ public class S3Service {
             s3Client.deleteObjects(deleteRequest);
 
         } catch (SdkException e) {
-            throw new CustomS3Exception("500-4", "폴더 내 객체 삭제 실패", e);
+            ErrorCode.S3_OBJECT_DELETE_FAIL.throwS3Exception(e);
         }
     }
 
@@ -139,7 +141,7 @@ public class S3Service {
                         .build();
             } while (Boolean.TRUE.equals(listResponse.isTruncated()));
         } catch (SdkException e) {
-            throw new CustomS3Exception("500-5", "폴더 객체 조회 실패", e);
+            ErrorCode.S3_OBJECT_ACCESS_FAIL.throwS3Exception(e);
         }
 
         return objects;

@@ -10,16 +10,16 @@ import com.ll.hotel.domain.review.review.dto.response.*;
 import com.ll.hotel.domain.review.review.service.ReviewService;
 import com.ll.hotel.global.app.AppConfig;
 import com.ll.hotel.global.aws.s3.S3Service;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.standard.base.Empty;
 import com.ll.hotel.standard.page.dto.PageDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,26 +61,23 @@ public class ReviewController {
 
         List<URL> urls = s3Service.generatePresignedUrls(ImageType.REVIEW, reviewId, extensions);
 
-        return new RsData<>(
-                "200-1",
-                "리뷰가 생성되었습니다.",
-                new PresignedUrlsResponse(reviewId, urls));
+        return RsData.success(HttpStatus.CREATED, new PresignedUrlsResponse(reviewId, urls));
     }
 
     @PostMapping("/{reviewId}/urls")
     @Operation(summary = "사진 URL 리스트 저장")
-    public RsData<Empty> saveImageUrls(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void saveImageUrls(
             @PathVariable("reviewId") long reviewId,
             @RequestBody List<String> urls) {
         Member actor = rq.getActor();
 
         // 권한 체크 (리뷰 작성자인가?)
         if (!reviewService.getReview(reviewId).isWrittenBy(actor)) {
-            throw new ServiceException("403-1", "리뷰 작성자만 사진 등록이 가능합니다.");
+            ErrorCode.REVIEW_IMAGE_REGISTRATION_FORBIDDEN.throwServiceException();
         }
 
         imageService.saveImages(ImageType.REVIEW, reviewId, urls);
-        return RsData.OK;
     }
 
     @PutMapping("/{reviewId}")
@@ -110,16 +107,13 @@ public class ReviewController {
         // 새로운 사진의 Presigned URL 반환
         List<URL> urls = s3Service.generatePresignedUrls(ImageType.REVIEW, reviewId, extensions);
 
-        return new RsData<>(
-                "200-1",
-                "리뷰가 업데이트 되었습니다.",
-                new PresignedUrlsResponse(reviewId, urls)
-        );
+        return RsData.success(HttpStatus.OK, new PresignedUrlsResponse(reviewId, urls));
     }
 
     @DeleteMapping("/{reviewId}")
     @Operation(summary = "리뷰 삭제")
-    public RsData<Empty> deleteReview(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteReview(
             @PathVariable("reviewId") long reviewId
     ) {
         Member actor = rq.getActor();
@@ -132,8 +126,6 @@ public class ReviewController {
         if(imageCount > 0 && !appConfig.getMode().equals("TEST")) {
             s3Service.deleteAllObjectsById(ImageType.REVIEW, reviewId);
         }
-
-        return RsData.OK;
     }
 
     @GetMapping("/{reviewId}")
@@ -143,11 +135,7 @@ public class ReviewController {
     ) {
         Member actor = rq.getActor();
 
-        return new RsData<>(
-                "200-1",
-                "리뷰 조회 성공",
-                reviewService.getReviewResponse(actor, reviewId) // (+권한 체크)
-        );
+        return RsData.success(HttpStatus.OK,reviewService.getReviewResponse(actor, reviewId));
     }
 
     @GetMapping("/me")
@@ -160,11 +148,7 @@ public class ReviewController {
         // 접속자 리뷰 목록 조회 (+ 권한 체크)
         Page<MyReviewResponse> myReviewPage = reviewService.getMyReviewResponses(actor, page);
 
-        return new RsData<>(
-                "200-1",
-                "나의 리뷰 목록 생성",
-                new PageDto<>(myReviewPage)
-        );
+        return RsData.success(HttpStatus.OK, new PageDto<>(myReviewPage));
     }
 
     @GetMapping("/hotels/{hotelId}")
@@ -179,10 +163,6 @@ public class ReviewController {
                 new PageDto<>(hotelReviewPage),
                 hotelService.getHotelById(hotelId).getAverageRating());
 
-        return new RsData<>(
-                "200-1",
-                "호텔 리뷰 목록 생성",
-                hotelReviewListResponse
-        );
+        return RsData.success(HttpStatus.OK, hotelReviewListResponse);
     }
 }
