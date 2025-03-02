@@ -128,6 +128,28 @@ public class ReviewCommentControllerTest {
     }
 
     @Test
+    @DisplayName("비정상 답변 생성 - 리뷰 존재 X")
+    void 비정상답변생성3() throws Exception {
+        setUpAuthentication(1L, "business1", "business1@hotel.com", Role.BUSINESS);
+
+        long reviewId = 10000L;
+
+        ReviewCommentContentRequest request = new ReviewCommentContentRequest("좋은 리뷰 감사합니다");
+
+        ResultActions resultActions = mvc.perform(
+                        post("/api/reviews/{reviewId}/comments", reviewId)
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ReviewCommentController.class))
+                .andExpect(handler().methodName("createReviewComment"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value("리뷰가 존재하지 않습니다."));
+    }
+
+    @Test
     @DisplayName("정상 답변 수정")
     void 정상답변수정() throws Exception {
         setUpAuthentication(1L, "business1", "business1@hotel.com", Role.BUSINESS);
@@ -199,6 +221,29 @@ public class ReviewCommentControllerTest {
     }
 
     @Test
+    @DisplayName("비정상 답변 수정 - 답변 존재 X")
+    void 비정상답변수정3() throws Exception {
+        setUpAuthentication(1L, "business1", "business1@hotel.com", Role.BUSINESS);
+
+        long reviewId = 1L;
+        long commentId = 0L;
+
+        ReviewCommentContentRequest request = new ReviewCommentContentRequest("리뷰 1 수정하기");
+
+        ResultActions resultActions = mvc.perform(
+                        put("/api/reviews/{reviewId}/comments/{commentId}", reviewId, commentId)
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ReviewCommentController.class))
+                .andExpect(handler().methodName("updateReviewComment"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value("수정할 리뷰 답변이 존재하지 않습니다."));
+    }
+
+    @Test
     @DisplayName("정상 답변 삭제")
     void 정상답변삭제() throws Exception {
         setUpAuthentication(1L, "business1", "business1@hotel.com", Role.BUSINESS);
@@ -256,6 +301,26 @@ public class ReviewCommentControllerTest {
                 .andExpect(handler().methodName("deleteReviewComment"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.msg").value("답변 작성자만 리뷰 답변 삭제 가능합니다."));
+    }
+
+    @Test
+    @DisplayName("비정상 답변 삭제 - 답변 존재 X")
+    void 비정상답변삭제3() throws Exception {
+        setUpAuthentication(1L, "business1", "business1@hotel.com", Role.BUSINESS);
+
+        long reviewId = 1L;
+        long commentId = 0L;
+
+        ResultActions resultActions = mvc.perform(
+                        delete("/api/reviews/{reviewId}/comments/{commentId}", reviewId, commentId)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ReviewCommentController.class))
+                .andExpect(handler().methodName("deleteReviewComment"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value("삭제할 리뷰 답변이 존재하지 않습니다."));
     }
 
     @Test

@@ -30,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -90,8 +91,31 @@ public class ReviewControllerTest {
     }
 
     @Test
-    @DisplayName("비정상 리뷰 생성 - 인증 안함")
+    @DisplayName("비정상 리뷰 생성 - rating 범위 초과")
     void 비정상리뷰생성() throws Exception {
+        setUpAuthentication(1L, "customer1", "customer1@hotel.com", Role.USER);
+
+        long bookingId = 1L;
+        long hotelId = 1L;
+        long roomId = 1L;
+
+        PostReviewRequest postReviewRequest = new PostReviewRequest("좋은 호텔이네요", 100, List.of("jpg", "png"));
+
+        ResultActions resultActions = mvc.perform(
+                post("/api/reviews/{bookingId}?hotelId={hotelId}&roomId={roomId}", bookingId, hotelId, roomId)
+                        .content(objectMapper.writeValueAsString(postReviewRequest))
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)));
+
+        resultActions
+                .andExpect(handler().handlerType(ReviewController.class))
+                .andExpect(handler().methodName("createReview"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("평점은 최대 5점이어야 합니다.")));
+    }
+
+    @Test
+    @DisplayName("비정상 리뷰 생성 - 인증 안함")
+    void 비정상리뷰생성2() throws Exception {
 
         long bookingId = 1L;
         long hotelId = 1L;
@@ -113,7 +137,7 @@ public class ReviewControllerTest {
 
     @Test
     @DisplayName("비정상 리뷰 생성 - 권한 실패")
-    void 비정상리뷰생성2() throws Exception {
+    void 비정상리뷰생성3() throws Exception {
         setUpAuthentication(2L, "customer2", "customer2@hotel.com", Role.USER);
 
         long bookingId = 1L;
@@ -168,8 +192,8 @@ public class ReviewControllerTest {
         long reviewId = 1L;
 
         List<String> urls = List.of(
-                "https://test-bucket.s3.amazonaws.com/reviews/2/1.jpg",
-                "https://test-bucket.s3.amazonaws.com/reviews/2/2.jpg");
+                "https://test-bucket.s3.amazonaws.com/reviews/2/3.jpg",
+                "https://test-bucket.s3.amazonaws.com/reviews/2/4.jpg");
 
         ResultActions resultActions = mvc.perform(
                 post("/api/reviews/{reviewId}/urls", reviewId)
@@ -191,8 +215,8 @@ public class ReviewControllerTest {
         long reviewId = 1L;
 
         List<String> urls = List.of(
-                "https://test-bucket.s3.amazonaws.com/reviews/2/1.jpg",
-                "https://test-bucket.s3.amazonaws.com/reviews/2/2.jpg");
+                "https://test-bucket.s3.amazonaws.com/reviews/2/3.jpg",
+                "https://test-bucket.s3.amazonaws.com/reviews/2/4.jpg");
 
         ResultActions resultActions = mvc.perform(
                 post("/api/reviews/{reviewId}/urls", reviewId)
@@ -259,6 +283,23 @@ public class ReviewControllerTest {
                 .andExpect(handler().methodName("getReview"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.msg").value("리뷰 작성자만 단건 리뷰 조회 가능합니다."));
+    }
+
+    @Test
+    @DisplayName("비정상 리뷰 단건 조회 - 리뷰 존재 X")
+    void 비정상리뷰단건조회3() throws Exception {
+        setUpAuthentication(1L, "customer1", "customer1@hotel.com", Role.USER);
+
+        long reviewId = 10000L;
+
+        ResultActions resultActions = mvc.perform(
+                get("/api/reviews/{reviewId}", reviewId));
+
+        resultActions
+                .andExpect(handler().handlerType(ReviewController.class))
+                .andExpect(handler().methodName("getReview"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value("해당 리뷰가 존재하지 않습니다."));
     }
 
     @Test
@@ -391,6 +432,23 @@ public class ReviewControllerTest {
                 .andExpect(handler().methodName("deleteReview"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.msg").value("리뷰 작성자만 리뷰 삭제 가능합니다."));
+    }
+
+    @Test
+    @DisplayName("비정상 리뷰 삭제 - 리뷰 존재 X")
+    void 비정상리뷰삭제3() throws Exception {
+        setUpAuthentication(1L, "customer1", "customer1@hotel.com", Role.USER);
+
+        long reviewId = 10000L;
+
+        ResultActions resultActions = mvc.perform(
+                delete("/api/reviews/{reviewId}", reviewId));
+
+        resultActions
+                .andExpect(handler().handlerType(ReviewController.class))
+                .andExpect(handler().methodName("deleteReview"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.msg").value("삭제할 리뷰가 존재하지 않습니다."));
     }
 
     @Test
