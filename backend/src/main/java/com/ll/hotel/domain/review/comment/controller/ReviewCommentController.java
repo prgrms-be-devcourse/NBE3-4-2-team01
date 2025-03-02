@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "ReviewCommentController")
 public class ReviewCommentController {
     private final ReviewCommentService reviewCommentService;
-    private final Rq Rq;
+    private final Rq rq;
 
     @PostMapping("")
     @Operation(summary = "리뷰 답변 생성")
@@ -28,7 +28,7 @@ public class ReviewCommentController {
             @PathVariable("reviewId") long reviewId,
             @RequestBody @Valid ReviewCommentContentRequest contentRequest
     ) {
-        Member actor = Rq.getActor();
+        Member actor = rq.getActor();
 
         reviewCommentService.createReviewComment(actor, reviewId, contentRequest.content());
     }
@@ -51,7 +51,7 @@ public class ReviewCommentController {
             @PathVariable("commentId") long commentId,
             @RequestBody @Valid ReviewCommentContentRequest contentRequest
     ) {
-        Member actor = Rq.getActor();
+        Member actor = rq.getActor();
 
         reviewCommentService.updateReviewComment(actor, commentId, contentRequest.content());
     }
@@ -63,7 +63,7 @@ public class ReviewCommentController {
             @PathVariable("reviewId") long reviewId,
             @PathVariable("commentId") long commentId
     ) {
-        Member actor = Rq.getActor();
+        Member actor = rq.getActor();
 
         reviewCommentService.deleteReviewComment(actor, commentId);
     }
