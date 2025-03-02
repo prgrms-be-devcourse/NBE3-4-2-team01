@@ -53,14 +53,7 @@ public class ReviewService {
         // 호텔 평균 리뷰 수정
         updateRatingOnReviewCreated(hotel, rating);
 
-        Review review = Review.builder()
-                .hotel(hotel)
-                .room(room)
-                .member(member)
-                .booking(booking)
-                .content(content)
-                .rating(rating)
-                .build();
+        Review review = new Review(hotel, room, booking, member, content, rating);
 
         Review savedReview = reviewRepository.save(review);
         return savedReview.getId();
