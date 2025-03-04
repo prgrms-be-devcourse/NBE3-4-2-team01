@@ -112,7 +112,7 @@ public class RoomOptionControllerTest {
     void modifyRoomOptionTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        put("/api/admin/room-options/{id}", testId)
+                        patch("/api/admin/room-options/{id}", testId)
                                 .content("""
                                         {
                                             "name": "수정됨"
