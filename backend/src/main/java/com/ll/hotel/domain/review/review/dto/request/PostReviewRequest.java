@@ -1,14 +1,12 @@
 package com.ll.hotel.domain.review.review.dto.request;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.util.List;
 
 public record PostReviewRequest(
         @NotBlank(message = "리뷰 내용은 필수입니다")
+        @Size(min = 5, max = 300, message = "리뷰 내용은 5자 이상, 300자 이하여야 합니다.")
         String content,
 
         @NotNull(message = "리뷰 레이팅은 필수입니다")

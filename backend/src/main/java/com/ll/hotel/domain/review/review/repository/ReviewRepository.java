@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
@@ -49,5 +51,21 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         WHERE h.id = :hotelId
     """)
     Page<HotelReviewWithCommentDto> findReviewsWithCommentByHotelId(@Param("hotelId") Long hotelId, Pageable pageable);
+
+    @Query("""
+        SELECT rv
+        FROM Review rv
+        WHERE rv.member.id = :memberId
+        ORDER BY rv.id DESC
+    """)
+    List<Review> findByMemberId(@Param("memberId") Long memberId);
+
+    @Query("""
+        SELECT rv
+        FROM Review rv
+        WHERE rv.hotel.id = :hotelId
+        ORDER BY rv.id DESC
+    """)
+    List<Review> findByHotelId(@Param("hotelId") Long hotelId);
 }
 
