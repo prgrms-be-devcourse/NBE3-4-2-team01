@@ -32,8 +32,6 @@ public class AdminHotelServiceTest {
 
     @BeforeEach
     void setUp() {
-        hotelRepository.deleteAll();
-
         for (int i = 0; i < 3; i++) {
             Hotel hotel = Hotel
                     .builder()
