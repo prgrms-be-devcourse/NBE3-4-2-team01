@@ -56,11 +56,7 @@ public class AdminHotelControllerTest {
 
     @BeforeEach
     void setUp() {
-        hotelRepository.deleteAll();
-        businessRepository.deleteAll();
-        memberRepository.deleteAll();
-
-        Member member = memberRepository.save(Member
+        Member member = Member
                 .builder()
                 .birthDate(LocalDate.now())
                 .memberEmail("member@gmail.com")
@@ -68,11 +64,14 @@ public class AdminHotelControllerTest {
                 .memberPhoneNumber("01012345678")
                 .memberStatus(MemberStatus.ACTIVE)
                 .role(Role.BUSINESS)
-                .build()
-        );
+                .build();
+        memberRepository.save(member);
+
         Business business = Business
                 .builder()
-                .businessRegistrationNumber(String.format("1234567890"))
+                .businessRegistrationNumber("1234567890")
+                .startDate(LocalDate.now())
+                .ownerName("김사장")
                 .approvalStatus(BusinessApprovalStatus.PENDING)
                 .member(member)
                 .hotel(null)
