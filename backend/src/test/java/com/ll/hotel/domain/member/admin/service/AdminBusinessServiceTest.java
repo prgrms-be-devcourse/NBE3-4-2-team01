@@ -13,6 +13,7 @@ import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,11 +41,8 @@ class AdminBusinessServiceTest {
 
     @BeforeEach
     void setUp() {
-        businessRepository.deleteAll();
-        memberRepository.deleteAll();
-
         for (int i = 0; i < 3; i++) {
-            Member member = memberRepository.save(Member
+            Member member = Member
                     .builder()
                     .birthDate(LocalDate.now())
                     .memberEmail(String.format("member[%02d]", i))
@@ -52,8 +50,9 @@ class AdminBusinessServiceTest {
                     .memberPhoneNumber("01012345678")
                     .memberStatus(MemberStatus.ACTIVE)
                     .role(Role.BUSINESS)
-                    .build()
-            );
+                    .build();
+            memberRepository.save(member);
+
             Business business = Business
                     .builder()
                     .businessRegistrationNumber(String.format("123456789%01d", i))
