@@ -158,7 +158,7 @@ public class AdminBusinessControllerTest {
 
         resultActions
                 .andExpect(handler().handlerType(AdminBusinessController.class))
-                .andExpect(handler().methodName("modify"))
+                .andExpect(handler().methodName("approve"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200"))
                 .andExpect(jsonPath("$.msg").value("사업자 승인 정보가 수정되었습니다."));
