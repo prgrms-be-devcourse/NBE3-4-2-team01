@@ -1,12 +1,20 @@
 package com.ll.hotel.domain.member.member.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.rsData.RsData;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,15 +23,15 @@ public class FavoriteController {
     private final MemberService memberService;
 
     @PostMapping("/{hotelId}")
-    public RsData<Void> addFavorite(@PathVariable Long hotelId) {
+    public RsData<?> addFavorite(@PathVariable Long hotelId) {
         memberService.addFavorite(hotelId);
-        return new RsData<>("200-1", "즐겨찾기에 추가되었습니다.");
+        return RsData.success(HttpStatus.OK, "즐겨찾기에 추가되었습니다.");
     }
 
     @DeleteMapping("/{hotelId}")
-    public RsData<Void> removeFavorite(@PathVariable Long hotelId) {
+    public RsData<?> removeFavorite(@PathVariable Long hotelId) {
         memberService.removeFavorite(hotelId);
-        return new RsData<>("200-1", "즐겨찾기가 삭제되었습니다.");
+        return RsData.success(HttpStatus.OK, "즐겨찾기가 삭제되었습니다.");
     }
 
     @GetMapping("/me")
@@ -31,18 +39,15 @@ public class FavoriteController {
         List<HotelDto> favorites = memberService.getFavoriteHotels();
         
         if (favorites.isEmpty()) {
-            return new RsData<>("200-1", "즐겨찾기한 호텔이 없습니다.", List.of());
+            return RsData.success(HttpStatus.OK, List.of());
         }
 
-        return new RsData<>("200-1", "즐겨찾기 목록을 조회했습니다.", favorites);
+        return RsData.success(HttpStatus.OK, favorites);
     }
 
     @GetMapping("/me/{hotelId}")
-    public RsData<Boolean> checkFavorite(
-            @PathVariable("hotelId")long hotelId
-    ) {
+    public RsData<Boolean> checkFavorite(@PathVariable("hotelId") Long hotelId) {
         boolean isFavorite = memberService.isFavoriteHotel(hotelId);
-
-        return new RsData<>("200-1", "즐겨찾기 아이디들을 조회했습니다.", isFavorite);
+        return RsData.success(HttpStatus.OK, isFavorite);
     }
 } 

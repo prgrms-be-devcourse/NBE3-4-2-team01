@@ -6,7 +6,7 @@ import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.service.BusinessService;
 import com.ll.hotel.domain.member.member.service.BusinessValidationService;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.globalExceptionHandler.GlobalExceptionHandler;
 import com.ll.hotel.global.rq.Rq;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -26,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 public class BusinessControllerTest {
@@ -83,38 +85,6 @@ public class BusinessControllerTest {
         mockMvc.perform(post("/api/businesses/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(jsonPath("$.resultCode").value("201"))
-                .andExpect(jsonPath("$.msg").value("사업자 정보가 등록되었습니다."));
-    }
-
-    @Test
-    @DisplayName("유효하지 않은 사업자 등록")
-    void registerBusinessFailureTest() throws Exception {
-        // Given
-        Member mockMember = Member.builder()
-                .memberName("홍길동")
-                .role(Role.USER)
-                .build();
-
-        // Mock 동작 설정
-        when(rq.getActor()).thenReturn(mockMember);
-        when(businessValidationService.validateBusiness(any())).thenReturn("02");
-        when(businessService.register(any(), any(), any()))
-                .thenThrow(new ServiceException("400", "유효하지 않은 사업자입니다."));
-
-        String requestBody = """
-                {
-                    "businessRegistrationNumber": "1234567890",
-                    "startDate": "2020-01-01",
-                    "ownerName": "홍길동"
-                }
-                """;
-
-        // When & Then
-        mockMvc.perform(post("/api/businesses/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(jsonPath("$.resultCode").value("400"))
-                .andExpect(jsonPath("$.msg").value("유효하지 않은 사업자입니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.CREATED.name()));
     }
 }

@@ -4,11 +4,13 @@ import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import com.ll.hotel.domain.member.admin.dto.request.AdminHotelRequest;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.exceptions.ServiceException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,11 +84,12 @@ public class AdminHotelServiceTest {
         int invalidPage = (int) (totalElements / pageSize) + 1;
 
         // When
-        Page<Hotel> result = adminHotelService.findAllPaged(invalidPage);
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            adminHotelService.findAllPaged(invalidPage);
+        });
 
         // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getContent().size()).isEqualTo(0);
+        assertThat(exception.getResultCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -94,7 +97,7 @@ public class AdminHotelServiceTest {
     void findByIdTest1() {
         // Given
         Hotel savedHotel = hotelRepository.findById(testHotelId)
-                .orElseThrow(() -> new ServiceException("404", "Hotel Not Found"));
+                .orElseThrow(ErrorCode.HOTEL_NOT_FOUND::throwServiceException);
 
         // When
         Hotel result = adminHotelService.findById(testHotelId);
@@ -114,13 +117,13 @@ public class AdminHotelServiceTest {
                 .max()
                 .orElse(0L) + 1;
 
-        // When & Then
+        // When
         ServiceException exception = assertThrows(ServiceException.class, () -> {
             adminHotelService.findById(invalidId);
         });
 
-        // 예외 메시지 확인
-        assertThat(exception.getMessage()).isEqualTo("404 : 존재하지 않는 호텔입니다.");
+        // Then
+        assertThat(exception.getResultCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test

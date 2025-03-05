@@ -6,11 +6,11 @@ import com.ll.hotel.domain.review.comment.dto.request.ReviewCommentContentReques
 import com.ll.hotel.domain.review.comment.service.ReviewCommentService;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.standard.base.Empty;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,14 +23,14 @@ public class ReviewCommentController {
 
     @PostMapping("")
     @Operation(summary = "리뷰 답변 생성")
-    public RsData<Empty> createReviewComment(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void createReviewComment(
             @PathVariable("reviewId") long reviewId,
             @RequestBody @Valid ReviewCommentContentRequest contentRequest
     ) {
         Member actor = rq.getActor();
 
         reviewCommentService.createReviewComment(actor, reviewId, contentRequest.content());
-        return RsData.OK; // 201 vs 200
     }
 
     @GetMapping("/{commentId}")
@@ -40,16 +40,13 @@ public class ReviewCommentController {
             @PathVariable("commentId") long commentId
     ) {
 
-        return new RsData<>(
-                "200-1",
-                "리뷰 답변 조회 성공",
-                reviewCommentService.getReviewComment(commentId)
-        );
+        return RsData.success(HttpStatus.OK, reviewCommentService.getReviewComment(commentId));
     }
 
     @PutMapping("/{commentId}")
     @Operation(summary = "리뷰 답변 수정")
-    public RsData<Empty> updateReviewComment(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateReviewComment(
             @PathVariable("reviewId") long reviewId,
             @PathVariable("commentId") long commentId,
             @RequestBody @Valid ReviewCommentContentRequest contentRequest
@@ -57,18 +54,17 @@ public class ReviewCommentController {
         Member actor = rq.getActor();
 
         reviewCommentService.updateReviewComment(actor, commentId, contentRequest.content());
-        return RsData.OK;
     }
 
     @DeleteMapping("/{commentId}")
     @Operation(summary = "리뷰 답변 삭제")
-    public RsData<Empty> deleteReviewComment(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteReviewComment(
             @PathVariable("reviewId") long reviewId,
             @PathVariable("commentId") long commentId
     ) {
         Member actor = rq.getActor();
 
         reviewCommentService.deleteReviewComment(actor, commentId);
-        return RsData.OK;
     }
 }

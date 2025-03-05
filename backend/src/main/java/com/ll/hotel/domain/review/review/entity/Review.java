@@ -59,14 +59,7 @@ public class Review extends BaseTime {
     private Integer rating;
 
     @Builder
-    private Review(
-            Hotel hotel,
-            Room room,
-            Booking booking,
-            Member member,
-            String content,
-            Integer rating) {
-
+    public Review(Hotel hotel, Room room, Booking booking, Member member, String content, Integer rating) {
         this.hotel = hotel;
         this.room = room;
         this.booking = booking;

@@ -2,7 +2,7 @@ package com.ll.hotel.global.rq;
 
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -26,7 +26,7 @@ public class Rq {
                     .filter(principal -> principal instanceof SecurityUser)
                     .map(principal -> (SecurityUser) principal)
                     .flatMap(securityUser -> memberRepository.findByMemberEmail(securityUser.getEmail()))
-                    .orElseThrow(() -> new ServiceException("401-1", "로그인이 필요합니다."));
+                    .orElseThrow(ErrorCode.UNAUTHORIZED::throwServiceException);
         }
 
         return actor;

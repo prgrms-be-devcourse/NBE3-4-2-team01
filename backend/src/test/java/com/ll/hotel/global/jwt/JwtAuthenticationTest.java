@@ -22,6 +22,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -32,6 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
 
+import static com.ll.hotel.global.exceptions.ErrorCode.UNAUTHORIZED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -126,7 +128,7 @@ public class JwtAuthenticationTest {
     @DisplayName("토큰 없이 API 호출 시 401 에러")
     void noToken_Unauthorized() throws Exception {
         // 인증 실패 케이스 테스트
-        when(rq.getActor()).thenThrow(new ServiceException("401-1", "로그인이 필요합니다."));
+        when(rq.getActor()).thenThrow(new ServiceException(UNAUTHORIZED.getHttpStatus(), "로그인이 필요합니다."));
         
         // when & then
         mockMvc.perform(get("/api/favorites/me"))
@@ -144,7 +146,7 @@ public class JwtAuthenticationTest {
         
         // then
         assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getResultCode()).startsWith("200");
+        assertThat(result.getResultCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getData()).isNotEmpty();
         
         // 새 토큰으로 이메일 추출 테스트

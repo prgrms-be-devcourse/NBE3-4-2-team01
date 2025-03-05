@@ -3,7 +3,7 @@ package com.ll.hotel.domain.hotel.option.service;
 import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
 import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import com.ll.hotel.domain.hotel.option.repository.RoomOptionRepository;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +31,7 @@ public class RoomOptionService {
 
     public RoomOption findById(Long id) {
         return roomOptionRepository.findById(id)
-                .orElseThrow(() -> new ServiceException("404", "유효하지 않은 편의시설입니다."));
+                .orElseThrow(ErrorCode.ROOM_OPTION_NOT_FOUND::throwServiceException);
     }
 
     @Transactional
@@ -45,7 +45,7 @@ public class RoomOptionService {
 
     public void delete(RoomOption roomOption) {
         if (!roomOption.getRooms().isEmpty()) {
-            throw new ServiceException("400", "이미 사용 중인 객실 옵션은 삭제할 수 없습니다.");
+            ErrorCode.OPTION_IN_USE.throwServiceException();
         }
 
         roomOptionRepository.delete(roomOption);

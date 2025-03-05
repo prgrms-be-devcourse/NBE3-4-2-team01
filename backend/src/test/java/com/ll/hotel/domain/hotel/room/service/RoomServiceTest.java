@@ -1,20 +1,11 @@
 package com.ll.hotel.domain.hotel.room.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
 import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import com.ll.hotel.domain.hotel.option.service.RoomOptionService;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
-import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.PutRoomRequest;
-import com.ll.hotel.domain.hotel.room.dto.PutRoomResponse;
+import com.ll.hotel.domain.hotel.room.dto.*;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
@@ -27,20 +18,21 @@ import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.standard.base.Empty;
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -109,12 +101,12 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
             this.roomService.createRoom(hotel.getId(), business.getMember(), req1);
-        }).getRsData();
+        });
 
-        assertEquals(404, rsData.getStatusCode());
-        assertEquals("사용할 수 없는 객실 옵션이 존재합니다.", rsData.getMsg());
+        assertEquals(404, exception.getResultCode().value());
+        assertEquals("사용할 수 없는 객실 옵션이 존재합니다.", exception.getMsg());
     }
 
     @Test
@@ -129,12 +121,12 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
             this.roomService.createRoom(hotel.getId(), actor, req1);
-        }).getRsData();
+        });
 
-        assertEquals(403, rsData.getStatusCode());
-        assertEquals("사업가만 관리할 수 있습니다.", rsData.getMsg());
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
     }
 
     @Test
@@ -149,12 +141,12 @@ class RoomServiceTest {
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
             this.roomService.createRoom(hotel.getId(), newBusiness.getMember(), req1);
-        }).getRsData();
+        });
 
-        assertEquals(403, rsData.getStatusCode());
-        assertEquals("해당 호텔의 사업가가 아닙니다.", rsData.getMsg());
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("해당 호텔의 사업자가 아닙니다.", exception.getMsg());
     }
 
     @Test
@@ -320,12 +312,12 @@ class RoomServiceTest {
         PutRoomRequest putReq1 = new PutRoomRequest("수정 객실1", 5, null, null, 5, null,
                 "in_booking", null, null, roomOptions);
 
-        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
             this.roomService.modifyRoom(hotel.getId(), roomId, business.getMember(), putReq1);
-        }).getRsData();
+        });
 
-        assertEquals(404, rsData.getStatusCode());
-        assertEquals("사용할 수 없는 객실 옵션이 존재합니다.", rsData.getMsg());
+        assertEquals(404, exception.getResultCode().value());
+        assertEquals("사용할 수 없는 객실 옵션이 존재합니다.", exception.getMsg());
     }
 
     @Test
@@ -351,12 +343,12 @@ class RoomServiceTest {
         PutRoomRequest putReq1 = new PutRoomRequest("수정 객실1", 5, null, null, 5, null,
                 "in_booking", null, null, roomOptions);
 
-        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
             this.roomService.modifyRoom(hotel.getId(), roomId, actor, putReq1);
-        }).getRsData();
+        });
 
-        assertEquals(403, rsData.getStatusCode());
-        assertEquals("사업가만 관리할 수 있습니다.", rsData.getMsg());
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
     }
 
     @Test
@@ -382,12 +374,12 @@ class RoomServiceTest {
         PutRoomRequest putReq1 = new PutRoomRequest("수정 객실1", 5, null, null, 5, null,
                 "in_booking", null, null, roomOptions);
 
-        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
             this.roomService.modifyRoom(hotel.getId(), roomId, newBusiness.getMember(), putReq1);
-        }).getRsData();
+        });
 
-        assertEquals(403, rsData.getStatusCode());
-        assertEquals("해당 호텔의 사업가가 아닙니다.", rsData.getMsg());
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("해당 호텔의 사업자가 아닙니다.", exception.getMsg());
     }
 
     @Test
@@ -420,12 +412,12 @@ class RoomServiceTest {
         Hotel hotel = this.hotelRepository.findByBusiness(business).get();
         Long roomId = hotel.getRooms().getFirst().getId();
 
-        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
             this.roomService.deleteRoom(hotel.getId(), roomId, member);
-        }).getRsData();
+        });
 
-        assertEquals(403, rsData.getStatusCode());
-        assertEquals("사업가만 관리할 수 있습니다.", rsData.getMsg());
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
     }
 
     @Test
@@ -436,12 +428,12 @@ class RoomServiceTest {
         Hotel hotel = this.hotelRepository.findByBusiness(business).get();
         Long roomId = hotel.getRooms().getFirst().getId();
 
-        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
             this.roomService.deleteRoom(hotel.getId(), roomId, newBusiness.getMember());
-        }).getRsData();
+        });
 
-        assertEquals(403, rsData.getStatusCode());
-        assertEquals("해당 호텔의 사업가가 아닙니다.", rsData.getMsg());
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("해당 호텔의 사업자가 아닙니다.", exception.getMsg());
     }
 
     // business1 비즈니스 호출

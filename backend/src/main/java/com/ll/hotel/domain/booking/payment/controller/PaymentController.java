@@ -12,6 +12,7 @@ import com.ll.hotel.global.rsData.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,9 +28,8 @@ public class PaymentController {
     public RsData<UidResponse> getUid() {
         Member actor = rq.getActor();
 
-        return new RsData<>(
-                "200",
-                "Uid 발급에 성공했습니다.",
+        return RsData.success(
+                HttpStatus.OK,
                 paymentService.generateMerchantUid()
         );
     }

@@ -4,12 +4,14 @@ import com.ll.hotel.domain.member.admin.dto.request.AdminBusinessRequest;
 import com.ll.hotel.domain.member.admin.dto.response.AdminBusinessResponse;
 import com.ll.hotel.domain.member.admin.service.AdminBusinessService;
 import com.ll.hotel.domain.member.member.entity.Business;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.page.dto.PageDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,15 +27,7 @@ public class AdminBusinessController {
         Page<AdminBusinessResponse.Summary> pagedBusinessSummaries = adminBusinessService.findAllPaged(page)
                 .map(AdminBusinessResponse.Summary::from);
 
-        if (!pagedBusinessSummaries.hasContent()) {
-            throw new ServiceException("404", "요청하신 사업자 정보 페이지가 없습니다.");
-        }
-
-        return new RsData<>(
-                "200",
-                "모든 사업자 정보가 조회되었습니다.",
-                new PageDto<>(pagedBusinessSummaries)
-        );
+        return RsData.success(HttpStatus.OK, new PageDto<>(pagedBusinessSummaries));
     }
 
     @GetMapping("/{id}")
@@ -41,11 +35,7 @@ public class AdminBusinessController {
 
         Business business = adminBusinessService.findById(id);
 
-        return new RsData<>(
-                "200",
-                "사업자 정보가 조회되었습니다.",
-                AdminBusinessResponse.Detail.from(business)
-        );
+        return RsData.success(HttpStatus.OK, AdminBusinessResponse.Detail.from(business));
     }
 
     @PatchMapping("/{id}")
@@ -57,10 +47,6 @@ public class AdminBusinessController {
 
         adminBusinessService.flush();
 
-        return new RsData<>(
-                "200",
-                "사업자 승인 정보가 수정되었습니다.",
-                AdminBusinessResponse.ApprovalResult.from(business)
-        );
+        return RsData.success(HttpStatus.OK, AdminBusinessResponse.ApprovalResult.from(business));
     }
 }

@@ -6,6 +6,7 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class BusinessService {
         if (validationResult.equals("01")) {
             member.setRole(Role.BUSINESS);
         } else {
-            throw new ServiceException("400", "유효하지 않은 사업자입니다.");
+            ErrorCode.INVALID_BUSINESS_INFO.throwServiceException();
         }
 
         Business business = Business

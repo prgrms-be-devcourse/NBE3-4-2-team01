@@ -86,7 +86,6 @@ public class BookingControllerTest {
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("preBook"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("예약 페이지 정보 조회에 성공했습니다."))
                 .andExpect(jsonPath("$.data.hotel.hotelName").value("강남호텔"))
                 .andExpect(jsonPath("$.data.room.roomName").value("스탠다드룸"))
                 .andExpect(jsonPath("$.data.thumbnailUrls").exists())
@@ -94,7 +93,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    @DisplayName("1-2 / 비정상) 예약 페이지 요청, 존재하지 않는 호텔 ID")
+    @DisplayName("1-2 / 비정상) 예약 페이지 요청: 존재하지 않는 호텔 ID")
     void t1_2() throws Exception {
         // 인가 설정
         Member customer = memberRepository.findByMemberName("customer1")
@@ -112,8 +111,7 @@ public class BookingControllerTest {
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("preBook"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.msg").value("호텔 정보를 찾을 수 없습니다."));
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -138,7 +136,7 @@ public class BookingControllerTest {
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("book"))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -163,8 +161,7 @@ public class BookingControllerTest {
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("book"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.msg").value("객실 정보를 찾을 수 없습니다."));
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -185,7 +182,6 @@ public class BookingControllerTest {
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("getMyBookings"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("내 예약 목록 조회에 성공했습니다."))
                 .andExpect(jsonPath("$.data.items[0].bookingId").value(2))
                 .andExpect(jsonPath("$.data.items[1].bookingId").value(1));
     }
@@ -208,7 +204,6 @@ public class BookingControllerTest {
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("getHotelBookings"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("호텔 예약 목록 조회에 성공했습니다."))
                 .andExpect(jsonPath("$.data.items[0].bookingId").value(2))
                 .andExpect(jsonPath("$.data.items[1].bookingId").value(1));
     }
@@ -230,8 +225,7 @@ public class BookingControllerTest {
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("getHotelBookings"))
-                .andExpect(status().isUnauthorized()) // 403으로 변경할 것
-                .andExpect(jsonPath("$.msg").value("예약 조회 권한이 없습니다."));
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -252,7 +246,6 @@ public class BookingControllerTest {
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("getBookingDetails"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("예약 상세 조회에 성공했습니다."))
                 .andExpect(jsonPath("$.data.bookingId").value(1));
     }
 
@@ -273,8 +266,7 @@ public class BookingControllerTest {
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("getBookingDetails"))
-                .andExpect(status().isUnauthorized()) // 403으로 변경할 것
-                .andExpect(jsonPath("$.msg").value("예약 조회 권한이 없습니다."));
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -294,8 +286,7 @@ public class BookingControllerTest {
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("getBookingDetails"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.msg").value("예약 정보를 찾을 수 없습니다."));
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -315,7 +306,7 @@ public class BookingControllerTest {
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("cancel"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -335,8 +326,7 @@ public class BookingControllerTest {
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("cancel"))
-                .andExpect(status().isUnauthorized()) // 403으로 변경할 것
-                .andExpect(jsonPath("$.msg").value("예약 취소 권한이 없습니다."));
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -358,8 +348,7 @@ public class BookingControllerTest {
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("cancel"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.msg").value("이미 취소된 예약입니다."));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -371,7 +360,7 @@ public class BookingControllerTest {
         setMock(customer);
 
         // 예약 완료 처리 후 취소
-        mvc.perform(post("/api/bookings/{booking_id}", 1)) // 완료 처리, patch로 변경할 것
+        mvc.perform(patch("/api/bookings/{booking_id}", 1)) // 완료 처리
                 .andDo(print());
         ResultActions resultActions = mvc
                 .perform(delete("/api/bookings/{booking_id}", 1)) // 예약 취소
@@ -381,12 +370,11 @@ public class BookingControllerTest {
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("cancel"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.msg").value("완료된 예약은 취소할 수 없습니다."));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("6-4 / 비정상) 예약 취소, 존재하지 않는 예약 ID")
+    @DisplayName("6-5 / 비정상) 예약 취소, 존재하지 않는 예약 ID")
     void t6_5() throws Exception {
         // 인가 설정
         Member customer = memberRepository.findByMemberName("customer1")
@@ -402,8 +390,7 @@ public class BookingControllerTest {
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("cancel"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.msg").value("예약 정보를 찾을 수 없습니다."));
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -416,14 +403,14 @@ public class BookingControllerTest {
 
         // 예약 완료 처리
         ResultActions resultActions = mvc
-                .perform(post("/api/bookings/{booking_id}", 1)) // patch로 변경할 것, 이후 주석 생략
+                .perform(patch("/api/bookings/{booking_id}", 1))
                 .andDo(print());
 
         // 검증
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("complete"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -436,15 +423,14 @@ public class BookingControllerTest {
 
         // 예약 완료 처리
         ResultActions resultActions = mvc
-                .perform(post("/api/bookings/{booking_id}", 1))
+                .perform(patch("/api/bookings/{booking_id}", 1))
                 .andDo(print());
 
         // 검증
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("complete"))
-                .andExpect(status().isUnauthorized()) // 403으로 변경할 것
-                .andExpect(jsonPath("$.msg").value("예약 완료 처리 권한이 없습니다."));
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -456,18 +442,17 @@ public class BookingControllerTest {
         setMock(customer);
 
         // 예약 중복 완료 처리
-        mvc.perform(post("/api/bookings/{booking_id}", 1))
+        mvc.perform(patch("/api/bookings/{booking_id}", 1))
                 .andDo(print());
         ResultActions resultActions = mvc
-                .perform(post("/api/bookings/{booking_id}", 1))
+                .perform(patch("/api/bookings/{booking_id}", 1))
                 .andDo(print());
 
         // 검증
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("complete"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.msg").value("이미 완료된 예약입니다."));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -482,15 +467,14 @@ public class BookingControllerTest {
         mvc.perform(delete("/api/bookings/{booking_id}", 1)) // 예약 취소
                 .andDo(print());
         ResultActions resultActions = mvc
-                .perform(post("/api/bookings/{booking_id}", 1)) // 완료 처리
+                .perform(patch("/api/bookings/{booking_id}", 1)) // 완료 처리
                 .andDo(print());
 
         // 검증
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("complete"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.msg").value("취소된 예약은 완료 처리할 수 없습니다."));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -503,14 +487,13 @@ public class BookingControllerTest {
 
         // 잘못된 예약 완료 처리
         ResultActions resultActions = mvc
-                .perform(post("/api/bookings/{booking_id}", 99)) // 존재하지 않는 예약 ID
+                .perform(patch("/api/bookings/{booking_id}", 99)) // 존재하지 않는 예약 ID
                 .andDo(print());
 
         // 검증
         resultActions
                 .andExpect(handler().handlerType(BookingController.class))
                 .andExpect(handler().methodName("complete"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.msg").value("예약 정보를 찾을 수 없습니다."));
+                .andExpect(status().isNotFound());
     }
 }
