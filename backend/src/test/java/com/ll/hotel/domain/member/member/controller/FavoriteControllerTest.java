@@ -126,10 +126,7 @@ class FavoriteControllerTest {
         // when & then
         mockMvc.perform(post("/api/favorites/" + testHotel1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("OK"))
-                .andExpect(jsonPath("$.msg").value("OK"))
-                .andExpect(jsonPath("$.data").value("즐겨찾기에 추가되었습니다."));
+                .andExpect(status().isNoContent());
     }
     
     @Test
@@ -142,10 +139,7 @@ class FavoriteControllerTest {
         // 즐겨찾기 삭제 요청
         mockMvc.perform(delete("/api/favorites/" + testHotel1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("OK"))
-                .andExpect(jsonPath("$.msg").value("OK"))
-                .andExpect(jsonPath("$.data").value("즐겨찾기가 삭제되었습니다."));
+                .andExpect(status().isNoContent());
     }
     
     @Test
