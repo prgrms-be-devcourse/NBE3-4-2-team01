@@ -12,11 +12,11 @@ import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.standard.base.Empty;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -40,55 +41,35 @@ public class RoomController {
     {
         Member actor = this.rq.getActor();
 
-        return new RsData<>(
-                "201-1",
-                "객실을 정상적으로 등록하였습니다.",
-                this.roomService.createRoom(hotelId, actor, postRoomRequest)
-        );
+        return RsData.success(HttpStatus.CREATED, this.roomService.createRoom(hotelId, actor, postRoomRequest));
     }
 
     @PostMapping("/{roomId}/urls")
-    public RsData<Empty> saveImageUrls(@PathVariable long hotelId, @PathVariable long roomId,
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void saveImageUrls(@PathVariable long hotelId, @PathVariable long roomId,
                                        @RequestBody List<String> urls
     ) {
         Member actor = this.rq.getActor();
 
         this.roomService.saveImages(actor, ImageType.ROOM, roomId, urls);
-
-        return new RsData<>(
-                "201-1",
-                "객실 이미지 저장에 성공하였습니다."
-        );
     }
 
     @DeleteMapping("/{roomId}")
-    public RsData<Empty> deleteRoom(@PathVariable long hotelId, @PathVariable long roomId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteRoom(@PathVariable long hotelId, @PathVariable long roomId) {
         Member actor = this.rq.getActor();
 
         this.roomService.deleteRoom(hotelId, roomId, actor);
-
-        return new RsData<>(
-                "200-1",
-                "객실 삭제에 성공하였습니다."
-        );
     }
 
     @GetMapping
     public RsData<List<GetRoomResponse>> findAllRooms(@PathVariable long hotelId) {
-        return new RsData<>(
-                "200-1",
-                "모든 객실 정보를 정상적으로 조회했습니다.",
-                this.roomService.findAllRooms(hotelId)
-        );
+        return RsData.success(HttpStatus.OK, this.roomService.findAllRooms(hotelId));
     }
 
     @GetMapping("/{roomId}")
     public RsData<GetRoomDetailResponse> findRoomDetail(@PathVariable long hotelId, @PathVariable long roomId) {
-        return new RsData<>(
-                "200-1",
-                "객실 정보를 정상적으로 조회했습니다.",
-                this.roomService.findRoomDetail(hotelId, roomId)
-        );
+        return RsData.success(HttpStatus.OK, this.roomService.findRoomDetail(hotelId, roomId));
     }
 
     @PutMapping("{roomId}")
@@ -98,20 +79,13 @@ public class RoomController {
     {
         Member actor = this.rq.getActor();
 
-        return new RsData<>(
-                "200-1",
-                "객실 정보를 수정에 성공하였습니다.",
-                this.roomService.modifyRoom(hotelId, roomId, actor, request));
+        return RsData.success(HttpStatus.OK, this.roomService.modifyRoom(hotelId, roomId, actor, request));
     }
 
     @GetMapping("/room-option")
     public RsData<GetAllRoomOptionsResponse> findAllRoomOptions(@PathVariable long hotelId) {
         Member actor = this.rq.getActor();
 
-        return new RsData<>(
-                "200-1",
-                "객실 옵션 조회에 성공했습니다.",
-                this.roomService.findAllRoomOptions(actor)
-        );
+        return RsData.success(HttpStatus.OK, this.roomService.findAllRoomOptions(actor));
     }
 }
