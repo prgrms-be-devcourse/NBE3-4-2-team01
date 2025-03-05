@@ -11,7 +11,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -58,15 +57,7 @@ public class Review extends BaseTime {
     @Max(value = 5, message = "평점은 최대 5점이어야 합니다.")
     private Integer rating;
 
-    @Builder
-    private Review(
-            Hotel hotel,
-            Room room,
-            Booking booking,
-            Member member,
-            String content,
-            Integer rating) {
-
+    public Review(Hotel hotel, Room room, Booking booking, Member member, String content, Integer rating) {
         this.hotel = hotel;
         this.room = room;
         this.booking = booking;

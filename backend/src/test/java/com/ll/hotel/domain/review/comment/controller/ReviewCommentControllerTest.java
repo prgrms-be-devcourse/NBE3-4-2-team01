@@ -81,7 +81,7 @@ public class ReviewCommentControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("createReviewComment"))
-                .andExpect(status().isOk()); // TODO: isCreated() 로 변경 필요
+                .andExpect(status().isNoContent()); // TODO: isCreated() 로 변경 필요
     }
 
     @Test
@@ -102,7 +102,7 @@ public class ReviewCommentControllerTest {
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("createReviewComment"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.msg").value("로그인이 필요합니다."));
+                .andExpect(content().string("로그인이 필요합니다."));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class ReviewCommentControllerTest {
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("createReviewComment"))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.msg").value("이 호텔 사업자만 리뷰 답변 작성이 가능합니다."));
+                .andExpect(content().string("리뷰 답변 생성 권한이 없습니다"));
     }
 
     @Test
@@ -146,7 +146,7 @@ public class ReviewCommentControllerTest {
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("createReviewComment"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.msg").value("리뷰가 존재하지 않습니다."));
+                .andExpect(content().string("리뷰가 존재하지 않습니다"));
     }
 
     @Test
@@ -170,7 +170,7 @@ public class ReviewCommentControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("updateReviewComment"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(reviewComment.getContent()).isEqualTo(request.content());
     }
@@ -193,7 +193,7 @@ public class ReviewCommentControllerTest {
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("updateReviewComment"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.msg").value("로그인이 필요합니다."));
+                .andExpect(content().string("로그인이 필요합니다."));
     }
 
     @Test
@@ -216,7 +216,7 @@ public class ReviewCommentControllerTest {
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("updateReviewComment"))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.msg").value("답변 작성자만 리뷰 답변 수정 가능합니다."));
+                .andExpect(content().string("리뷰 답변 수정 권한이 없습니다"));
 
     }
 
@@ -240,7 +240,7 @@ public class ReviewCommentControllerTest {
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("updateReviewComment"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.msg").value("수정할 리뷰 답변이 존재하지 않습니다."));
+                .andExpect(content().string("리뷰 답변이 존재하지 않습니다"));
     }
 
     @Test
@@ -261,7 +261,7 @@ public class ReviewCommentControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("deleteReviewComment"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -280,7 +280,7 @@ public class ReviewCommentControllerTest {
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("deleteReviewComment"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.msg").value("로그인이 필요합니다."));
+                .andExpect(content().string("로그인이 필요합니다."));
     }
 
     @Test
@@ -300,7 +300,7 @@ public class ReviewCommentControllerTest {
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("deleteReviewComment"))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.msg").value("답변 작성자만 리뷰 답변 삭제 가능합니다."));
+                .andExpect(content().string("리뷰 답변 삭제 권한이 없습니다"));
     }
 
     @Test
@@ -320,7 +320,7 @@ public class ReviewCommentControllerTest {
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("deleteReviewComment"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.msg").value("삭제할 리뷰 답변이 존재하지 않습니다."));
+                .andExpect(content().string("리뷰 답변이 존재하지 않습니다"));
     }
 
     @Test
