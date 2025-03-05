@@ -40,23 +40,23 @@ class FavoriteControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    
+
     @Autowired
     private MemberService memberService;
-    
+
     @Autowired
     private MemberRepository memberRepository;
-    
+
     @Autowired
     private HotelRepository hotelRepository;
-    
+
     @Mock
     private Rq rq;
-    
+
     private Member testMember;
     private Hotel testHotel1;
     private Hotel testHotel2;
-    
+
     @BeforeEach
     void setUp() {
         // Mockito 초기화
@@ -127,8 +127,9 @@ class FavoriteControllerTest {
         mockMvc.perform(post("/api/favorites/" + testHotel1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.msg").value("즐겨찾기에 추가되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value("OK"))
+                .andExpect(jsonPath("$.msg").value("OK"))
+                .andExpect(jsonPath("$.data").value("즐겨찾기에 추가되었습니다."));
     }
     
     @Test
@@ -142,8 +143,9 @@ class FavoriteControllerTest {
         mockMvc.perform(delete("/api/favorites/" + testHotel1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.msg").value("즐겨찾기가 삭제되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value("OK"))
+                .andExpect(jsonPath("$.msg").value("OK"))
+                .andExpect(jsonPath("$.data").value("즐겨찾기가 삭제되었습니다."));
     }
     
     @Test
@@ -157,8 +159,8 @@ class FavoriteControllerTest {
         mockMvc.perform(get("/api/favorites/me")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.msg").value("즐겨찾기 목록을 조회했습니다."))
+                .andExpect(jsonPath("$.resultCode").value("OK"))
+                .andExpect(jsonPath("$.msg").value("OK"))
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data.length()").value(2));
     }
@@ -170,8 +172,8 @@ class FavoriteControllerTest {
         mockMvc.perform(get("/api/favorites/me")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.msg").value("즐겨찾기한 호텔이 없습니다."))
+                .andExpect(jsonPath("$.resultCode").value("OK"))
+                .andExpect(jsonPath("$.msg").value("OK"))
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data.length()").value(0));
     }
@@ -187,8 +189,8 @@ class FavoriteControllerTest {
         mockMvc.perform(get("/api/favorites/me/" + testHotel1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.msg").value("즐겨찾기 아이디들을 조회했습니다."))
+                .andExpect(jsonPath("$.resultCode").value("OK"))
+                .andExpect(jsonPath("$.msg").value("OK"))
                 .andExpect(jsonPath("$.data").value(true));
     }
 } 
