@@ -2,16 +2,6 @@ spring:
   application:
     name: hotel
 
-  cloud:
-    aws:
-      s3:
-        bucket: test-bucket
-      credentials:
-        access-key: test-access-key
-        secret-key: test-secret-key
-      region:
-        static: us-east-1
-
   data:
     redis:
       host: localhost
