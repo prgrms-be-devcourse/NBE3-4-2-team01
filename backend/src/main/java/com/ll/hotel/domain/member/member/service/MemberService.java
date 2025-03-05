@@ -4,6 +4,7 @@ package com.ll.hotel.domain.member.member.service;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
+import com.ll.hotel.domain.hotel.option.entity.HotelOption;
 import com.ll.hotel.domain.member.member.dto.JoinRequest;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
@@ -260,7 +261,40 @@ public class MemberService {
         return favorites.stream()
             .map(hotel -> {
                 log.debug("getFavoriteHotels - hotel: {}", hotel.getHotelName());
-                return new HotelDto(hotel);
+                
+                // 즐겨찾기를 프론트로 넘길 때 많은 데이터를 넘기면 프론트에서 받지 못하는 부분이 있어 간소화
+                List<Map<String, Object>> simplifiedRooms = hotel.getRooms().stream()
+                    .map(room -> {
+                        Map<String, Object> roomMap = new HashMap<>();
+                        roomMap.put("id", room.getId());
+                        roomMap.put("roomName", room.getRoomName());
+                        roomMap.put("roomNumber", room.getRoomNumber());
+                        roomMap.put("basePrice", room.getBasePrice());
+                        return roomMap;
+                    })
+                    .collect(Collectors.toList());
+                
+                List<String> hotelOptionNames = hotel.getHotelOptions() != null
+                    ? hotel.getHotelOptions().stream()
+                        .map(HotelOption::getName)
+                        .collect(Collectors.toList())
+                    : new ArrayList<>();
+                
+                return new HotelDto(
+                    hotel.getId(),
+                    hotel.getHotelName(),
+                    hotel.getHotelEmail(),
+                    hotel.getHotelPhoneNumber(),
+                    hotel.getStreetAddress(),
+                    hotel.getZipCode(),
+                    hotel.getHotelGrade(),
+                    hotel.getCheckInTime(),
+                    hotel.getCheckOutTime(),
+                    hotel.getHotelExplainContent(),
+                    hotel.getHotelStatus().getValue(),
+                    simplifiedRooms,
+                    hotelOptionNames
+                );
             })
             .collect(Collectors.toList());
     }
