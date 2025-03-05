@@ -23,7 +23,7 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import com.ll.hotel.global.annotation.BusinessOnly;
 import com.ll.hotel.global.aws.s3.S3Service;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
@@ -52,7 +52,7 @@ public class RoomService {
         Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
-            throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
         BedTypeNumber bedTypeNumber = BedTypeNumber.fromJson(postRoomRequest.bedTypeNumber());
@@ -60,7 +60,7 @@ public class RoomService {
         Set<RoomOption> roomOptions = this.roomOptionRepository.findByNameIn(postRoomRequest.roomOptions());
 
         if (roomOptions.size() != postRoomRequest.roomOptions().size()) {
-            throw new ServiceException("404-2", "사용할 수 없는 객실 옵션이 존재합니다.");
+            ErrorCode.ROOM_OPTION_NOT_FOUND.throwServiceException();
         }
 
         Room room = Room.roomBuild(hotel, postRoomRequest, bedTypeNumber, roomOptions);
@@ -69,20 +69,21 @@ public class RoomService {
             return new PostRoomResponse(this.roomRepository.save(room),
                     this.saveRoomImages(room.getId(), postRoomRequest.imageExtensions()));
         } catch (DataIntegrityViolationException e) {
-            throw new ServiceException("409-1", "동일한 이름의 방이 이미 호텔에 존재합니다.");
+            ErrorCode.ROOM_NAME_ALREADY_EXISTS.throwServiceException();
+            return null;
         }
     }
 
     @BusinessOnly
     @Transactional
     public void saveImages(Member actor, ImageType imageType, long roomId, List<String> urls) {
+        Hotel hotel = getRoomById(roomId).getHotel();
+
+        if (!hotel.isOwnedBy(actor)) {
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
+        }
+
         this.imageService.saveImages(imageType, roomId, urls);
-
-        List<String> imageUrls = this.imageService.findImagesById(ImageType.ROOM, roomId).stream()
-                .map(Image::getImageUrl)
-                .toList();
-
-        return;
     }
 
     @BusinessOnly
@@ -91,7 +92,7 @@ public class RoomService {
         Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
-            throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
         Room room = this.getRoomById(roomId);
@@ -129,13 +130,13 @@ public class RoomService {
         Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
-            throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
         Room room = this.getRoomDetail(hotelId, roomId);
 
         if (this.roomRepository.existsByHotelIdAndRoomNameAndIdNot(hotelId, request.roomName(), roomId)) {
-            throw new ServiceException("409-1", "동일한 이름의 방이 이미 호텔에 존재합니다.");
+            ErrorCode.ROOM_NAME_ALREADY_EXISTS.throwServiceException();
         }
 
         modifyIfPresent(request.roomName(), room::getRoomName, room::setRoomName);
@@ -149,7 +150,7 @@ public class RoomService {
             try {
                 room.setRoomStatus(RoomStatus.valueOf(request.roomStatus().toUpperCase()));
             } catch (Exception e) {
-                throw new ServiceException("404-3", "객실 상태 정보를 정확히 입력해주세요.");
+                ErrorCode.ROOM_STATUS_NOT_FOUND.throwServiceException();
             }
         }
 
@@ -179,7 +180,7 @@ public class RoomService {
         Set<RoomOption> options = this.roomOptionRepository.findByNameIn(optionNames);
 
         if (options.size() != optionNames.size()) {
-            throw new ServiceException("404-4", "사용할 수 없는 객실 옵션이 존재합니다.");
+            ErrorCode.ROOM_OPTION_NOT_FOUND.throwServiceException();
         }
 
         room.setRoomOptions(options);
@@ -187,22 +188,22 @@ public class RoomService {
 
     private Hotel getHotelById(long hotelId) {
         return this.hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보가 존재하지 않습니다."));
+                .orElseThrow(ErrorCode.HOTEL_NOT_FOUND::throwServiceException);
     }
 
     private Room getRoomById(long roomId) {
         return this.roomRepository.findById(roomId)
-                .orElseThrow(() -> new ServiceException("404-2", "객실 정보가 존재하지 않습니다."));
+                .orElseThrow(ErrorCode.ROOM_NOT_FOUND::throwServiceException);
     }
 
     private Room getRoomDetail(long hotelId, long roomId) {
         return this.roomRepository.findRoomDetail(hotelId, roomId)
-                .orElseThrow(() -> new ServiceException("404-2", "객실 정보를 조회할 수 없습니다."));
+                .orElseThrow(ErrorCode.ROOM_NOT_FOUND::throwServiceException);
     }
 
     private void checkHotelExists(long hotelId) {
         if (!this.hotelRepository.existsById(hotelId)) {
-            throw new ServiceException("404-1", "호텔 정보가 존재하지 않습니다.");
+            ErrorCode.HOTEL_NOT_FOUND.throwServiceException();
         }
     }
 
