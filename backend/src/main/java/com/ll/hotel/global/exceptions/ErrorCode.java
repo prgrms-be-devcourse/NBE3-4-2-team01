@@ -56,17 +56,12 @@ public enum ErrorCode {
     ROOM_NAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "동일한 이름의 방이 이미 호텔에 존재합니다."),
 
     // option
-    OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "옵션이 존재하지 않습니다"),
     OPTION_IN_USE(HttpStatus.BAD_REQUEST, "사용 중인 옵션은 삭제할 수 없습니다"),
-
-    // HotelOption
     HOTEL_OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "사용할 수 없는 호텔 옵션이 존재합니다."),
-
-    // RoomOption
     ROOM_OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "사용할 수 없는 객실 옵션이 존재합니다."),
 
     // Review
-    REVIEW_NOT_FOUND(HttpStatus.BAD_REQUEST, "리뷰가 존재하지 않습니다"),
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰가 존재하지 않습니다"),
     REVIEW_CREATION_FORBIDDEN(HttpStatus.FORBIDDEN, "리뷰 생성 권한이 없습니다"),
     REVIEW_ACCESS_FORBIDDEN(HttpStatus.FORBIDDEN, "리뷰 조회 권한이 없습니다"),
     REVIEW_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "리뷰 수정 권한이 없습니다"),

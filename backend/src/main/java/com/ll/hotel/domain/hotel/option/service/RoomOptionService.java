@@ -31,7 +31,7 @@ public class RoomOptionService {
 
     public RoomOption findById(Long id) {
         return roomOptionRepository.findById(id)
-                .orElseThrow(ErrorCode.OPTION_NOT_FOUND::throwServiceException);
+                .orElseThrow(ErrorCode.ROOM_OPTION_NOT_FOUND::throwServiceException);
     }
 
     @Transactional
