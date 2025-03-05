@@ -7,6 +7,7 @@ import com.ll.hotel.domain.hotel.option.service.HotelOptionService;
 import com.ll.hotel.global.rsData.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,11 +23,7 @@ public class HotelOptionController {
 
         HotelOption hotelOption = hotelOptionService.add(optionRequest);
 
-        return new RsData<>(
-                "201",
-                "항목이 추가되었습니다.",
-                OptionResponse.from(hotelOption)
-        );
+        return RsData.success(HttpStatus.CREATED, OptionResponse.from(hotelOption));
     }
 
     @GetMapping
@@ -36,11 +33,7 @@ public class HotelOptionController {
                 .stream()
                 .map(OptionResponse::from).toList();
 
-        return new RsData<>(
-                "200",
-                "모든 항목이 조회되었습니다.",
-                hotelOptionList
-        );
+        return RsData.success(HttpStatus.OK, hotelOptionList);
     }
 
     @GetMapping("/{id}")
@@ -48,11 +41,7 @@ public class HotelOptionController {
 
         HotelOption hotelOption = hotelOptionService.findById(id);
 
-        return new RsData<>(
-                "200",
-                "항목이 조회되었습니다.",
-                OptionResponse.from(hotelOption)
-        );
+        return RsData.success(HttpStatus.OK, OptionResponse.from(hotelOption));
     }
 
     @PatchMapping("/{id}")
@@ -63,20 +52,13 @@ public class HotelOptionController {
 
         hotelOptionService.flush();
 
-        return new RsData<>(
-                "200",
-                "항목이 수정되었습니다.",
-                OptionResponse.from(hotelOption)
-        );
+        return RsData.success(HttpStatus.OK, OptionResponse.from(hotelOption));
     }
 
     @DeleteMapping("/{id}")
-    public RsData<Void> delete(@PathVariable("id") Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable("id") Long id) {
         HotelOption hotelOption = hotelOptionService.findById(id);
         hotelOptionService.delete(hotelOption);
-        return new RsData<>(
-                "200",
-                "항목이 삭제되었습니다."
-        );
     }
 }

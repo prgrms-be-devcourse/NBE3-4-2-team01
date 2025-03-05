@@ -19,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,11 +91,13 @@ public class BusinessServiceTest {
 
         Member member = memberRepository.findById(testId).get();
 
-        // When & Then
+        // When
         ServiceException exception = assertThrows(ServiceException.class, () ->
                 businessService.register(businessRequest, member, "02")
         );
 
-        assertThat(exception.getMessage()).isEqualTo("400 : 유효하지 않은 사업자입니다.");
+        // Then
+        assertThat(exception.getResultCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getMessage()).isEqualTo("사업자가 유효하지 않습니다.");
     }
 }

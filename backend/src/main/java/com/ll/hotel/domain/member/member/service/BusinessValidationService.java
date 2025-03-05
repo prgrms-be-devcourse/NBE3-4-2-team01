@@ -3,6 +3,7 @@ package com.ll.hotel.domain.member.member.service;
 import com.ll.hotel.domain.member.member.dto.request.BusinessRequest;
 import com.ll.hotel.domain.member.member.dto.response.BusinessResponse;
 import com.ll.hotel.domain.member.member.type.BusinessApiProperties;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -36,24 +37,18 @@ public class BusinessValidationService {
 
             BusinessResponse.Verification response = responseEntity.getBody();
 
-            if (response == null || response.data() == null) {
-                throw new ServiceException("500", "사업자 등록 검증 API 응답이 올바르지 않습니다.");
-            }
-
-            if (response.data().isEmpty()) {
-                throw new ServiceException("400", "사업자 정보가 조회되지 않았습니다.");
+            if (response == null || response.data() == null || response.data().isEmpty()) {
+                ErrorCode.EXTERNAL_API_UNEXPECTED_RESPONSE.throwServiceException();
             }
 
             Map<String, Object> result = response.data().getFirst();
             return (String) result.get("valid");
 
-        } catch (RestClientResponseException e) {
-            throw new ServiceException("402", "사업자 검증 API 호출 실패했습니다.");
-        } catch (ResourceAccessException e) {
-            throw new ServiceException("503", "사업자 검증 API 요청 중 네트워크 오류가 발생했습니다.");
         } catch (Exception e) {
-            throw new ServiceException("500", "사업자 검증 중 예기치 못한 오류가 발생했습니다.");
+            ErrorCode.EXTERNAL_API_COMMUNICATION_ERROR.throwServiceException(e);
         }
+
+        throw new IllegalStateException("외부 API 호출에 실패했습니다.");
     }
 
     private HttpHeaders createHeaders() {
