@@ -26,7 +26,7 @@ export const createRoom = async (
     });
 
     const rsData: RsData<PostRoomResponse> = await response.json();
-    if (rsData.resultCode !== "201-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
 
@@ -55,8 +55,12 @@ export const saveRoomImageUrls = async (
       }
     );
 
+    if (response.status === 204) {
+      return;
+    }
+
     const rsData: RsData<Empty> = await response.json();
-    if (rsData.resultCode !== "201-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
   } catch (error) {
@@ -73,7 +77,7 @@ export const findRoomDetail = async (
     const response = await fetch(`${BASE_URL}/${hotelId}/rooms/${roomId}`);
     const rsData: RsData<GetRoomDetailResponse> = await response.json();
 
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
 
@@ -100,7 +104,7 @@ export const modifyRoom = async (
     });
 
     const rsData: RsData<PutRoomResponse> = await response.json();
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
 
@@ -121,8 +125,12 @@ export const deleteRoom = async (
       method: "DELETE",
     });
 
+    if (response.status === 204) {
+      return;
+    }
+
     const rsData: RsData<Empty> = await response.json();
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
   } catch (error) {
@@ -138,7 +146,7 @@ export const findAllRooms = async (
     const response = await fetch(`${BASE_URL}/${hotelId}/rooms`);
     const rsData: RsData<GetRoomResponse[]> = await response.json();
 
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
 
@@ -158,7 +166,7 @@ export const findAllRoomOptions = async (
     });
     const rsData: RsData<GetAllRoomOptionsResponse> = await response.json();
 
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
 

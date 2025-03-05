@@ -16,14 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
-import static com.ll.hotel.global.exceptions.ErrorCode.*;
+import static com.ll.hotel.global.exceptions.ErrorCode.EMAIL_ALREADY_EXISTS;
+import static com.ll.hotel.global.exceptions.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 
 @Slf4j
 @RestController
@@ -64,9 +62,9 @@ public class MemberController {
     }
 
     @PostMapping("/logout")
-    public RsData<?> logout(HttpServletRequest request, HttpServletResponse response) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
         memberService.logout(request, response);
-        return RsData.success(HttpStatus.OK, null);
     }
 
     @PostMapping("/refresh")

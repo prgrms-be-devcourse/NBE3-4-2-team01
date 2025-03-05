@@ -51,6 +51,10 @@ export const uploadImageUrls = async (reviewId: number, viewUrls: string[]) => {
       }
     );
 
+    if (response.status === 204) {
+      return;
+    }
+
     const rsData = await response.json();
     if (!response.ok) {
       throw new Error(rsData.msg);
@@ -70,6 +74,10 @@ export const deleteReview = async (reviewId: number) => {
         credentials: "include",
       }
     );
+
+    if (response.status === 204) {
+      return;
+    }
 
     const rsData = await response.json();
     if (!response.ok) {
