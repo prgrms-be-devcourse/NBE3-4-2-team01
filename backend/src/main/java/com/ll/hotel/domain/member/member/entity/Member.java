@@ -7,6 +7,7 @@ import com.ll.hotel.global.jpa.entity.BaseTime;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.ll.hotel.global.exceptions.ErrorCode.BUSINESS_ACCESS_FORBIDDEN;
 
 @Entity
 @Getter
@@ -87,7 +89,7 @@ public class Member extends BaseTime {
 
     public void checkBusiness() {
         if (!this.isBusiness()) {
-            throw new ServiceException("403-1", "사업가만 관리할 수 있습니다.");
+            throw BUSINESS_ACCESS_FORBIDDEN.throwServiceException();
         }
     }
 }
