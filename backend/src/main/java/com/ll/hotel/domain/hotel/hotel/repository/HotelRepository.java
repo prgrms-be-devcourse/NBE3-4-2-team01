@@ -3,6 +3,7 @@ package com.ll.hotel.domain.hotel.hotel.repository;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelWithImageDto;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.image.type.ImageType;
+import com.ll.hotel.domain.member.member.entity.Business;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,4 +40,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     Optional<Hotel> findHotelDetail(@Param("hotelId") long hotelId);
 
     boolean existsByHotelEmailAndIdNot(String hotelEmail, long hotelId);
+
+    Optional<Hotel> findByBusiness(Business business);
 }
