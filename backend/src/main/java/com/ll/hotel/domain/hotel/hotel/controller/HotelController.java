@@ -1,26 +1,40 @@
 package com.ll.hotel.domain.hotel.hotel.controller;
 
-import com.ll.hotel.domain.hotel.hotel.dto.*;
+import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelOptionsResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelRevenueResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
+import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
+import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.global.validation.GlobalValidation;
-import com.ll.hotel.standard.base.Empty;
 import com.ll.hotel.standard.page.dto.PageDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,28 +48,20 @@ public class HotelController {
     public RsData<PostHotelResponse> create(@RequestBody @Valid PostHotelRequest postHotelRequest) {
         Member actor = this.rq.getActor();
 
-        return new RsData<>(
-                "201-1",
-                "호텔을 정상적으로 등록하였습니다.",
-                this.hotelService.createHotel(actor, postHotelRequest)
-        );
+        return RsData.success(HttpStatus.CREATED, this.hotelService.createHotel(actor, postHotelRequest));
     }
 
     @PostMapping("/{hotelId}/urls")
-    public RsData<Empty> saveImageUrls(@PathVariable long hotelId,
-                                       @RequestBody List<String> urls,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void saveImageUrls(@PathVariable long hotelId,
+                              @RequestBody List<String> urls,
+                              HttpServletRequest request,
+                              HttpServletResponse response
     ) {
         Member actor = this.rq.getActor();
 
         this.hotelService.saveImages(actor, ImageType.HOTEL, hotelId, urls);
         this.hotelService.updateRoleCookie(request, response, hotelId);
-
-        return new RsData<>(
-                "201-1",
-                "호텔 이미지 저장에 성공하였습니다."
-        );
     }
 
     @GetMapping
@@ -74,36 +80,27 @@ public class HotelController {
         GlobalValidation.checkPageSize(pageSize);
         GlobalValidation.checkCheckInAndOutDate(checkInDate, checkoutDate);
 
-        return new RsData<>(
-                "200-1",
-                "모든 호텔 정보를 정상적으로 조회했습니다.",
+        return RsData.success(HttpStatus.OK,
                 new PageDto<>(
-                        this.hotelService.findAllHotels(page, pageSize, filterName, filterDirection,
-                                streetAddress, checkInDate, checkoutDate, personal))
-        );
+                        this.hotelService.findAllHotels(page, pageSize, filterName, filterDirection, streetAddress,
+                                checkInDate, checkoutDate, personal)));
     }
 
     @GetMapping("/{hotelId}")
     public RsData<GetHotelDetailResponse> findHotelDetailWithAvailableRooms(@PathVariable long hotelId,
-                                                          @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}") @DateTimeFormat(iso = ISO.DATE)
-                                                          LocalDate checkInDate,
-                                                          @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().plusDays(1)}") @DateTimeFormat(iso = ISO.DATE)
-                                                              LocalDate checkoutDate,
-                                                          @RequestParam(defaultValue = "2") int personal) {
-        return new RsData<>(
-                "200-1",
-                "호텔 정보를 정상적으로 조회했습니다.",
-                this.hotelService.findHotelDetailWithAvailableRooms(hotelId, checkInDate, checkoutDate, personal)
-        );
+                                                                            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}") @DateTimeFormat(iso = ISO.DATE)
+                                                                            LocalDate checkInDate,
+                                                                            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().plusDays(1)}") @DateTimeFormat(iso = ISO.DATE)
+                                                                            LocalDate checkoutDate,
+                                                                            @RequestParam(defaultValue = "2") int personal) {
+
+        return RsData.success(HttpStatus.OK,
+                this.hotelService.findHotelDetailWithAvailableRooms(hotelId, checkInDate, checkoutDate, personal));
     }
 
     @GetMapping("/{hotelId}/business")
     public RsData<GetHotelDetailResponse> findHotelDetail(@PathVariable long hotelId) {
-        return new RsData<>(
-                "200-1",
-                "호텔 정보를 정상적으로 조회했습니다.",
-                this.hotelService.findHotelDetail(hotelId)
-        );
+        return RsData.success(HttpStatus.OK, this.hotelService.findHotelDetail(hotelId));
     }
 
     @PutMapping("/{hotelId}")
@@ -112,52 +109,28 @@ public class HotelController {
     ) {
         Member actor = this.rq.getActor();
 
-        return new RsData<>(
-                "200-1",
-                "호텔 정보 수정에 성공하였습니다.",
-                this.hotelService.modifyHotel(hotelId, actor, request)
-        );
+        return RsData.success(HttpStatus.OK, this.hotelService.modifyHotel(hotelId, actor, request));
     }
 
     @DeleteMapping("/{hotelId}")
-    public RsData<Empty> deleteHotel(@PathVariable Long hotelId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteHotel(@PathVariable Long hotelId) {
         Member actor = this.rq.getActor();
 
         this.hotelService.deleteHotel(hotelId, actor);
-
-        return new RsData<>(
-                "200-1",
-                "호텔 삭제에 성공하였습니다."
-        );
     }
 
     @GetMapping("{hotelId}/revenue")
     public RsData<GetHotelRevenueResponse> findHotelRevenue(@PathVariable long hotelId) {
         Member actor = this.rq.getActor();
 
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인 해주세요.");
-        }
-
-        if (!actor.isBusiness()) {
-            throw new ServiceException("403-1", "사업가만 호텔 매출을 확인할 수 있습니다.");
-        }
-
-        return new RsData<>(
-                "200-1",
-                "호텔 매출 조회에 성공하였습니다.",
-                this.hotelService.findRevenue(hotelId, actor)
-        );
+        return RsData.success(HttpStatus.OK, this.hotelService.findRevenue(hotelId, actor));
     }
 
     @GetMapping("/hotel-option")
     public RsData<GetAllHotelOptionsResponse> findAllHotelOptions() {
         Member actor = this.rq.getActor();
 
-        return new RsData<>(
-                "200-1",
-                "호텔 옵션 조회에 성공했습니다.",
-                this.hotelService.findHotelOptions(actor)
-        );
+        return RsData.success(HttpStatus.OK, this.hotelService.findHotelOptions(actor));
     }
 }

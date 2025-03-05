@@ -3,7 +3,16 @@ package com.ll.hotel.domain.hotel.hotel.service;
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.booking.booking.type.BookingStatus;
 import com.ll.hotel.domain.booking.payment.entity.Payment;
-import com.ll.hotel.domain.hotel.hotel.dto.*;
+import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelOptionsResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelRevenueResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.HotelDetailDto;
+import com.ll.hotel.domain.hotel.hotel.dto.HotelWithImageDto;
+import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
+import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
+import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
@@ -23,12 +32,27 @@ import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import com.ll.hotel.global.annotation.BusinessOnly;
 import com.ll.hotel.global.aws.s3.S3Service;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.standard.util.CookieUtil;
-import com.ll.hotel.standard.util.Ut;
+import com.ll.hotel.standard.util.Ut.json;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -38,15 +62,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -63,16 +78,16 @@ public class HotelService {
     @Transactional
     public PostHotelResponse createHotel(Member actor, PostHotelRequest postHotelRequest) {
         Business business = this.businessRepository.findByMember(actor)
-                .orElseThrow(() -> new ServiceException("404-1", "사업자가 존재하지 않습니다."));
+                .orElseThrow(ErrorCode.BUSINESS_NOT_FOUND::throwServiceException);
 
         if (business.getHotel() != null) {
-            throw new ServiceException("409-1", "한 사업자는 하나의 호텔만 등록할 수 있습니다.");
+            ErrorCode.BUSINESS_HOTEL_LIMIT_EXCEEDED.throwServiceException();
         }
 
         Set<HotelOption> hotelOptions = this.hotelOptionRepository.findByNameIn(postHotelRequest.hotelOptions());
 
         if (hotelOptions.size() != postHotelRequest.hotelOptions().size()) {
-            throw new ServiceException("404-2", "사용할 수 없는 호텔 옵션이 존재합니다.");
+            ErrorCode.HOTEL_OPTION_NOT_FOUND.throwServiceException();
         }
 
         Hotel hotel = Hotel.hotelBuild(postHotelRequest, business, hotelOptions);
@@ -81,7 +96,8 @@ public class HotelService {
             return new PostHotelResponse(this.hotelRepository.save(hotel),
                     this.saveHotelImages(hotel.getId(), postHotelRequest.imageExtensions()));
         } catch (DataIntegrityViolationException e) {
-            throw new ServiceException("409-2", "동일한 이메일의 호텔이 이미 존재합니다.");
+            ErrorCode.HOTEL_EMAIL_ALREADY_EXISTS.throwServiceException();
+            return null;
         }
     }
 
@@ -91,7 +107,7 @@ public class HotelService {
         Hotel hotel = getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
-            throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
         this.imageService.saveImages(imageType, hotelId, urls);
@@ -109,21 +125,19 @@ public class HotelService {
 
         String sortField = sortFieldMapping.getOrDefault(filterName, "createdAt");
 
-        Sort.Direction direction;
+        Direction direction = null;
         if (filterDirection == null) {
             direction = Direction.DESC;
         } else {
             try {
-                direction = Sort.Direction.valueOf(filterDirection.toUpperCase());
+                direction = Direction.valueOf(filterDirection.toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new ServiceException("400-1", "정렬 방향은 ASC 또는 DESC만 가능합니다.");
+                ErrorCode.INVALID_FILTER_DIRECTION.throwServiceException();
             }
         }
 
         Sort sort = Sort.by(direction, sortField);
         PageRequest pageRequest = PageRequest.of(page - 1, pageSize, sort);
-
-        System.out.println(sort);
 
         List<HotelWithImageDto> hotels = this.hotelRepository.findAllHotels(ImageType.HOTEL, streetAddress,
                         PageRequest.of(0, Integer.MAX_VALUE, sort))
@@ -142,7 +156,7 @@ public class HotelService {
     @Transactional(readOnly = true)
     public GetHotelDetailResponse findHotelDetail(long hotelId) {
         Hotel hotel = this.hotelRepository.findHotelDetail(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
+                .orElseThrow(ErrorCode.HOTEL_NOT_FOUND::throwServiceException);
 
         List<String> imageUrls = this.imageService.findImagesById(ImageType.HOTEL, hotelId).stream()
                 .map(Image::getImageUrl)
@@ -157,7 +171,7 @@ public class HotelService {
     public GetHotelDetailResponse findHotelDetailWithAvailableRooms(long hotelId, LocalDate checkInDate,
                                                                     LocalDate checkoutDate, int personal) {
         Hotel hotel = this.hotelRepository.findHotelDetail(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
+                .orElseThrow(ErrorCode.HOTEL_NOT_FOUND::throwServiceException);
 
         List<String> imageUrls = this.imageService.findImagesById(ImageType.HOTEL, hotelId).stream()
                 .map(Image::getImageUrl)
@@ -181,11 +195,11 @@ public class HotelService {
         Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
-            throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
         if (this.hotelRepository.existsByHotelEmailAndIdNot(request.hotelEmail(), hotelId)) {
-            throw new ServiceException("409-1", "동일한 이름의 방이 이미 호텔에 존재합니다.");
+            ErrorCode.HOTEL_EMAIL_ALREADY_EXISTS.throwServiceException();
         }
 
         modifyIfPresent(request.hotelName(), hotel::getHotelName, hotel::setHotelName);
@@ -202,7 +216,7 @@ public class HotelService {
             try {
                 hotel.setHotelStatus(HotelStatus.valueOf(request.hotelStatus().toUpperCase()));
             } catch (Exception e) {
-                throw new ServiceException("404-2", "호텔 상태 정보를 정확히 입력해주세요.");
+                ErrorCode.HOTEL_STATUS_NOT_FOUND.throwServiceException();
             }
         }
 
@@ -231,7 +245,7 @@ public class HotelService {
         Set<HotelOption> options = this.hotelOptionRepository.findByNameIn(optionNames);
 
         if (options.size() != optionNames.size()) {
-            throw new ServiceException("404-3", "사용할 수 없는 호텔 옵션이 존재합니다.");
+            ErrorCode.HOTEL_OPTION_NOT_FOUND.throwServiceException();
         }
 
         hotel.setHotelOptions(options);
@@ -243,7 +257,7 @@ public class HotelService {
         Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
-            throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
         hotel.setHotelStatus(HotelStatus.UNAVAILABLE);
@@ -253,12 +267,13 @@ public class HotelService {
         }
     }
 
+    @BusinessOnly
     @Transactional
     public GetHotelRevenueResponse findRevenue(long hotelId, Member actor) {
         Hotel hotel = getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
-            throw new ServiceException("403-2", "해당 호텔의 사업자가 아닙니다.");
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
         long hotelRevenue = 0;
@@ -288,7 +303,7 @@ public class HotelService {
 
     public Hotel getHotelById(Long hotelId) {
         return this.hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보를 찾을 수 없습니다."));
+                .orElseThrow(ErrorCode.HOTEL_NOT_FOUND::throwServiceException);
     }
 
     // 예약 가능한 호텔 리스트 예약 가능한 객실이 없으면 해당 호텔은 보여주지 않음.
@@ -300,7 +315,6 @@ public class HotelService {
         return hotels.stream()
                 .map(dto -> {
                     Hotel hotel = dto.hotel();
-                    System.out.println("호텔이름 : " + hotel.getHotelName());
                     List<Room> availableRooms = hotel.getRooms().stream()
                             .filter(room -> room.getRoomStatus() == RoomStatus.AVAILABLE)
                             .filter(room -> personal >= room.getStandardNumber() && personal <= room.getMaxNumber())
@@ -361,14 +375,14 @@ public class HotelService {
             try {
                 // URL 디코딩 후 JSON 파싱
                 String decodedValue = URLDecoder.decode(roleCookieOpt.get().getValue(), StandardCharsets.UTF_8);
-                Map<String, Object> roleData = Ut.json.toMap(decodedValue);
+                Map<String, Object> roleData = json.toMap(decodedValue);
 
                 // 데이터 업데이트
                 roleData.put("hasHotel", true);
                 roleData.put("hotelId", hotelId); // 새로운 호텔 ID
 
                 // 다시 JSON으로 변환하고 URL 인코딩
-                String updatedEncodedData = URLEncoder.encode(Ut.json.toString(roleData), StandardCharsets.UTF_8);
+                String updatedEncodedData = URLEncoder.encode(json.toString(roleData), StandardCharsets.UTF_8);
 
                 // 새 쿠키 생성 및 설정
                 Cookie updatedCookie = new Cookie("role", updatedEncodedData);
