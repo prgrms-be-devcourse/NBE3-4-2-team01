@@ -12,6 +12,7 @@ import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.member.member.entity.Member;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,9 +46,9 @@ public class BookingService {
     public void create(Member member, BookingRequest bookingRequest) {
         try {
             Room room = roomRepository.findById(bookingRequest.roomId())
-                    .orElseThrow(() -> new ServiceException("404", "객실 정보를 찾을 수 없습니다."));
+                    .orElseThrow(() -> ErrorCode.BOOKING_ROOM_NOT_FOUND.throwServiceException());
             Hotel hotel = hotelRepository.findById(bookingRequest.hotelId())
-                    .orElseThrow(() -> new ServiceException("404", "호텔 정보를 찾을 수 없습니다."));
+                    .orElseThrow(() -> ErrorCode.BOOKING_HOTEL_NOT_FOUND.throwServiceException());
             Payment payment = paymentService.create(bookingRequest);
 
             // Booking 생성, 리팩터링 예정
@@ -66,8 +67,7 @@ public class BookingService {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            log.error("예약 처리 중 에러 발생", e);
-            throw new ServiceException("500", "예약에 실패했습니다.");
+            ErrorCode.BOOKING_CREATE_FAIL.throwServiceException(e);
         }
     }
 
@@ -87,14 +87,14 @@ public class BookingService {
     public Page<BookingResponseSummary> tryGetHotelBookings(Member member, int page, int pageSize) {
         // 호텔 사업자만 조회 가능
         if (!member.isBusiness()) {
-            throw new ServiceException("401", "예약 조회 권한이 없습니다.");
+            ErrorCode.BOOKING_ACCESS_FORBIDDEN.throwServiceException();
         }
 
         Hotel myHotel = member.getBusiness().getHotel();
 
         // 내 호텔이 없을 경우
         if (myHotel == null) {
-            throw new ServiceException("404", "등록된 호텔이 없습니다.");
+            ErrorCode.BOOKING_MY_HOTEL_NOT_FOUND.throwServiceException();
         }
 
         return findByHotel(myHotel, page, pageSize).map((booking) -> bookingDtoMapper.getSummary(booking));
@@ -106,7 +106,7 @@ public class BookingService {
 
         // 관리자, 예약자, 호텔 사업자만 조회 가능
         if (!member.isAdmin() && !booking.isReservedBy(member) && !booking.isOwnedBy(member)) {
-            throw new ServiceException("401", "예약 조회 권한이 없습니다.");
+            ErrorCode.BOOKING_ACCESS_FORBIDDEN.throwServiceException();
         }
 
         return bookingDtoMapper.getDetails(booking);
@@ -121,17 +121,17 @@ public class BookingService {
 
         // 인가, 관리자/예약 당사자/호텔 주인일 경우 가능
         if (!member.isAdmin() && !booking.isReservedBy(member) && !booking.isOwnedBy(member)) {
-            throw new ServiceException("401", "예약 취소 권한이 없습니다.");
+            ErrorCode.BOOKING_CANCEL_FORBIDDEN.throwServiceException();
         }
         // 이미 취소된 예약일 경우
         if (booking.getBookingStatus() == BookingStatus.CANCELLED
                 && booking.getPayment().getPaymentStatus() == PaymentStatus.CANCELLED) {
-            throw new ServiceException("400", "이미 취소된 예약입니다.");
+            ErrorCode.BOOKING_CANCEL_TO_CANCEL.throwServiceException();
         }
 
         // 완료된 예약일 경우
         if (booking.getBookingStatus() == BookingStatus.COMPLETED) {
-            throw new ServiceException("400", "완료된 예약은 취소할 수 없습니다.");
+            ErrorCode.BOOKING_COMPLETE_TO_CANCEL.throwServiceException();
         }
 
         cancel(booking);
@@ -151,8 +151,7 @@ public class BookingService {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            log.error("예약 취소 중 에러 발생", e);
-            throw new ServiceException("500", "예약 취소에 실패했습니다.");
+            ErrorCode.BOOKING_CANCEL_FAIL.throwServiceException(e);
         }
     }
 
@@ -162,17 +161,17 @@ public class BookingService {
 
         // 인가, 관리자/호텔 사업자만 완료 처리 가능
         if (!member.isAdmin() && !booking.isOwnedBy(member)) {
-            throw new ServiceException("401", "예약 완료 처리 권한이 없습니다.");
+            ErrorCode.BOOKING_COMPLETE_FORBIDDEN.throwServiceException();
         }
 
         // 이미 완료 처리된 예약일 경우
         if (booking.getBookingStatus() == BookingStatus.COMPLETED) {
-            throw new ServiceException("400", "이미 완료된 예약입니다.");
+            ErrorCode.BOOKING_COMPLETE_TO_COMPLETE.throwServiceException();
         }
 
         // 취소된 예약일 경우
         if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
-            throw new ServiceException("400", "취소된 예약은 완료 처리할 수 없습니다.");
+            ErrorCode.BOOKING_CANCEL_TO_COMPLETE.throwServiceException();
         }
 
         setCompleted(booking);
@@ -186,15 +185,14 @@ public class BookingService {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            log.error("예약 완료 처리 중 에러 발생", e);
-            throw new ServiceException("500", "예약 완료 처리에 실패했습니다.");
+            ErrorCode.BOOKING_COMPLETE_FAIL.throwServiceException(e);
         }
     }
 
     // 기본 조회 메서드
     public Booking findById(long id) {
         return bookingRepository.findById(id)
-                .orElseThrow(() -> new ServiceException("404", "예약 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> ErrorCode.BOOKING_NOT_FOUND.throwServiceException());
     }
 
     public Page<Booking> findByMember(Member member, int page, int pageSize) {
