@@ -53,7 +53,7 @@ public class HotelOptionControllerTest {
     void addHotelOptionTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        post("/admin/hotel-options")
+                        post("/api/admin/hotel-options")
                                 .content("""
                                         {
                                             "name": "추가 테스트"
@@ -78,7 +78,7 @@ public class HotelOptionControllerTest {
     void getAllHotelOptionsTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/hotel-options")
+                        get("/api/admin/hotel-options")
                 )
                 .andDo(print());
 
@@ -95,7 +95,7 @@ public class HotelOptionControllerTest {
     void getHotelOptionByIdTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/hotel-options/{id}", testId)
+                        get("/api/admin/hotel-options/{id}", testId)
                 )
                 .andDo(print());
 
@@ -112,7 +112,7 @@ public class HotelOptionControllerTest {
     void modifyHotelOptionTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        put("/admin/hotel-options/{id}", testId)
+                        patch("/api/admin/hotel-options/{id}", testId)
                                 .content("""
                                         {
                                             "name": "수정됨"
@@ -137,7 +137,7 @@ public class HotelOptionControllerTest {
     void deleteHotelOptionTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        delete("/admin/hotel-options/{id}", testId)
+                        delete("/api/admin/hotel-options/{id}", testId)
                 )
                 .andDo(print());
 

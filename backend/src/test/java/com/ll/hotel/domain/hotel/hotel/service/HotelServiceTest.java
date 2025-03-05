@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.HotelWithImageDto;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
@@ -14,32 +15,35 @@ import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
-import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
 import com.ll.hotel.domain.hotel.option.entity.HotelOption;
 import com.ll.hotel.domain.hotel.option.service.HotelOptionService;
+import com.ll.hotel.domain.hotel.room.entity.Room;
+import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
+import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
+import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.standard.base.Empty;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.swing.text.html.Option;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -55,32 +59,30 @@ class HotelServiceTest {
     private HotelRepository hotelRepository;
 
     @Autowired
+    private RoomRepository roomRepository;
+
+    @Autowired
     private BusinessRepository businessRepository;
 
     @Autowired
     private MemberRepository memberRepository;
 
-    @BeforeEach
-    public void beforeEach() {
-        this.createOthersForHotel();
-    }
-
     @Test
     @DisplayName("호텔 생성")
     public void createHotel() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Business business = this.businessRepository.findAll().getFirst();
+        // given
+        Business business = this.createBusiness("새사장1", "newBusiness1@gmail.com");
+        Member actor = business.getMember();
+        Set<String> hotelOptions = this.hotelOptionService.findAll()
+                .stream()
+                .map(HotelOption::getName)
+                .collect(Collectors.toSet());
 
-        this.hotelOptionService.add(new OptionRequest("Parking_lot"));
-        this.hotelOptionService.add(new OptionRequest("Breakfast"));
-        this.hotelOptionService.add(new OptionRequest("Lunch"));
-
-        Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
-
-        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
+        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔3", "hotel3@naver.com",
                 "010-1234-1234", "서울시", 0123,
-                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
+                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔3입니다.", null, hotelOptions);
 
+        // when
         PostHotelResponse postHotelResponse = this.hotelService.createHotel(actor, postHotelRequest);
 
         Hotel hotel = this.hotelRepository.findById(postHotelResponse.hotelId()).get();
@@ -88,33 +90,74 @@ class HotelServiceTest {
         business.setHotel(hotel);
         this.businessRepository.save(business);
 
-        Set<String> hotelNames = hotel.getHotelOptions().stream()
-                .map(HotelOption::getName)
-                .collect(Collectors.toSet());
-
-        assertEquals(this.hotelRepository.count(), 1L);
-
-        assertEquals(hotel.getHotelName(), "호텔1");
-        assertEquals(hotel.getHotelEmail(), "hotel@naver.com");
+        // then
+        assertEquals(this.hotelRepository.count(), 2L);
+        assertEquals(hotel.getHotelName(), "호텔3");
+        assertEquals(hotel.getHotelEmail(), "hotel3@naver.com");
         assertEquals(hotel.getHotelPhoneNumber(), "010-1234-1234");
         assertEquals(hotel.getBusiness().getId(), business.getId());
         assertEquals(hotel.getBusiness().getMember().getRole(), Role.BUSINESS);
         assertEquals(hotel.getBusiness().getHotel(), hotel);
-        assertEquals(hotel.getHotelOptions().size(), 3);
-        assertTrue(hotelNames.contains("Parking_lot"));
-        assertTrue(hotelNames.contains("Breakfast"));
-        assertTrue(hotelNames.contains("Lunch"));
-        assertFalse(hotelNames.contains("AirConditioner"));
+        assertEquals(hotel.getHotelOptions().size(), 2);
+
+        Set<String> hotelNames = hotel.getHotelOptions().stream()
+                .map(HotelOption::getName)
+                .collect(Collectors.toSet());
+
+        assertTrue(hotelNames.contains("무료 Wi-Fi"));
+        assertTrue(hotelNames.contains("프론트 데스크"));
+    }
+
+    @Test
+    @DisplayName("호텔 생성 실패 - 비사업가 호텔 생성 시도")
+    public void createHotelFailed_notBusiness() {
+        // given
+        Member actor = this.memberRepository.findByMemberName("customer1").get();
+
+        Set<String> hotelOptions = new HashSet<>();
+
+        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
+                "010-1234-1234", "서울시", 0123,
+                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
+
+        // when
+        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+            this.hotelService.createHotel(actor, postHotelRequest);
+        }).getRsData();
+
+        // then
+        assertEquals(403, rsData.getStatusCode());
+        assertEquals("사업가만 관리할 수 있습니다.", rsData.getMsg());
+    }
+
+    @Test
+    @DisplayName("호텔 생성 실패 - 사업가 1개 이상 호텔 생성 시도")
+    public void createHotelFailed_severalCreate() {
+        // given
+        Member actor = this.memberRepository.findByMemberName("business1").get();
+
+        Set<String> hotelOptions = new HashSet<>();
+
+        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
+                "010-1234-1234", "서울시", 0123,
+                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
+
+        // when
+        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+            this.hotelService.createHotel(actor, postHotelRequest);
+        }).getRsData();
+
+        // then
+        assertEquals(409, rsData.getStatusCode());
+        assertEquals("한 사업자는 하나의 호텔만 등록할 수 있습니다.", rsData.getMsg());
     }
 
     @Test
     @DisplayName("호텔 생성 실패 - 존재하지 않는 호텔 옵션")
-    public void createHotelInvalidHotelOptions() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Business business = businessRepository.findAll().getFirst();
-
-        this.hotelOptionService.add(new OptionRequest("Parking_lot"));
-        this.hotelOptionService.add(new OptionRequest("Breakfast"));
+    public void createHotel_invalidHotelOptions() {
+        // given
+        Business business = this.createBusiness("새사장1", "newBusiness1@gmail.com");
+        Member actor = business.getMember();
 
         Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
 
@@ -122,10 +165,12 @@ class HotelServiceTest {
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
 
+        // when
         ServiceException error = assertThrows(ServiceException.class, () -> {
             this.hotelService.createHotel(actor, postHotelRequest);
         });
 
+        // then
         assertEquals(404, error.getRsData().getStatusCode());
         assertEquals("사용할 수 없는 호텔 옵션이 존재합니다.", error.getRsData().getMsg());
     }
@@ -133,368 +178,454 @@ class HotelServiceTest {
     @Test
     @DisplayName("호텔 전체 목록 조회")
     public void findAllHotels() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Business business = this.businessRepository.findAll().getFirst();
+        // given_1
+        Business business = this.createBusiness("새사장1", "newHotel1@gmail.com");
 
         PostHotelRequest req1 = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
-        PostHotelResponse res1 = this.hotelService.createHotel(actor, req1);
+        PostHotelResponse hotelRes = this.hotelService.createHotel(business.getMember(), req1);
+        Hotel hotel = this.hotelRepository.findById(hotelRes.hotelId()).get();
 
-        Hotel hotel = this.hotelRepository.findById(res1.hotelId()).get();
-
-        business.setHotel(hotel);
-        this.businessRepository.save(business);
-
-        Member member = Member.builder()
-                .memberEmail("business@naver.com")
-                .memberName("b2")
-                .memberPhoneNumber("010-1111-1111")
-                .birthDate(LocalDate.of(2000, 1, 1))
-                .role(Role.BUSINESS)
-                .memberStatus(MemberStatus.ACTIVE)
+        Room room = Room.builder()
+                .roomName("새객실1")
+                .roomNumber(3)
+                .hotel(hotel)
+                .standardNumber(2)
+                .maxNumber(6)
                 .build();
 
-        business = Business.builder()
-                .businessRegistrationNumber("1111111111")
-                .startDate(LocalDate.now().minusDays(1))
-                .ownerName("Business2")
-                .member(member)
-                .build();
+        this.roomRepository.save(room);
+        List<Room> rooms = hotel.getRooms();
+        rooms.add(room);
+        hotel.setRooms(rooms);
+        this.hotelRepository.save(hotel);
 
-        member.setBusiness(business);
-
-        this.memberRepository.save(member);
-        this.businessRepository.save(business);
+        // given_2
+        business = this.createBusiness("새사장2", "newHotel2@gmail.com");
 
         PostHotelRequest req2 = new PostHotelRequest("호텔2", "sin@naver.com",
                 "010-1111-1111", "부산시", 1111,
                 5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
 
-        PostHotelResponse res2 = this.hotelService.createHotel(member, req2);
+        hotelRes = this.hotelService.createHotel(business.getMember(), req2);
+        hotel = this.hotelRepository.findById(hotelRes.hotelId()).get();
 
-        hotel = this.hotelRepository.findById(res2.hotelId()).get();
-        business.setHotel(hotel);
+        room = Room.builder()
+                .roomName("새객실2")
+                .roomNumber(3)
+                .hotel(hotel)
+                .standardNumber(2)
+                .maxNumber(6)
+                .build();
 
-        Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", "asc", "", LocalDate.now(),
-                LocalDate.now().plusDays(1), 2);
+        this.roomRepository.save(room);
+        rooms = hotel.getRooms();
+        rooms.add(room);
+        hotel.setRooms(rooms);
+        this.hotelRepository.save(hotel);
+
+        // tempLine
+        Page<HotelWithImageDto> allHotels = this.hotelRepository.findAllHotels(ImageType.HOTEL, "서울",
+                PageRequest.of(1, 10));
+        List<Hotel> hotels = this.hotelRepository.findAll();
+        //
+
+        // when
+        Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", "asc", "",
+                LocalDate.now().plusDays(30),
+                LocalDate.now().plusDays(31), 2);
         List<GetHotelResponse> list = resultPage.getContent();
-        GetHotelResponse Allres1 = list.getFirst();
-        GetHotelResponse Allres2 = list.getLast();
+        GetHotelResponse resFirst = list.getFirst();
+        GetHotelResponse resLast = list.getLast();
 
-        assertEquals(Allres1.hotelId(), res1.hotelId());
-        assertEquals(Allres2.hotelId(), res2.hotelId());
-        assertEquals(Allres1.hotelName(), "호텔1");
-        assertEquals(Allres2.hotelName(), "호텔2");
-        assertEquals(Allres1.streetAddress(), "서울시");
-        assertEquals(Allres2.streetAddress(), "부산시");
+        // then
+        assertEquals(this.hotelRepository.findAll().size(), list.size());
+        assertEquals(resFirst.hotelName(), "강남호텔");
+        assertEquals(resLast.hotelName(), "호텔2");
+        assertEquals(resFirst.streetAddress(), "서울시 강남구 호텔로 10");
+        assertEquals(resLast.streetAddress(), "부산시");
     }
 
     @Test
     @DisplayName("호텔 전체 목록 조회 - filterDirection 값을 입력하지 않았을 경우")
     public void findAllHotelsWithoutFilterDirection() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Business business = this.businessRepository.findAll().getFirst();
+        // given_1
+        Business business = this.createBusiness("새사장1", "newHotel1@gmail.com");
 
         PostHotelRequest req1 = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
-        PostHotelResponse res1 = this.hotelService.createHotel(actor, req1);
+        PostHotelResponse hotelRes = this.hotelService.createHotel(business.getMember(), req1);
+        Hotel hotel = this.hotelRepository.findById(hotelRes.hotelId()).get();
 
-        Hotel hotel = this.hotelRepository.findById(res1.hotelId()).get();
-
-        business.setHotel(hotel);
-        this.businessRepository.save(business);
-
-        Member member = Member.builder()
-                .memberEmail("business@naver.com")
-                .memberName("b2")
-                .memberPhoneNumber("010-1111-1111")
-                .birthDate(LocalDate.of(2000, 1, 1))
-                .role(Role.BUSINESS)
-                .memberStatus(MemberStatus.ACTIVE)
+        Room room = Room.builder()
+                .roomName("새객실1")
+                .roomNumber(3)
+                .hotel(hotel)
+                .standardNumber(2)
+                .maxNumber(6)
                 .build();
 
-        business = Business.builder()
-                .businessRegistrationNumber("1111111111")
-                .startDate(LocalDate.now().minusDays(1))
-                .ownerName("Business2")
-                .member(member)
-                .build();
+        this.roomRepository.save(room);
+        List<Room> rooms = hotel.getRooms();
+        rooms.add(room);
+        hotel.setRooms(rooms);
+        this.hotelRepository.save(hotel);
 
-        member.setBusiness(business);
-
-        this.memberRepository.save(member);
-        this.businessRepository.save(business);
+        // given_2
+        business = this.createBusiness("새사장2", "newHotel2@gmail.com");
 
         PostHotelRequest req2 = new PostHotelRequest("호텔2", "sin@naver.com",
                 "010-1111-1111", "부산시", 1111,
                 5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
 
-        PostHotelResponse res2 = this.hotelService.createHotel(member, req2);
+        hotelRes = this.hotelService.createHotel(business.getMember(), req2);
+        hotel = this.hotelRepository.findById(hotelRes.hotelId()).get();
 
-        hotel = this.hotelRepository.findById(res2.hotelId()).get();
-        business.setHotel(hotel);
+        room = Room.builder()
+                .roomName("새객실2")
+                .roomNumber(3)
+                .hotel(hotel)
+                .standardNumber(2)
+                .maxNumber(6)
+                .build();
 
-        Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", null, "", LocalDate.now(),
-                LocalDate.now().plusDays(1), 2);
+        this.roomRepository.save(room);
+        rooms = hotel.getRooms();
+        rooms.add(room);
+        hotel.setRooms(rooms);
+        this.hotelRepository.save(hotel);
+
+        // when
+        Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", null, "",
+                LocalDate.now().plusDays(30),
+                LocalDate.now().plusDays(31), 2);
         List<GetHotelResponse> list = resultPage.getContent();
-        GetHotelResponse Allres1 = list.getFirst();
-        GetHotelResponse Allres2 = list.getLast();
+        GetHotelResponse resFirst = list.getFirst();
+        GetHotelResponse resLast = list.getLast();
 
-        assertEquals(Allres1.hotelId(), res2.hotelId());
-        assertEquals(Allres2.hotelId(), res1.hotelId());
-        assertEquals(Allres1.hotelName(), "호텔2");
-        assertEquals(Allres2.hotelName(), "호텔1");
-        assertEquals(Allres1.streetAddress(), "부산시");
-        assertEquals(Allres2.streetAddress(), "서울시");
+        // then
+        assertEquals(this.hotelRepository.findAll().size(), list.size());
+        assertEquals(resFirst.hotelName(), "호텔2");
+        assertEquals(resLast.hotelName(), "강남호텔");
+        assertEquals(resFirst.streetAddress(), "부산시");
+        assertEquals(resLast.streetAddress(), "서울시 강남구 호텔로 10");
     }
 
     @Test
     @DisplayName("호텔 전체 목록 조회 - 주소지 검색")
     public void findAllHotelsWithStreetAddress() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Business business = this.businessRepository.findAll().getFirst();
+        // given_1
+        Business business = this.createBusiness("새사장1", "newHotel1@gmail.com");
 
         PostHotelRequest req1 = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
-        PostHotelResponse res1 = this.hotelService.createHotel(actor, req1);
+        PostHotelResponse hotelRes = this.hotelService.createHotel(business.getMember(), req1);
+        Hotel hotel = this.hotelRepository.findById(hotelRes.hotelId()).get();
 
-        Hotel hotel = this.hotelRepository.findById(res1.hotelId()).get();
-
-        business.setHotel(hotel);
-        this.businessRepository.save(business);
-
-        Member member = Member.builder()
-                .memberEmail("business@naver.com")
-                .memberName("b2")
-                .memberPhoneNumber("010-1111-1111")
-                .birthDate(LocalDate.of(2000, 1, 1))
-                .role(Role.BUSINESS)
-                .memberStatus(MemberStatus.ACTIVE)
+        Room room = Room.builder()
+                .roomName("새객실1")
+                .roomNumber(3)
+                .hotel(hotel)
+                .standardNumber(2)
+                .maxNumber(6)
                 .build();
 
-        business = Business.builder()
-                .businessRegistrationNumber("1111111111")
-                .startDate(LocalDate.now().minusDays(1))
-                .ownerName("Business2")
-                .member(member)
-                .build();
+        this.roomRepository.save(room);
+        List<Room> rooms = hotel.getRooms();
+        rooms.add(room);
+        hotel.setRooms(rooms);
+        this.hotelRepository.save(hotel);
 
-        member.setBusiness(business);
-
-        this.memberRepository.save(member);
-        this.businessRepository.save(business);
+        // given_2
+        business = this.createBusiness("새사장2", "newHotel2@gmail.com");
 
         PostHotelRequest req2 = new PostHotelRequest("호텔2", "sin@naver.com",
                 "010-1111-1111", "부산시", 1111,
                 5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
 
-        PostHotelResponse res2 = this.hotelService.createHotel(member, req2);
+        hotelRes = this.hotelService.createHotel(business.getMember(), req2);
+        hotel = this.hotelRepository.findById(hotelRes.hotelId()).get();
 
-        hotel = this.hotelRepository.findById(res2.hotelId()).get();
-        business.setHotel(hotel);
+        room = Room.builder()
+                .roomName("새객실2")
+                .roomNumber(3)
+                .hotel(hotel)
+                .standardNumber(2)
+                .maxNumber(6)
+                .build();
 
-        Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", null, "서울",
-                LocalDate.now(),
-                LocalDate.now().plusDays(1), 2);
+        this.roomRepository.save(room);
+        rooms = hotel.getRooms();
+        rooms.add(room);
+        hotel.setRooms(rooms);
+        this.hotelRepository.save(hotel);
+
+        // when
+        Page<GetHotelResponse> resultPage = this.hotelService.findAllHotels(1, 10, "latest", "asc", "서울",
+                LocalDate.now().plusDays(30),
+                LocalDate.now().plusDays(31), 2);
         List<GetHotelResponse> list = resultPage.getContent();
-        GetHotelResponse Allres1 = list.getFirst();
+        GetHotelResponse resFirst = list.getFirst();
+        GetHotelResponse resLast = list.getLast();
 
-        assertEquals(list.size(), 1);
-        assertEquals(Allres1.hotelId(), res1.hotelId());
-        assertEquals(Allres1.hotelName(), "호텔1");
-        assertEquals(Allres1.streetAddress(), "서울시");
+        // then
+        assertEquals(2, list.size());
+        assertEquals(resFirst.hotelName(), "강남호텔");
+        assertEquals(resLast.hotelName(), "호텔1");
+        assertEquals(resFirst.streetAddress(), "서울시 강남구 호텔로 10");
+        assertEquals(resLast.streetAddress(), "서울시");
     }
 
     @Test
     @DisplayName("호텔 단일 목록 조회")
     public void findHotelDetail() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Business business = this.businessRepository.findAll().getFirst();
+        // given_1
+        Member actor = this.memberRepository.findByMemberName("business1").get();
+        Business business = this.businessRepository.findByMember(actor).get();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+
+        // when_1
+        GetHotelDetailResponse detRes = this.hotelService.findHotelDetail(hotel.getId());
+
+        // then_1
+        assertEquals(hotel.getId(), detRes.hotelDetailDto().hotelId());
+        assertEquals("강남호텔", detRes.hotelDetailDto().hotelName());
+        assertEquals("서울시 강남구 호텔로 10", detRes.hotelDetailDto().streetAddress());
+        assertTrue(detRes.hotelDetailDto().hotelOptions().contains("무료 Wi-Fi"));
+        assertTrue(detRes.hotelDetailDto().hotelOptions().contains("프론트 데스크"));
+
+        // given_2
+        business = this.createBusiness("새사장1", "newHotel1@gmail.com");
 
         PostHotelRequest req1 = new PostHotelRequest("호텔1", "hotel@naver.com",
                 "010-1234-1234", "서울시", 0123,
                 3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
 
-        PostHotelResponse res1 = this.hotelService.createHotel(actor, req1);
-        Hotel hotel = this.hotelRepository.findById(res1.hotelId()).get();
+        PostHotelResponse res1 = this.hotelService.createHotel(business.getMember(), req1);
+        hotel = this.hotelRepository.findById(res1.hotelId()).get();
 
         business.setHotel(hotel);
         this.businessRepository.save(business);
 
-        GetHotelDetailResponse detRes1 = this.hotelService.findHotelDetail(hotel.getId());
+        // when_2
+        detRes = this.hotelService.findHotelDetail(hotel.getId());
 
-        assertEquals(res1.hotelId(), detRes1.hotelDetailDto().hotelId());
-        assertEquals("호텔1", detRes1.hotelDetailDto().hotelName());
-        assertEquals(LocalTime.of(12, 0), detRes1.hotelDetailDto().checkInTime());
-        assertEquals(detRes1.hotelDetailDto().hotelOptions().size(), 0);
-
-        Member member = Member.builder()
-                .memberEmail("business@naver.com")
-                .memberName("b2")
-                .memberPhoneNumber("010-1111-1111")
-                .birthDate(LocalDate.of(2000, 1, 1))
-                .role(Role.BUSINESS)
-                .memberStatus(MemberStatus.ACTIVE)
-                .build();
-
-        business = Business.builder()
-                .businessRegistrationNumber("1111111111")
-                .startDate(LocalDate.now().minusDays(1))
-                .ownerName("Business2")
-                .member(member)
-                .build();
-
-        member.setBusiness(business);
-
-        this.memberRepository.save(member);
-        this.businessRepository.save(business);
-
-        PostHotelRequest req2 = new PostHotelRequest("호텔2", "sin@naver.com",
-                "010-1111-1111", "부산시", 1111,
-                5, LocalTime.of(14, 0), LocalTime.of(16, 0), "신호텔", null, null);
-
-        PostHotelResponse res2 = this.hotelService.createHotel(member, req2);
-
-        hotel = this.hotelRepository.findById(res2.hotelId()).get();
-        business.setHotel(hotel);
-        this.businessRepository.save(business);
-
-        detRes1 = this.hotelService.findHotelDetail(hotel.getId());
-
-        assertEquals(res2.hotelId(), detRes1.hotelDetailDto().hotelId());
-        assertEquals("호텔2", detRes1.hotelDetailDto().hotelName());
-        assertEquals(LocalTime.of(14, 0), detRes1.hotelDetailDto().checkInTime());
-        assertEquals(detRes1.hotelDetailDto().hotelOptions().size(), 0);
+        // then_2
+        assertEquals(res1.hotelId(), detRes.hotelDetailDto().hotelId());
+        assertEquals("호텔1", detRes.hotelDetailDto().hotelName());
+        assertEquals("서울시", detRes.hotelDetailDto().streetAddress());
+        assertEquals(detRes.hotelDetailDto().hotelOptions().size(), 0);
     }
 
     @Test
     @DisplayName("호텔 수정")
     public void modifyHotel() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Business business = businessRepository.findAll().getFirst();
-        this.hotelOptionService.add(new OptionRequest("Parking_lot"));
-        this.hotelOptionService.add(new OptionRequest("Breakfast"));
-        this.hotelOptionService.add(new OptionRequest("Lunch"));
-        this.hotelOptionService.add(new OptionRequest("Dinner"));
-        Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
+        // given
+        Member actor = this.memberRepository.findByMemberName("business1").get();
+        Business business = this.businessRepository.findByMember(actor).get();
+        Set<String> hotelOptions = new HashSet<>(Set.of("무료 Wi-Fi"));
 
-        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
-                "010-1234-1234", "서울시", 0123,
-                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
-
-        PostHotelResponse postHotelResponse = this.hotelService.createHotel(actor, postHotelRequest);
-
-        Hotel hotel = this.hotelRepository.findById(postHotelResponse.hotelId()).get();
-
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
         long hotelId = hotel.getId();
-        business.setHotel(hotel);
-        this.businessRepository.save(business);
 
-        hotelOptions = new HashSet<>(Set.of("Parking_lot", "Dinner"));
+        PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", "", 0123, 1,
+                LocalTime.now(), LocalTime.now(), "", HotelStatus.AVAILABLE.name(), null, null, hotelOptions);
 
-        PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", null, 0123, null,
-                null, null, null, null, null, null, hotelOptions);
-
+        // when
         PutHotelResponse res1 = this.hotelService.modifyHotel(hotelId, actor, req1);
 
-        hotel = this.hotelRepository.findById(res1.hotelId()).get();
+        hotel = this.hotelRepository.findById(hotelId).get();
 
         Set<String> hotelOptionNames = hotel.getHotelOptions().stream()
                 .map(HotelOption::getName)
                 .collect(Collectors.toSet());
 
-        assertEquals(hotel.getId(), hotelId);
-        assertEquals(hotel.getStreetAddress(), postHotelRequest.streetAddress());
+        // then
+        assertEquals(hotel.getId(), res1.hotelId());
+        assertEquals(hotel.getStreetAddress(), req1.streetAddress());
         assertEquals(hotel.getZipCode(), req1.zipCode());
-        assertEquals(hotel.getCheckInTime(), postHotelRequest.checkInTime());
-        assertEquals(hotel.getHotelName(), req1.hotelName());
+        assertEquals(hotel.getCheckInTime(), req1.checkInTime());
+        assertEquals(hotel.getHotelName(), res1.hotelName());
         assertEquals(hotel.getHotelEmail(), req1.hotelEmail());
-        assertEquals(hotelOptionNames, hotelOptions);
+        assertEquals(1, hotelOptionNames.size());
+        assertTrue(hotelOptionNames.contains("무료 Wi-Fi"));
+        assertFalse(hotelOptionNames.contains("프론트 데스크"));
+    }
+
+    @Test
+    @DisplayName("호텔 수정 실패 - 사업자가 아닐 경우")
+    public void modifyHotelFailed_notBusiness() {
+        // given
+        Member actor = this.memberRepository.findByMemberName("customer1").get();
+
+        Member businessMem = this.memberRepository.findByMemberName("business1").get();
+        Business business = this.businessRepository.findByMember(businessMem).get();
+        Set<String> hotelOptions = new HashSet<>();
+
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+
+        PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", "", 0123, 1,
+                LocalTime.now(), LocalTime.now(), "", HotelStatus.AVAILABLE.name(), null, null, hotelOptions);
+
+        // when
+        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+            this.hotelService.modifyHotel(hotel.getId(), actor, req1);
+        }).getRsData();
+
+        // then
+        assertEquals(403, rsData.getStatusCode());
+        assertEquals("사업가만 관리할 수 있습니다.", rsData.getMsg());
+    }
+
+    @Test
+    @DisplayName("호텔 수정 실패 - 호텔 소유주가 아닐 경우")
+    public void modifyHotelFailed_notEqualBusiness() {
+        // given
+        Business newBusiness = this.createBusiness("새사장1", "newHotel1@gmail.com");
+
+        Member businessMem = this.memberRepository.findByMemberName("business1").get();
+        Business business = this.businessRepository.findByMember(businessMem).get();
+        Set<String> hotelOptions = new HashSet<>();
+
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+        long hotelId = hotel.getId();
+
+        PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", "", 0123, 1,
+                LocalTime.now(), LocalTime.now(), "", HotelStatus.AVAILABLE.name(), null, null, hotelOptions);
+
+        // when
+        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+            this.hotelService.modifyHotel(hotelId, newBusiness.getMember(), req1);
+        }).getRsData();
+
+        // then
+        assertEquals(403, rsData.getStatusCode());
+        assertEquals("해당 호텔의 사업자가 아닙니다.", rsData.getMsg());
     }
 
     @Test
     @DisplayName("호텔 수정 실패 - 존재하지 않는 호텔 옵션")
-    public void modifyHotelInvalidHotelOptions() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Business business = businessRepository.findAll().getFirst();
-        this.hotelOptionService.add(new OptionRequest("Parking_lot"));
-        this.hotelOptionService.add(new OptionRequest("Breakfast"));
-        this.hotelOptionService.add(new OptionRequest("Lunch"));
-        Set<String> hotelOptions = new HashSet<>(Set.of("Parking_lot", "Breakfast", "Lunch"));
+    public void modifyHotelFailed_invalidHotelOptions() {
+        // given
+        Member actor = this.memberRepository.findByMemberName("business1").get();
+        Business business = this.businessRepository.findByMember(actor).get();
+        Set<String> hotelOptions = new HashSet<>(Set.of("에어컨"));
 
-        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
-                "010-1234-1234", "서울시", 0123,
-                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, hotelOptions);
-
-        PostHotelResponse postHotelResponse = this.hotelService.createHotel(actor, postHotelRequest);
-
-        Hotel hotel = this.hotelRepository.findById(postHotelResponse.hotelId()).get();
-
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
         long hotelId = hotel.getId();
-        business.setHotel(hotel);
-        this.businessRepository.save(business);
 
-        hotelOptions = new HashSet<>(Set.of("Parking_lot", "Dinner"));
+        PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", "", 0123, 1,
+                LocalTime.now(), LocalTime.now(), "", HotelStatus.AVAILABLE.name(), null, null, hotelOptions);
 
-        PutHotelRequest req1 = new PutHotelRequest("수정된 호텔1", "moHotel@naver.com", "010-1111-2222", null, 0123, null,
-                null, null, null, null, null, null, hotelOptions);
-
-        ServiceException error = assertThrows(ServiceException.class, () -> {
+        // when
+        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
             this.hotelService.modifyHotel(hotelId, actor, req1);
-        });
+        }).getRsData();
 
-        assertEquals(404, error.getRsData().getStatusCode());
-        assertEquals("사용할 수 없는 호텔 옵션이 존재합니다.", error.getRsData().getMsg());
+        // then
+        assertEquals(404, rsData.getStatusCode());
+        assertEquals("사용할 수 없는 호텔 옵션이 존재합니다.", rsData.getMsg());
     }
 
     @Test
     @DisplayName("호텔 삭제")
     public void deleteHotel() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Business business = this.businessRepository.findAll().getFirst();
+        // given
+        Member actor = this.memberRepository.findByMemberName("business1").get();
+        Business business = this.businessRepository.findByMember(actor).get();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
 
-        PostHotelRequest postHotelRequest = new PostHotelRequest("호텔1", "hotel@naver.com",
-                "010-1234-1234", "서울시", 0123,
-                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
-
-        PostHotelResponse postHotelResponse = this.hotelService.createHotel(actor, postHotelRequest);
-
-        Hotel hotel = this.hotelRepository.findById(postHotelResponse.hotelId()).get();
-
-        business.setHotel(hotel);
-        this.businessRepository.save(business);
-
+        // when
         this.hotelService.deleteHotel(hotel.getId(), actor);
 
+        // then
         assertEquals(HotelStatus.UNAVAILABLE, hotel.getHotelStatus());
     }
 
-    public void createOthersForHotel() {
-        Member member = Member.builder()
-                .memberEmail("member@naver.com")
-                .memberName("business")
-                .memberPhoneNumber("010-1234-5678")
-                .birthDate(LocalDate.of(2020, 2, 2))
-                .role(Role.BUSINESS)
+    @Test
+    @DisplayName("호텔 삭제 실패 - 사업자가 아닐 경우")
+    public void deleteHotelFailed_notBusiness() {
+        // given
+        Member actor = this.memberRepository.findByMemberName("customer1").get();
+
+        Member businessMem = this.memberRepository.findByMemberName("business1").get();
+        Business business = this.businessRepository.findByMember(businessMem).get();
+
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+
+        // when
+        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+            this.hotelService.deleteHotel(hotel.getId(), actor);
+        }).getRsData();
+
+        // then
+        assertEquals(403, rsData.getStatusCode());
+        assertEquals("사업가만 관리할 수 있습니다.", rsData.getMsg());
+    }
+
+    @Test
+    @DisplayName("호텔 삭제 실패 - 호텔 소유주가 아닐 경우")
+    public void deleteHotelFailed_notEqualBusiness() {
+        // given
+        Business newBusiness = this.createBusiness("새사장1", "newHotel1@gmail.com");
+
+        Member actor = this.memberRepository.findByMemberName("business1").get();
+        Business business = this.businessRepository.findByMember(actor).get();
+
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+
+        // when
+        RsData<Empty> rsData = assertThrows(ServiceException.class, () -> {
+            this.hotelService.deleteHotel(hotel.getId(), newBusiness.getMember());
+        }).getRsData();
+
+        // then
+        assertEquals(403, rsData.getStatusCode());
+        assertEquals("해당 호텔의 사업자가 아닙니다.", rsData.getMsg());
+    }
+
+    // 사업가 생성
+    private Business createBusiness(String name, String email) {
+        // 회원 생성
+        Member member = Member
+                .builder()
+                .birthDate(LocalDate.now())
+                .memberEmail(email)
+                .memberName(name)
+                .memberPhoneNumber("01011111111")
                 .memberStatus(MemberStatus.ACTIVE)
+                .role(Role.BUSINESS)
                 .build();
 
-        Business business = Business.builder()
-                .businessRegistrationNumber("1234567890")
-                .startDate(LocalDate.now().minusDays(1))
-                .ownerName("Business")
+        // 회원 저장
+        memberRepository.save(member);
+
+        // 사업가 등록
+        Business business = Business
+                .builder()
+                .businessRegistrationNumber(createRegistrationNumber())
+                .startDate(LocalDate.now())
+                .ownerName(name)
+                .approvalStatus(BusinessApprovalStatus.APPROVED)
                 .member(member)
+                .hotel(null)
                 .build();
 
-        member.setBusiness(business);
+        // 사업가 저장
+        businessRepository.save(business);
 
-        this.memberRepository.save(member);
-        this.businessRepository.save(business);
+        return business;
+    }
+
+    // 사업가 번호 난수 생성
+    private String createRegistrationNumber() {
+        // 1000000000 ~ 9999999999 난수 생성
+        return String.valueOf((long) ((Math.random() * 9000000000L) + 1000000000L));
     }
 }

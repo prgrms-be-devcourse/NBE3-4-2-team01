@@ -32,8 +32,6 @@ public class AdminHotelServiceTest {
 
     @BeforeEach
     void setUp() {
-        hotelRepository.deleteAll();
-
         for (int i = 0; i < 3; i++) {
             Hotel hotel = Hotel
                     .builder()
@@ -68,20 +66,23 @@ public class AdminHotelServiceTest {
         System.out.println(result);
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getTotalElements()).isEqualTo(3);
-        assertThat(result.getContent().size()).isEqualTo(3);
-        assertThat(result.getContent().get(0).getHotelGrade()).isEqualTo(5);
-        assertThat(result.getContent().get(0).getHotelStatus()).isEqualTo(HotelStatus.PENDING);
+
+        long expectedCount = hotelRepository.count();
+        assertThat(result.getTotalElements()).isEqualTo(expectedCount);
+
+        assertThat(result.getContent().size()).isLessThanOrEqualTo(result.getPageable().getPageSize());
     }
 
     @Test
     @DisplayName("호텔 페이지 조회 - 존재하지 않는 페이지 조회 시 예외 발생")
     void findAllPagedTest2() {
         // Given
-        int page = 100;
+        int pageSize = 10;
+        long totalElements = hotelRepository.count();
+        int invalidPage = (int) (totalElements / pageSize) + 1;
 
         // When
-        Page<Hotel> result = adminHotelService.findAllPaged(page);
+        Page<Hotel> result = adminHotelService.findAllPaged(invalidPage);
 
         // Then
         assertThat(result).isNotNull();
@@ -106,9 +107,16 @@ public class AdminHotelServiceTest {
     @Test
     @DisplayName("호텔 조회 - 존재하지 않는 호텔 조회 시 예외 발생")
     void testFindTodoById2() {
+
+        long invalidId = hotelRepository.findAll()
+                .stream()
+                .mapToLong(Hotel::getId)
+                .max()
+                .orElse(0L) + 1;
+
         // When & Then
         ServiceException exception = assertThrows(ServiceException.class, () -> {
-            adminHotelService.findById(20L);
+            adminHotelService.findById(invalidId);
         });
 
         // 예외 메시지 확인

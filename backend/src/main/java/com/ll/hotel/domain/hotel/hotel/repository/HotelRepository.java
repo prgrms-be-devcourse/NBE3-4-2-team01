@@ -3,8 +3,10 @@ package com.ll.hotel.domain.hotel.hotel.repository;
 import com.ll.hotel.domain.hotel.hotel.dto.HotelWithImageDto;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.image.type.ImageType;
-import java.util.List;
+import com.ll.hotel.domain.member.member.entity.Business;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,8 +28,8 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             OR i is NULL)
             AND h.streetAddress LIKE %:streetAddress%
             """)
-    List<HotelWithImageDto> findAllHotels(@Param("imageType") ImageType imageType,
-                                          @Param("streetAddress") String streetAddress);
+    Page<HotelWithImageDto> findAllHotels(@Param("imageType") ImageType imageType,
+                                          @Param("streetAddress") String streetAddress, PageRequest pageRequest);
 
     @Query("""
             SELECT h
@@ -38,4 +40,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     Optional<Hotel> findHotelDetail(@Param("hotelId") long hotelId);
 
     boolean existsByHotelEmailAndIdNot(String hotelEmail, long hotelId);
+
+    Optional<Hotel> findByBusiness(Business business);
 }

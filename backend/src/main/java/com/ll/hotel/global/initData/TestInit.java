@@ -68,7 +68,7 @@ public class TestInit {
     private TestInit self;
 
     @Bean
-    public ApplicationRunner baseInitApplicationRunner() {
+    public ApplicationRunner testInitApplicationRunner() {
         return args -> {
             self.createData();
         };

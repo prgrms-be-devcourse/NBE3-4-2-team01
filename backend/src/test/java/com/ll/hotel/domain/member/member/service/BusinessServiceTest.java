@@ -1,6 +1,7 @@
 package com.ll.hotel.domain.member.member.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.ll.hotel.domain.member.member.dto.request.BusinessRequest;
 import com.ll.hotel.domain.member.member.entity.Business;
@@ -11,6 +12,8 @@ import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import java.time.LocalDate;
 import java.util.ArrayList;
+
+import com.ll.hotel.global.exceptions.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -73,5 +76,25 @@ public class BusinessServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getApprovalStatus()).isEqualTo(BusinessApprovalStatus.APPROVED);
         assertThat(result.getBusinessRegistrationNumber()).isEqualTo(businessRequest.businessRegistrationNumber());
+    }
+
+    @Test
+    @DisplayName("사업자 등록 실패 - 02")
+    public void registerBusinessFailureTest() {
+        // Given
+        BusinessRequest.RegistrationInfo businessRequest = new BusinessRequest.RegistrationInfo(
+                "1234567890",
+                LocalDate.now(),
+                "김사장"
+        );
+
+        Member member = memberRepository.findById(testId).get();
+
+        // When & Then
+        ServiceException exception = assertThrows(ServiceException.class, () ->
+                businessService.register(businessRequest, member, "02")
+        );
+
+        assertThat(exception.getMessage()).isEqualTo("400 : 유효하지 않은 사업자입니다.");
     }
 }

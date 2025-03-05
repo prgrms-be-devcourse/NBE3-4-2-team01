@@ -53,7 +53,7 @@ public class RoomOptionControllerTest {
     void addRoomOptionTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        post("/admin/room-options")
+                        post("/api/admin/room-options")
                                 .content("""
                                         {
                                             "name": "추가 테스트"
@@ -78,7 +78,7 @@ public class RoomOptionControllerTest {
     void getAllRoomOptionsTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/room-options")
+                        get("/api/admin/room-options")
                 )
                 .andDo(print());
 
@@ -95,7 +95,7 @@ public class RoomOptionControllerTest {
     void getRoomOptionByIdTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/room-options/{id}", testId)
+                        get("/api/admin/room-options/{id}", testId)
                 )
                 .andDo(print());
 
@@ -112,7 +112,7 @@ public class RoomOptionControllerTest {
     void modifyRoomOptionTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        put("/admin/room-options/{id}", testId)
+                        patch("/api/admin/room-options/{id}", testId)
                                 .content("""
                                         {
                                             "name": "수정됨"
@@ -137,7 +137,7 @@ public class RoomOptionControllerTest {
     void deleteRoomOptionTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        delete("/admin/room-options/{id}", testId)
+                        delete("/api/admin/room-options/{id}", testId)
                 )
                 .andDo(print());
 
