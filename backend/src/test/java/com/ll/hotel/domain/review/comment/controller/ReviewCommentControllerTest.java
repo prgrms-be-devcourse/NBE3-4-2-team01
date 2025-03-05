@@ -145,7 +145,7 @@ public class ReviewCommentControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("createReviewComment"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(content().string("리뷰가 존재하지 않습니다"));
     }
 
@@ -239,7 +239,7 @@ public class ReviewCommentControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("updateReviewComment"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(content().string("리뷰 답변이 존재하지 않습니다"));
     }
 
@@ -319,7 +319,7 @@ public class ReviewCommentControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ReviewCommentController.class))
                 .andExpect(handler().methodName("deleteReviewComment"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(content().string("리뷰 답변이 존재하지 않습니다"));
     }
 
