@@ -8,7 +8,6 @@ import com.ll.hotel.domain.member.member.dto.JoinRequest;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
-import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.jwt.dto.GeneratedToken;
 import com.ll.hotel.global.jwt.dto.JwtProperties;
 import com.ll.hotel.global.rq.Rq;
@@ -32,6 +31,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.ll.hotel.global.exceptions.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +72,7 @@ public class MemberService {
                 return member;
             }
             
-            throw new ServiceException("400", "이미 가입된 이메일입니다.");
+            throw EMAIL_ALREADY_EXISTS.throwServiceException();
         }
 
         Member newMember = Member.builder()
@@ -143,7 +144,7 @@ public class MemberService {
         }
 
         if (accessToken == null) {
-            throw new ServiceException("400-1", "토큰이 필요합니다.");
+            throw UNAUTHORIZED.throwServiceException();
         }
 
         String email = authTokenService.getEmail(accessToken);
@@ -195,10 +196,10 @@ public class MemberService {
 
     public String extractEmailIfValid(String token) {
         if (isLoggedOut(token)) {
-            throw new ServiceException("401-1", "로그아웃된 토큰입니다.");
+            throw TOKEN_LOGGED_OUT.throwServiceException();
         }
         if (!verifyToken(token)) {
-            throw new ServiceException("401-2", "유효하지 않은 토큰입니다.");
+            throw TOKEN_INVALID.throwServiceException();
         }
         return getEmailFromToken(token);
     }
@@ -207,14 +208,14 @@ public class MemberService {
     public void addFavorite(Long hotelId) {
         Member actor = rq.getActor();
         if (actor == null) {
-            throw new ServiceException("401-1", "로그인이 필요합니다.");
+            throw UNAUTHORIZED.throwServiceException();
         }
 
         Hotel hotel = hotelRepository.findById(hotelId)
-            .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 호텔입니다."));
+            .orElseThrow(HOTEL_NOT_FOUND::throwServiceException);
 
         if (actor.getFavoriteHotels().contains(hotel)) {
-            throw new ServiceException("400-1", "이미 즐겨찾기에 추가된 호텔입니다.");
+            throw FAVORITE_ALREADY_EXISTS.throwServiceException();
         }
 
         actor.getFavoriteHotels().add(hotel);
@@ -228,14 +229,14 @@ public class MemberService {
     public void removeFavorite(Long hotelId) {
         Member actor = rq.getActor();
         if (actor == null) {
-            throw new ServiceException("401-1", "로그인이 필요합니다.");
+            throw UNAUTHORIZED.throwServiceException();
         }
 
         Hotel hotel = hotelRepository.findById(hotelId)
-            .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 호텔입니다."));
+            .orElseThrow(HOTEL_NOT_FOUND::throwServiceException);
 
         if (!actor.getFavoriteHotels().contains(hotel)) {
-            throw new ServiceException("400-1", "즐겨찾기에 없는 호텔입니다.");
+            throw FAVORITE_NOT_FOUND.throwServiceException();
         }
 
         actor.getFavoriteHotels().remove(hotel);
@@ -250,7 +251,7 @@ public class MemberService {
         log.debug("getFavoriteHotels - actor: {}", actor);
         
         if (actor == null) {
-            throw new ServiceException("401-1", "로그인이 필요합니다.");
+            throw UNAUTHORIZED.throwServiceException();
         }
 
         Set<Hotel> favorites = actor.getFavoriteHotels();
@@ -268,7 +269,7 @@ public class MemberService {
         Member actor = rq.getActor();
 
         if (actor == null) {
-            throw new ServiceException("401-1", "로그인이 필요합니다.");
+            throw UNAUTHORIZED.throwServiceException();
         }
 
         Set<Hotel> favorites = actor.getFavoriteHotels();
@@ -280,7 +281,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public Member findByProviderAndOauthId(String provider, String oauthId) {
         return oAuthRepository.findByProviderAndOauthIdWithMember(provider, oauthId)
-            .orElseThrow(() -> new ServiceException("404-1", "해당 OAuth 정보를 찾을 수 없습니다."))
+            .orElseThrow(OAUTH_NOT_FOUND::throwServiceException)
             .getMember();
     }
 
