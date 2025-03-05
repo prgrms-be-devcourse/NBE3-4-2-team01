@@ -35,26 +35,27 @@ export default function JoinPage() {
         birthDate: formData.birthDate,
       });
 
-      if (response.resultCode === "200") {
+      console.log("회원가입 응답:", response);
+
+      // 응답이 성공적이면 (OK 메시지가 있거나 resultCode가 200인 경우)
+      if (response && (response.msg === "OK" || response.resultCode === "200")) {
         // 회원가입 성공 후 쿠키 확인
         const roleData = getRoleFromCookie();
         if (roleData) {
           if (roleData.role === "ADMIN") {
             router.push("/admin");
-            return;
           } else if (roleData.role === "BUSINESS") {
             if (roleData?.hasHotel) {
               router.push("/business/hotel/management");
-              return;
             } else {
               router.push("/business/");
-              return;
             }
+          } else {
+            // 일반 사용자는 홈으로
+            router.push("/");
           }
-          // 로그인 상태로 홈으로 리다이렉트
-          router.push("/");
         } else {
-          // 쿠키가 없으면 로그인 페이지로
+          // 쿠키가 없으면 로그인 페이지로 즉시 이동
           router.push("/login");
         }
       } else {
