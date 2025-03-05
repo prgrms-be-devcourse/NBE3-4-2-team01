@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -88,8 +89,7 @@ public class AdminBusinessControllerTest {
                 .andExpect(handler().handlerType(AdminBusinessController.class))
                 .andExpect(handler().methodName("getAll"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200"))
-                .andExpect(jsonPath("$.msg").value("모든 사업자 정보가 조회되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
     }
 
     @Test
@@ -120,8 +120,7 @@ public class AdminBusinessControllerTest {
                 .andExpect(handler().handlerType(AdminBusinessController.class))
                 .andExpect(handler().methodName("getById"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200"))
-                .andExpect(jsonPath("$.msg").value("사업자 정보가 조회되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
     }
 
     @Test
@@ -160,7 +159,6 @@ public class AdminBusinessControllerTest {
                 .andExpect(handler().handlerType(AdminBusinessController.class))
                 .andExpect(handler().methodName("approve"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200"))
-                .andExpect(jsonPath("$.msg").value("사업자 승인 정보가 수정되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
     }
 }

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -69,8 +70,7 @@ public class HotelOptionControllerTest {
                 .andExpect(handler().handlerType(HotelOptionController.class))
                 .andExpect(handler().methodName("add"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.resultCode").value("201"))
-                .andExpect(jsonPath("$.msg").value("항목이 추가되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.CREATED));
     }
 
     @Test
@@ -86,8 +86,7 @@ public class HotelOptionControllerTest {
                 .andExpect(handler().handlerType(HotelOptionController.class))
                 .andExpect(handler().methodName("getAll"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200"))
-                .andExpect(jsonPath("$.msg").value("모든 항목이 조회되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
     }
 
     @Test
@@ -103,8 +102,7 @@ public class HotelOptionControllerTest {
                 .andExpect(handler().handlerType(HotelOptionController.class))
                 .andExpect(handler().methodName("getById"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200"))
-                .andExpect(jsonPath("$.msg").value("항목이 조회되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
     }
 
     @Test
@@ -128,8 +126,7 @@ public class HotelOptionControllerTest {
                 .andExpect(handler().handlerType(HotelOptionController.class))
                 .andExpect(handler().methodName("modify"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200"))
-                .andExpect(jsonPath("$.msg").value("항목이 수정되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
     }
 
     @Test
@@ -144,8 +141,6 @@ public class HotelOptionControllerTest {
         resultActions
                 .andExpect(handler().handlerType(HotelOptionController.class))
                 .andExpect(handler().methodName("delete"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200"))
-                .andExpect(jsonPath("$.msg").value("항목이 삭제되었습니다."));
+                .andExpect(status().isOk());
     }
 }

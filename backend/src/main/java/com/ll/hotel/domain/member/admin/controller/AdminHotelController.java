@@ -10,6 +10,7 @@ import com.ll.hotel.standard.page.dto.PageDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,11 +31,7 @@ public class AdminHotelController {
             throw new ServiceException("404", "요청하신 호텔 정보 페이지가 없습니다.");
         }
 
-        return new RsData<>(
-                "200",
-                "모든 호텔 정보가 조회되었습니다.",
-                new PageDto<>(pagedHotelSummaries)
-        );
+        return RsData.success(HttpStatus.OK, new PageDto<>(pagedHotelSummaries));
     }
 
     @GetMapping("/{id}")
@@ -42,11 +39,7 @@ public class AdminHotelController {
 
         Hotel hotel = adminHotelService.findById(id);
 
-        return new RsData<>(
-                "200",
-                "호텔 정보가 조회되었습니다.",
-                AdminHotelResponse.Detail.from(hotel)
-        );
+        return RsData.success(HttpStatus.OK, AdminHotelResponse.Detail.from(hotel));
     }
 
     @PatchMapping("/{id}")
@@ -58,10 +51,6 @@ public class AdminHotelController {
 
         adminHotelService.flush();
 
-        return new RsData<>(
-                "200",
-                "호텔 승인 정보가 수정되었습니다.",
-                AdminHotelResponse.ApprovalResult.from(hotel)
-        );
+        return RsData.success(HttpStatus.OK, AdminHotelResponse.ApprovalResult.from(hotel));
     }
 }

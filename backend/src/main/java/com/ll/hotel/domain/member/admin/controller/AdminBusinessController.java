@@ -10,6 +10,7 @@ import com.ll.hotel.standard.page.dto.PageDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,11 +30,7 @@ public class AdminBusinessController {
             throw new ServiceException("404", "요청하신 사업자 정보 페이지가 없습니다.");
         }
 
-        return new RsData<>(
-                "200",
-                "모든 사업자 정보가 조회되었습니다.",
-                new PageDto<>(pagedBusinessSummaries)
-        );
+        return RsData.success(HttpStatus.OK, new PageDto<>(pagedBusinessSummaries));
     }
 
     @GetMapping("/{id}")
@@ -41,11 +38,7 @@ public class AdminBusinessController {
 
         Business business = adminBusinessService.findById(id);
 
-        return new RsData<>(
-                "200",
-                "사업자 정보가 조회되었습니다.",
-                AdminBusinessResponse.Detail.from(business)
-        );
+        return RsData.success(HttpStatus.OK, AdminBusinessResponse.Detail.from(business));
     }
 
     @PatchMapping("/{id}")
@@ -57,10 +50,6 @@ public class AdminBusinessController {
 
         adminBusinessService.flush();
 
-        return new RsData<>(
-                "200",
-                "사업자 승인 정보가 수정되었습니다.",
-                AdminBusinessResponse.ApprovalResult.from(business)
-        );
+        return RsData.success(HttpStatus.OK, AdminBusinessResponse.ApprovalResult.from(business));
     }
 }

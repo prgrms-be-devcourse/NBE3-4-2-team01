@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -83,8 +84,7 @@ public class BusinessControllerTest {
         mockMvc.perform(post("/api/businesses/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(jsonPath("$.resultCode").value("201"))
-                .andExpect(jsonPath("$.msg").value("사업자 정보가 등록되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.CREATED));
     }
 
     @Test
@@ -114,7 +114,6 @@ public class BusinessControllerTest {
         mockMvc.perform(post("/api/businesses/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(jsonPath("$.resultCode").value("400"))
-                .andExpect(jsonPath("$.msg").value("유효하지 않은 사업자입니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.BAD_REQUEST));
     }
 }
