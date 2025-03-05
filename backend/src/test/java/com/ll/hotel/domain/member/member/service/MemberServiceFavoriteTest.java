@@ -121,7 +121,7 @@ class MemberServiceFavoriteTest {
         // when & then
         assertThatThrownBy(() -> memberService.addFavorite(9999L))
                 .isInstanceOf(ServiceException.class)
-                .hasMessageContaining("존재하지 않는 호텔입니다");
+                .hasMessageContaining("호텔이 존재하지 않습니다");
     }
     
     @Test
