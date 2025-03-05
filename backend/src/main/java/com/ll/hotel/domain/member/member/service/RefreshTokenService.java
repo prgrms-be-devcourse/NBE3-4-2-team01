@@ -10,12 +10,15 @@ import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static com.ll.hotel.global.exceptions.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +35,7 @@ public class RefreshTokenService {
             log.debug("Saving token for email: {}", email);
             RefreshToken token = new RefreshToken(email, refreshToken, accessToken);
             repository.save(token);
-            
+
             String key = "rt:refreshToken:" + refreshToken;
             redisTemplate.expire(key, 86400, TimeUnit.SECONDS);
             log.debug("Token saved successfully for email: {}", email);
@@ -57,31 +60,31 @@ public class RefreshTokenService {
 
             String tokenType = Ut.jwt.getClaims(jwtProperties, token).get("type", String.class);
             if (!"refresh".equals(tokenType)) {
-                return new RsData<>("401-1", "리프레시 토큰이 아닙니다.", "");
+                throw REFRESH_TOKEN_INVALID.throwServiceException();
             }
 
-        boolean tokenExists = repository.existsByRefreshToken(token);
-        log.debug("Found refresh token in repository: {}", tokenExists);
+            boolean tokenExists = repository.existsByRefreshToken(token);
+            log.debug("Found refresh token in repository: {}", tokenExists);
 
             if (!tokenExists) {
-                return new RsData<>("400-1", "유효하지 않은 리프레시 토큰입니다.", "");
+                throw REFRESH_TOKEN_NOT_FOUND.throwServiceException();
             }
             RefreshToken resultToken = repository.findByRefreshToken(token)
-                .orElseThrow(() -> new RuntimeException("토큰을 찾을 수 없습니다."));
-            
+                .orElseThrow(REFRESH_TOKEN_NOT_FOUND::throwServiceException);
+
             String email = resultToken.getId();
             String role = Ut.jwt.getClaims(jwtProperties, token).get("role", String.class);
             String newAccessToken = Ut.jwt.toString(jwtProperties, Map.of("sub", email, "role", role));
-            
+
             resultToken.updateAccessToken(newAccessToken);
             repository.save(resultToken);
-            
-            return new RsData<>("200-1", "토큰이 갱신되었습니다.", newAccessToken);
+
+            return RsData.success(HttpStatus.OK, newAccessToken);
         } catch (MalformedJwtException e) {
-            return new RsData<>("401-2", "유효하지 않은 토큰 형식입니다.", "");
+            throw TOKEN_INVALID.throwServiceException();
         } catch (Exception e) {
             log.error("토큰 갱신 중 오류 발생", e);
-            return new RsData<>("500-1", "토큰 갱신 중 오류가 발생했습니다.", "");
+            throw INTERNAL_SERVER_ERROR.throwServiceException();
         }
     }
 
