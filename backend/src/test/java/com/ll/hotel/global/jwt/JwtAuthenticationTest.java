@@ -22,6 +22,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -145,7 +146,7 @@ public class JwtAuthenticationTest {
         
         // then
         assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getResultCode()).isEqualTo("200");
+        assertThat(result.getResultCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getData()).isNotEmpty();
         
         // 새 토큰으로 이메일 추출 테스트
