@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.stream.Collectors;
+
+import static com.ll.hotel.global.exceptions.ErrorCode.EMAIL_ALREADY_EXISTS;
+import static com.ll.hotel.global.exceptions.ErrorCode.UNAUTHORIZED;
 
 @Slf4j
 @RestController
@@ -40,8 +44,8 @@ public class MemberController {
                 .stream()
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.joining(", "));
-                
-            return new RsData<>("400", errorMessage, null);
+
+            throw EMAIL_ALREADY_EXISTS.throwServiceException();
         }
         
         try {
@@ -56,17 +60,16 @@ public class MemberController {
                 MemberDTO.from(member),
                 member.getMemberEmail()
             );
-            return new RsData<>("200", "회원가입이 완료되었습니다.", memberResponse);
+            return RsData.success(HttpStatus.OK, memberResponse);
         } catch (ServiceException e) {
-            return new RsData<>("400", "이미 가입된 이메일입니다.", 
-                new MemberResponse(null, joinRequest.email()));
+            throw EMAIL_ALREADY_EXISTS.throwServiceException();
         }
     }
 
     @PostMapping("/logout")
-    public RsData<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+    public RsData<?> logout(HttpServletRequest request, HttpServletResponse response) {
         memberService.logout(request, response);
-        return new RsData<>("200-1", "로그아웃 되었습니다.");
+        return RsData.success(HttpStatus.OK, null);
     }
 
     @PostMapping("/refresh")
@@ -91,7 +94,7 @@ public class MemberController {
         }
         
         if (refreshToken == null) {
-            return new RsData<>("401-1", "리프레시 토큰이 없습니다.", null);
+            throw UNAUTHORIZED.throwServiceException();
         }
         
         return memberService.refreshAccessToken(refreshToken);
