@@ -11,9 +11,9 @@ import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,14 +94,18 @@ class AdminBusinessServiceTest {
     @DisplayName("사업자 페이지 조회 - 존재하지 않는 페이지 조회 시 예외 발생")
     void findAllPagedTest2() {
         // Given
-        int page = 100;
+        int pageSize = 10;
+        long totalElements = businessRepository.count();
+        int invalidPage = (int) (totalElements / pageSize) + 1;
 
         // When
-        Page<Business> result = adminBusinessService.findAllPaged(page);
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            adminBusinessService.findAllPaged(invalidPage);
+        });
 
         // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getContent().size()).isEqualTo(0);
+        assertThat(exception.getResultCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getMessage()).isEqualTo("페이지가 존재하지 않습니다");
     }
 
     @Test
@@ -108,7 +113,7 @@ class AdminBusinessServiceTest {
     void findByIdTest1() {
         // Given
         Business savedBusiness = businessRepository.findById(testBusinessId)
-                .orElseThrow(() -> new ServiceException("404", "Business Not Found"));
+                .orElseThrow(ErrorCode.BUSINESS_NOT_FOUND::throwServiceException);
 
         // When
         Business result = adminBusinessService.findById(testBusinessId);
@@ -121,13 +126,15 @@ class AdminBusinessServiceTest {
     @Test
     @DisplayName("사업자 조회 - 존재하지 않는 사업자 조회 시 예외 발생")
     void testFindTodoById2() {
+        long invalidBusiness = businessRepository.count() + 1;
+
         // When & Then
-        ServiceException exception = assertThrows(ServiceException.class, () -> {
-            adminBusinessService.findById(20L);
-        });
+        ServiceException exception = assertThrows(
+                ServiceException.class, () -> adminBusinessService.findById(invalidBusiness));
 
         // 예외 메시지 확인
-        assertThat(exception.getMessage()).isEqualTo("404 : 존재하지 않는 사업자입니다.");
+        assertThat(exception.getResultCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getMessage()).isEqualTo("사업자가 존재하지 않습니다");
     }
 
     @Test

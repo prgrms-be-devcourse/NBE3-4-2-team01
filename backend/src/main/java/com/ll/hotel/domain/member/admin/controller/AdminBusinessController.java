@@ -4,6 +4,7 @@ import com.ll.hotel.domain.member.admin.dto.request.AdminBusinessRequest;
 import com.ll.hotel.domain.member.admin.dto.response.AdminBusinessResponse;
 import com.ll.hotel.domain.member.admin.service.AdminBusinessService;
 import com.ll.hotel.domain.member.member.entity.Business;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.page.dto.PageDto;
@@ -25,10 +26,6 @@ public class AdminBusinessController {
 
         Page<AdminBusinessResponse.Summary> pagedBusinessSummaries = adminBusinessService.findAllPaged(page)
                 .map(AdminBusinessResponse.Summary::from);
-
-        if (!pagedBusinessSummaries.hasContent()) {
-            throw new ServiceException("404", "요청하신 사업자 정보 페이지가 없습니다.");
-        }
 
         return RsData.success(HttpStatus.OK, new PageDto<>(pagedBusinessSummaries));
     }

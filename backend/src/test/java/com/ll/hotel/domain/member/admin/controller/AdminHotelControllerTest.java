@@ -130,7 +130,7 @@ public class AdminHotelControllerTest {
         resultActions
                 .andExpect(handler().handlerType(AdminHotelController.class))
                 .andExpect(handler().methodName("getAll"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
     }
 
     @Test

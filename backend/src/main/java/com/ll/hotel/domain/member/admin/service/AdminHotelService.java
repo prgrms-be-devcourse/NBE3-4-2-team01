@@ -3,7 +3,7 @@ package com.ll.hotel.domain.member.admin.service;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.member.admin.dto.request.AdminHotelRequest;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,12 +18,19 @@ public class AdminHotelService {
 
     public Page<Hotel> findAllPaged(int page) {
         Pageable pageable = PageRequest.of(page, 10);
-        return hotelRepository.findAll(pageable);
+
+        Page<Hotel> pagedHotel = hotelRepository.findAll(pageable);
+
+        if (!pagedHotel.hasContent()) {
+            ErrorCode.PAGE_NOT_FOUND.throwServiceException();
+        }
+
+        return pagedHotel;
     }
 
     public Hotel findById(Long id) {
         return hotelRepository.findById(id)
-                .orElseThrow(() -> new ServiceException("404", "존재하지 않는 호텔입니다."));
+                .orElseThrow(ErrorCode.HOTEL_NOT_FOUND::throwServiceException);
     }
 
     @Transactional

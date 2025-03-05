@@ -104,7 +104,7 @@ public class AdminBusinessControllerTest {
         resultActions
                 .andExpect(handler().handlerType(AdminBusinessController.class))
                 .andExpect(handler().methodName("getAll"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
     }
 
     @Test

@@ -6,7 +6,7 @@ import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.service.BusinessService;
 import com.ll.hotel.domain.member.member.service.BusinessValidationService;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.globalExceptionHandler.GlobalExceptionHandler;
 import com.ll.hotel.global.rq.Rq;
 import org.junit.jupiter.api.BeforeEach;
@@ -100,7 +100,7 @@ public class BusinessControllerTest {
         when(rq.getActor()).thenReturn(mockMember);
         when(businessValidationService.validateBusiness(any())).thenReturn("02");
         when(businessService.register(any(), any(), any()))
-                .thenThrow(new ServiceException("400", "유효하지 않은 사업자입니다."));
+                .thenThrow(ErrorCode.INVALID_BUSINESS.throwServiceException());
 
         String requestBody = """
                 {

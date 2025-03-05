@@ -27,10 +27,6 @@ public class AdminHotelController {
         Page<AdminHotelResponse.Summary> pagedHotelSummaries = adminHotelService.findAllPaged(page)
                 .map(AdminHotelResponse.Summary::from);
 
-        if (!pagedHotelSummaries.hasContent()) {
-            throw new ServiceException("404", "요청하신 호텔 정보 페이지가 없습니다.");
-        }
-
         return RsData.success(HttpStatus.OK, new PageDto<>(pagedHotelSummaries));
     }
 
