@@ -31,7 +31,7 @@ public class HotelOptionService {
 
     public HotelOption findById(Long id) {
         return hotelOptionRepository.findById(id)
-                .orElseThrow(ErrorCode.OPTION_NOT_FOUND::throwServiceException);
+                .orElseThrow(ErrorCode.HOTEL_OPTION_NOT_FOUND::throwServiceException);
     }
 
     @Transactional

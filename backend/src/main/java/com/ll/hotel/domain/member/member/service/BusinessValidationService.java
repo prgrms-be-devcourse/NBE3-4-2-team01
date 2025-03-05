@@ -4,12 +4,9 @@ import com.ll.hotel.domain.member.member.dto.request.BusinessRequest;
 import com.ll.hotel.domain.member.member.dto.response.BusinessResponse;
 import com.ll.hotel.domain.member.member.type.BusinessApiProperties;
 import com.ll.hotel.global.exceptions.ErrorCode;
-import com.ll.hotel.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -46,9 +43,8 @@ public class BusinessValidationService {
 
         } catch (Exception e) {
             ErrorCode.EXTERNAL_API_COMMUNICATION_ERROR.throwServiceException(e);
+            return null; // 실행 X
         }
-
-        throw new IllegalStateException("외부 API 호출에 실패했습니다.");
     }
 
     private HttpHeaders createHeaders() {
