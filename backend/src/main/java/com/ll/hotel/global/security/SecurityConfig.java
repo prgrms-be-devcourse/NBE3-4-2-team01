@@ -1,8 +1,17 @@
 package com.ll.hotel.global.security;
 
 
-import java.util.Arrays;
-
+import com.ll.hotel.domain.member.member.repository.MemberRepository;
+import com.ll.hotel.domain.member.member.service.MemberService;
+import com.ll.hotel.global.jwt.JwtAuthFilter;
+import com.ll.hotel.global.jwt.exception.JwtExceptionFilter;
+import com.ll.hotel.global.security.cors.CorsProperties;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthenticationSuccessHandler;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthorizationRequestRepository;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2FailureHandler;
+import com.ll.hotel.global.security.oauth2.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,18 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.ll.hotel.domain.member.member.repository.MemberRepository;
-import com.ll.hotel.domain.member.member.service.MemberService;
-import com.ll.hotel.global.jwt.JwtAuthFilter;
-import com.ll.hotel.global.jwt.exception.JwtExceptionFilter;
-import com.ll.hotel.global.security.cors.CorsProperties;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthenticationSuccessHandler;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2AuthorizationRequestRepository;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2FailureHandler;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2UserService;
-
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -62,7 +60,7 @@ public class SecurityConfig {
                                 "/api/hotels/**",
                                 "/api/bookings/**",
                                 "/api/favorites/**",
-                                "/api/reviews/hotels/**",
+                                "/api/reviews/**",
                                 "/oauth2/authorization/**",
                                 "/login/oauth2/code/**",
                                 "/api/*/oauth2/callback"

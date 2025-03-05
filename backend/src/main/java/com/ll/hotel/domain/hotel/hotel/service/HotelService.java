@@ -123,7 +123,11 @@ public class HotelService {
         Sort sort = Sort.by(direction, sortField);
         PageRequest pageRequest = PageRequest.of(page - 1, pageSize, sort);
 
-        List<HotelWithImageDto> hotels = this.hotelRepository.findAllHotels(ImageType.HOTEL, streetAddress);
+        System.out.println(sort);
+
+        List<HotelWithImageDto> hotels = this.hotelRepository.findAllHotels(ImageType.HOTEL, streetAddress,
+                        PageRequest.of(0, Integer.MAX_VALUE, sort))
+                .getContent();
 
         List<GetHotelResponse> availableHotels = this.getAvailableHotels(checkInDate, checkOutDate, personal, hotels);
 

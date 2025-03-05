@@ -6,6 +6,7 @@ import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.base.Empty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -30,5 +31,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(rsData.getStatusCode())
                 .body(rsData);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleValidationException(MethodArgumentNotValidException ex) {
+        return ResponseEntity.badRequest().body("Validation failed: " + ex.getBindingResult().toString());
     }
 }

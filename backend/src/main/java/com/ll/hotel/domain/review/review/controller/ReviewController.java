@@ -8,6 +8,7 @@ import com.ll.hotel.domain.review.review.dto.request.PostReviewRequest;
 import com.ll.hotel.domain.review.review.dto.request.UpdateReviewRequest;
 import com.ll.hotel.domain.review.review.dto.response.*;
 import com.ll.hotel.domain.review.review.service.ReviewService;
+import com.ll.hotel.global.app.AppConfig;
 import com.ll.hotel.global.aws.s3.S3Service;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rq.Rq;
@@ -39,6 +40,7 @@ public class ReviewController {
     private final ReviewService reviewService;
     private final S3Service s3Service;
     private final Rq rq;
+    private final AppConfig appConfig;
 
     @PostMapping("/{bookingId}")
     @Operation(summary = "리뷰 생성")
@@ -56,6 +58,7 @@ public class ReviewController {
         // 리뷰 사진 저장
         List<String> extensions = Optional.ofNullable(postReviewRequest.imageExtensions())
                 .orElse(Collections.emptyList());
+
         List<URL> urls = s3Service.generatePresignedUrls(ImageType.REVIEW, reviewId, extensions);
 
         return new RsData<>(
@@ -97,7 +100,9 @@ public class ReviewController {
         // DB 사진 삭제
         imageService.deleteImagesByIdAndUrls(ImageType.REVIEW, reviewId, deleteImageUrls);
         // S3 사진 삭제
-        s3Service.deleteObjectsByUrls(deleteImageUrls);
+        if(!appConfig.getMode().equals("TEST")) {
+            s3Service.deleteObjectsByUrls(deleteImageUrls);
+        }
 
         List<String> extensions = Optional.ofNullable(updateReviewRequest.newImageExtensions())
                 .orElse(Collections.emptyList());
@@ -124,7 +129,7 @@ public class ReviewController {
         // DB 의 사진 URL 정보 삭제
         long imageCount = imageService.deleteImages(ImageType.REVIEW, reviewId);
         // S3 의 사진 삭제
-        if(imageCount > 0) {
+        if(imageCount > 0 && !appConfig.getMode().equals("TEST")) {
             s3Service.deleteAllObjectsById(ImageType.REVIEW, reviewId);
         }
 

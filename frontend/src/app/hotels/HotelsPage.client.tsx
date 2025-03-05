@@ -65,7 +65,7 @@ export default function HotelsPageClient({
   };
 
   return (
-    <main className="container max-w-6xl mx-auto px-4 py-8">
+    <main className="container max-w-6xl mx-auto px-4 py-8 pb-20">
       <Navigation />
       <div className="content-wrapper flex items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold whitespace-nowrap">호텔 목록</h1>

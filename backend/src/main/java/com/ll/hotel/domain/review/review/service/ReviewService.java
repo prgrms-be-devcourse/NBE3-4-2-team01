@@ -3,6 +3,7 @@ package com.ll.hotel.domain.review.review.service;
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
+import com.ll.hotel.domain.hotel.hotel.service.HotelService;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.image.dto.ImageDto;
 import com.ll.hotel.domain.image.entity.Image;
@@ -35,6 +36,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ImageRepository imageRepository;
     private final HotelRepository hotelRepository;
+    private final HotelService hotelService;
 
     // 리뷰 생성
     public long createReview(Long hotelId, Long roomId, Long memberId, Long bookingId, String content, int rating) {
@@ -101,7 +103,7 @@ public class ReviewService {
                 .orElseThrow(() -> new ServiceException("400-1", "해당 리뷰가 존재하지 않습니다."));
 
         if(!review.isWrittenBy(actor)) {
-            throw new ServiceException("403-1", "리뷰 작성자만 리뷰 수정 가능합니다.");
+            throw new ServiceException("403-1", "리뷰 작성자만 단건 리뷰 조회 가능합니다.");
         }
 
         List<String> imageUrls = imageRepository.findByImageTypeAndReferenceId(ImageType.REVIEW, reviewId)
@@ -133,6 +135,8 @@ public class ReviewService {
 
     // 호텔의 모든 리뷰 조회 (답변, 이미지 포함)
     public Page<HotelReviewResponse> getHotelReviewResponses(long hotelId, int page) {
+        hotelService.getHotelById(hotelId);
+
         int size = 10;
         Pageable pageable = PageRequest.of(page-1, size, Sort.by("createdAt").descending());
         Page<HotelReviewWithCommentDto> hotelReviews = reviewRepository.findReviewsWithCommentByHotelId(hotelId, pageable);
@@ -187,4 +191,5 @@ public class ReviewService {
 
         return new PageImpl<>(responseList, pageable, reviews.getTotalElements());
     }
+
 }
