@@ -5,6 +5,7 @@ import com.ll.hotel.domain.booking.payment.dto.*;
 import com.ll.hotel.domain.booking.payment.entity.Payment;
 import com.ll.hotel.domain.booking.payment.repository.PaymentRepository;
 import com.ll.hotel.domain.booking.payment.type.PaymentStatus;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.exceptions.ServiceException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -36,31 +37,21 @@ public class PaymentService {
     @Value("${api-keys.portone.channel-key}")
     private String channelKey;
 
-    private final String CREATE_ERROR_MESSAGE = "결제 정보 저장에 실패했습니다.";
-    private final int MAX_GENERATE_COUNT = 10;
     private final int UID_GENERATE_LENGTH = 10;
     private final PaymentRepository paymentRepository;
 
-    public long count() {
-        return paymentRepository.count();
-    }
-
     // Uid 생성
     public UidResponse generateMerchantUid() {
-        //MAX_GENERATE_COUNT번 이내애 중복되지 않는 merchantUid를 생성해야 함, 리팩토링 예정
-        for (int i = 0; i < MAX_GENERATE_COUNT; i++) {
-            String merchantUid = Ut.random.generateUID(UID_GENERATE_LENGTH);
-            if (!paymentRepository.existsByMerchantUid(merchantUid)) {
-                return new UidResponse(apiId, channelKey, merchantUid);
-            }
+        String merchantUid = Ut.random.generateUID(UID_GENERATE_LENGTH);
+        if (paymentRepository.existsByMerchantUid(merchantUid)) {
+            throw ErrorCode.PAYMENT_UID_FAIL.throwServiceException();
         }
-
-        throw new ServiceException("500", "merchantUid 생성에 실패했습니다.");
+        return new UidResponse(apiId, channelKey, merchantUid);
     }
 
     /*
      * 결제 정보 저장
-     * BookingService에서 호출하여 예약 정보 저장과 동시에 발생하도록 함
+     * BookingService에서 호출하여 예약 정보 저장과 동시에 처리하도록 함
      */
     @Transactional
     public Payment create(BookingRequest bookingRequest) {
@@ -83,8 +74,7 @@ public class PaymentService {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            log.error("결제 처리 중 에러 발생", e);
-            throw new ServiceException("500", "결제 정보 저장에 실패했습니다.");
+            throw ErrorCode.PAYMENT_CREATE_FAIL.throwServiceException(e);
         }
     }
 
@@ -98,7 +88,7 @@ public class PaymentService {
     public Payment softDelete(Payment payment) {
         // 이미 취소되었을 경우
         if (payment.getPaymentStatus() == PaymentStatus.CANCELLED) {
-            throw new ServiceException("400", "이미 취소된 결제입니다.");
+            throw ErrorCode.PAYMENT_CANCEL_TO_CANCEL.throwServiceException();
         }
 
         WebClient webClient = WebClient.create("https://api.iamport.kr");
@@ -121,16 +111,12 @@ public class PaymentService {
             if (tokenResponse.getStatusCode().is2xxSuccessful()) {
                 return tokenResponse.getBody().response().accessToken();
             } else {
-                throw new ServiceException(
-                        tokenResponse.getStatusCode().toString(),
-                        "토큰 발급 권한이 없습니다."
-                );
+                throw ErrorCode.PAYMENT_TOKEN_FORBIDDEN.throwServiceException();
             }
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            log.error("결제 토큰 발급 중 에러 발생", e);
-            throw new ServiceException("500", "토큰 발급에 실패했습니다.");
+            throw ErrorCode.PAYMENT_TOKEN_FAIL.throwServiceException(e);
         }
     }
 
@@ -153,22 +139,18 @@ public class PaymentService {
                 payment.setPaymentStatus(PaymentStatus.CANCELLED);
                 return paymentRepository.save(payment);
             } else {
-                throw new ServiceException(
-                        response.getStatusCode().toString(),
-                        "결제 취소 권한이 없습니다."
-                );
+                throw ErrorCode.PAYMENT_CANCEL_FORBIDDEN.throwServiceException();
             }
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            log.error("결제 취소 중 에러 발생", e);
-            throw new ServiceException("500", "결제 취소에 실패했습니다.");
+            throw ErrorCode.PAYMENT_CANCEL_FAIL.throwServiceException(e);
         }
     }
 
     // 기본 조회 메서드
     public Payment findById(Long paymentId) {
         return paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new ServiceException("404", "결제 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> ErrorCode.PAYMENT_NOT_FOUND.throwServiceException());
     }
 }
