@@ -1,20 +1,11 @@
 package com.ll.hotel.domain.hotel.room.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
 import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import com.ll.hotel.domain.hotel.option.service.RoomOptionService;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
-import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.PutRoomRequest;
-import com.ll.hotel.domain.hotel.room.dto.PutRoomResponse;
+import com.ll.hotel.domain.hotel.room.dto.*;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
@@ -27,18 +18,21 @@ import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -132,7 +126,7 @@ class RoomServiceTest {
         });
 
         assertEquals(403, exception.getResultCode().value());
-        assertEquals("사업가만 관리할 수 있습니다.", exception.getMsg());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
     }
 
     @Test
@@ -152,7 +146,7 @@ class RoomServiceTest {
         });
 
         assertEquals(403, exception.getResultCode().value());
-        assertEquals("해당 호텔의 사업가가 아닙니다.", exception.getMsg());
+        assertEquals("해당 호텔의 사업자가 아닙니다.", exception.getMsg());
     }
 
     @Test
@@ -354,7 +348,7 @@ class RoomServiceTest {
         });
 
         assertEquals(403, exception.getResultCode().value());
-        assertEquals("사업가만 관리할 수 있습니다.", exception.getMsg());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
     }
 
     @Test
@@ -385,7 +379,7 @@ class RoomServiceTest {
         });
 
         assertEquals(403, exception.getResultCode().value());
-        assertEquals("해당 호텔의 사업가가 아닙니다.", exception.getMsg());
+        assertEquals("해당 호텔의 사업자가 아닙니다.", exception.getMsg());
     }
 
     @Test
@@ -423,7 +417,7 @@ class RoomServiceTest {
         });
 
         assertEquals(403, exception.getResultCode().value());
-        assertEquals("사업가만 관리할 수 있습니다.", exception.getMsg());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
     }
 
     @Test
@@ -439,7 +433,7 @@ class RoomServiceTest {
         });
 
         assertEquals(403, exception.getResultCode().value());
-        assertEquals("해당 호텔의 사업가가 아닙니다.", exception.getMsg());
+        assertEquals("해당 호텔의 사업자가 아닙니다.", exception.getMsg());
     }
 
     // business1 비즈니스 호출

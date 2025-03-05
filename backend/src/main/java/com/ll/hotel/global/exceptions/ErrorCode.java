@@ -39,8 +39,8 @@ public enum ErrorCode {
     FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "즐겨찾기에 없는 호텔입니다."),
 
     // Business
-    BUSINESS_ACCESS_FORBIDDEN(HttpStatus.FORBIDDEN, "사업가만 관리할 수 있습니다."),
-    INVALID_BUSINESS(HttpStatus.FORBIDDEN, "해당 호텔의 사업가가 아닙니다."),
+    BUSINESS_ACCESS_FORBIDDEN(HttpStatus.FORBIDDEN, "사업자만 관리할 수 있습니다."),
+    INVALID_BUSINESS(HttpStatus.FORBIDDEN, "해당 호텔의 사업자가 아닙니다."),
     BUSINESS_NOT_FOUND(HttpStatus.NOT_FOUND, "사업자가 존재하지 않습니다."),
     BUSINESS_HOTEL_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "한 사업자는 하나의 호텔만 등록할 수 있습니다."),
     INVALID_BUSINESS_INFO(HttpStatus.BAD_REQUEST, "사업자가 유효하지 않습니다"),

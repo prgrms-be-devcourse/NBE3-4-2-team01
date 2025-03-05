@@ -117,7 +117,7 @@ class HotelServiceTest {
 
         // then
         assertEquals(403, exception.getResultCode().value());
-        assertEquals("사업가만 관리할 수 있습니다.", exception.getMsg());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
     }
 
     @Test
@@ -470,7 +470,7 @@ class HotelServiceTest {
 
         // then
         assertEquals(403, exception.getResultCode().value());
-        assertEquals("사업가만 관리할 수 있습니다.", exception.getMsg());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
     }
 
     @Test
@@ -556,7 +556,7 @@ class HotelServiceTest {
 
         // then
         assertEquals(403, exception.getResultCode().value());
-        assertEquals("사업가만 관리할 수 있습니다.", exception.getMsg());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
     }
 
     @Test
