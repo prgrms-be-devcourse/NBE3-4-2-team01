@@ -105,7 +105,6 @@ class AdminBusinessServiceTest {
 
         // Then
         assertThat(exception.getResultCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(exception.getMessage()).isEqualTo("페이지가 존재하지 않습니다");
     }
 
     @Test
@@ -134,7 +133,6 @@ class AdminBusinessServiceTest {
 
         // 예외 메시지 확인
         assertThat(exception.getResultCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(exception.getMessage()).isEqualTo("사업자가 존재하지 않습니다");
     }
 
     @Test

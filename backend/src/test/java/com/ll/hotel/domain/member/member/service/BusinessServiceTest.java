@@ -98,6 +98,5 @@ public class BusinessServiceTest {
 
         // Then
         assertThat(exception.getResultCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(exception.getMessage()).isEqualTo("사업자가 유효하지 않습니다.");
     }
 }

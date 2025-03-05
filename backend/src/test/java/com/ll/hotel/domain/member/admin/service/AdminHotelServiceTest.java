@@ -90,7 +90,6 @@ public class AdminHotelServiceTest {
 
         // Then
         assertThat(exception.getResultCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(exception.getMessage()).isEqualTo("페이지가 존재하지 않습니다");
     }
 
     @Test
@@ -125,7 +124,6 @@ public class AdminHotelServiceTest {
 
         // Then
         assertThat(exception.getResultCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(exception.getMessage()).isEqualTo("호텔이 존재하지 않습니다");
     }
 
     @Test

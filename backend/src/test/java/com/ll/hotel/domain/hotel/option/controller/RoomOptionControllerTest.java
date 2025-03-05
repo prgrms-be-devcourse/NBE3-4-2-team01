@@ -70,7 +70,7 @@ public class RoomOptionControllerTest {
                 .andExpect(handler().handlerType(RoomOptionController.class))
                 .andExpect(handler().methodName("add"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.resultCode").value(HttpStatus.CREATED));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.CREATED.name()));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class RoomOptionControllerTest {
                 .andExpect(handler().handlerType(RoomOptionController.class))
                 .andExpect(handler().methodName("getAll"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK.name()));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class RoomOptionControllerTest {
                 .andExpect(handler().handlerType(RoomOptionController.class))
                 .andExpect(handler().methodName("getById"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK.name()));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class RoomOptionControllerTest {
                 .andExpect(handler().handlerType(RoomOptionController.class))
                 .andExpect(handler().methodName("modify"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK.name()));
     }
 
     @Test
@@ -141,6 +141,6 @@ public class RoomOptionControllerTest {
         resultActions
                 .andExpect(handler().handlerType(RoomOptionController.class))
                 .andExpect(handler().methodName("delete"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 }
