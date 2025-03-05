@@ -25,6 +25,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static com.ll.hotel.global.exceptions.ErrorCode.MEMBER_NOT_FOUND;
+import static com.ll.hotel.global.exceptions.ErrorCode.TOKEN_EXPIRED;
 import static com.ll.hotel.global.security.oauth2.dto.SecurityUser.of;
 
 @RequiredArgsConstructor
@@ -66,7 +68,7 @@ public class JwtAuthFilter extends OncePerRequestFilter implements Ordered {
                 log.debug("Access Token 유효함. Email: {}", email);
 
                 Member member = memberRepository.findByMemberEmail(email)
-                    .orElseThrow(() -> new ServiceException("404-1", "해당 회원이 존재하지 않습니다."));
+                    .orElseThrow(MEMBER_NOT_FOUND::throwServiceException);
                 log.debug("Found member: {}", member.getMemberEmail());
 
                 SecurityUser userDto = of(
@@ -101,7 +103,7 @@ public class JwtAuthFilter extends OncePerRequestFilter implements Ordered {
                             
                             String email = memberService.extractEmailIfValid(refreshResult.getData());
                             Member member = memberRepository.findByMemberEmail(email)
-                                .orElseThrow(() -> new ServiceException("404-1", "해당 회원이 존재하지 않습니다."));
+                                .orElseThrow(MEMBER_NOT_FOUND::throwServiceException);
 
                             SecurityUser userDto = of(
                                 member.getId(),
@@ -119,7 +121,7 @@ public class JwtAuthFilter extends OncePerRequestFilter implements Ordered {
                         }
                     } catch (Exception refreshError) {
                         log.error("Refresh Token 갱신 실패: {}", refreshError.getMessage());
-                        throw new ServiceException("401-1", "인증이 만료되었습니다. 다시 로그인해주세요.");
+                        throw TOKEN_EXPIRED.throwServiceException();
                     }
                 } else {
                     throw e;
