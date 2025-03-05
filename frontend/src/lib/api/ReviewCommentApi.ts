@@ -16,7 +16,7 @@ export const postReviewComment = async (reviewId: number, content: string) => {
     );
 
     const rsData = await response.json();
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
   } catch (error) {
@@ -38,7 +38,7 @@ export const deleteReviewComment = async (
     );
 
     const rsData = await response.json();
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
   } catch (error) {
@@ -59,7 +59,7 @@ export const fetchReviewComment = async (
     );
     const rsData: RsData<ReviewCommentDto> = await response.json();
 
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
     return rsData.data;
@@ -87,7 +87,7 @@ export const updateReviewComment = async (
     );
 
     const rsData = await response.json();
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
   } catch (error) {

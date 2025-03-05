@@ -298,7 +298,7 @@ public class ReviewControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ReviewController.class))
                 .andExpect(handler().methodName("getReview"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(content().string("리뷰가 존재하지 않습니다"));
     }
 
@@ -447,7 +447,7 @@ public class ReviewControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ReviewController.class))
                 .andExpect(handler().methodName("deleteReview"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(content().string("리뷰가 존재하지 않습니다"));
     }
 

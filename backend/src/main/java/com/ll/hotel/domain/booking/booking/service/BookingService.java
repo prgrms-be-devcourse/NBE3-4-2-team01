@@ -46,9 +46,9 @@ public class BookingService {
     public void create(Member member, BookingRequest bookingRequest) {
         try {
             Room room = roomRepository.findById(bookingRequest.roomId())
-                    .orElseThrow(() -> ErrorCode.BOOKING_ROOM_NOT_FOUND.throwServiceException());
+                    .orElseThrow(ErrorCode.ROOM_NOT_FOUND::throwServiceException);
             Hotel hotel = hotelRepository.findById(bookingRequest.hotelId())
-                    .orElseThrow(() -> ErrorCode.BOOKING_HOTEL_NOT_FOUND.throwServiceException());
+                    .orElseThrow(ErrorCode.HOTEL_NOT_FOUND::throwServiceException);
             Payment payment = paymentService.create(bookingRequest);
 
             // Booking 생성, 리팩터링 예정
@@ -87,14 +87,14 @@ public class BookingService {
     public Page<BookingResponseSummary> tryGetHotelBookings(Member member, int page, int pageSize) {
         // 호텔 사업자만 조회 가능
         if (!member.isBusiness()) {
-            throw ErrorCode.BOOKING_ACCESS_FORBIDDEN.throwServiceException();
+            throw ErrorCode.BUSINESS_ACCESS_FORBIDDEN.throwServiceException();
         }
 
         Hotel myHotel = member.getBusiness().getHotel();
 
         // 내 호텔이 없을 경우
         if (myHotel == null) {
-            throw ErrorCode.BOOKING_MY_HOTEL_NOT_FOUND.throwServiceException();
+            throw ErrorCode.HOTEL_NOT_FOUND.throwServiceException();
         }
 
         return findByHotel(myHotel, page, pageSize).map((booking) -> bookingDtoMapper.getSummary(booking));
@@ -192,7 +192,7 @@ public class BookingService {
     // 기본 조회 메서드
     public Booking findById(long id) {
         return bookingRepository.findById(id)
-                .orElseThrow(() -> ErrorCode.BOOKING_NOT_FOUND.throwServiceException());
+                .orElseThrow(ErrorCode.BOOKING_NOT_FOUND::throwServiceException);
     }
 
     public Page<Booking> findByMember(Member member, int page, int pageSize) {

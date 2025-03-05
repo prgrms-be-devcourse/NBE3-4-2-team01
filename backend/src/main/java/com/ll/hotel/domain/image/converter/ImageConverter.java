@@ -1,4 +1,4 @@
-package com.ll.hotel.domain.hotel.room.converter;
+package com.ll.hotel.domain.image.converter;
 
 import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.type.ImageType;
