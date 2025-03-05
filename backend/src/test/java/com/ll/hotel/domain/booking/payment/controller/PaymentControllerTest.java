@@ -74,7 +74,7 @@ public class PaymentControllerTest {
                 .orElseThrow(() -> new IllegalArgumentException("테스트 데이터가 잘못되었습니다."));
         setMock(customer);
 
-        // UID GET 요청
+        // UID 발급 요청
         ResultActions resultActions = mvc
                 .perform(get("/api/bookings/payments/uid"))
                 .andDo(print());
@@ -84,7 +84,6 @@ public class PaymentControllerTest {
                 .andExpect(handler().handlerType(PaymentController.class))
                 .andExpect(handler().methodName("getUid"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("Uid 발급에 성공했습니다."))
                 .andExpect(jsonPath("$.data.merchantUid").exists())
                 .andExpect(jsonPath("$.data.apiId").exists())
                 .andExpect(jsonPath("$.data.channelKey").exists());

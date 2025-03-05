@@ -23,7 +23,7 @@ public class BusinessService {
         if (validationResult.equals("01")) {
             member.setRole(Role.BUSINESS);
         } else {
-            ErrorCode.INVALID_BUSINESS.throwServiceException();
+            ErrorCode.INVALID_BUSINESS_INFO.throwServiceException();
         }
 
         Business business = Business
