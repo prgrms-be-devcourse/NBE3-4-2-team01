@@ -2,18 +2,22 @@ package com.ll.hotel.domain.member.member.entity;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.jpa.entity.BaseTime;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.http.HttpStatus;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import static com.ll.hotel.global.exceptions.ErrorCode.BUSINESS_ACCESS_FORBIDDEN;
 
