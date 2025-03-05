@@ -49,10 +49,7 @@ public class AdminBusinessControllerTest {
 
     @BeforeEach
     void setUp() {
-        businessRepository.deleteAll();
-        memberRepository.deleteAll();
-
-        Member member = memberRepository.save(Member
+        Member member = Member
                 .builder()
                 .birthDate(LocalDate.now())
                 .memberEmail("member@gmail.com")
@@ -60,11 +57,12 @@ public class AdminBusinessControllerTest {
                 .memberPhoneNumber("01012345678")
                 .memberStatus(MemberStatus.ACTIVE)
                 .role(Role.BUSINESS)
-                .build()
-        );
+                .build();
+        memberRepository.save(member);
+
         Business business = Business
                 .builder()
-                .businessRegistrationNumber(String.format("1234567890"))
+                .businessRegistrationNumber("1234567890")
                 .startDate(LocalDate.now())
                 .ownerName("김사장")
                 .approvalStatus(BusinessApprovalStatus.PENDING)
@@ -160,7 +158,7 @@ public class AdminBusinessControllerTest {
 
         resultActions
                 .andExpect(handler().handlerType(AdminBusinessController.class))
-                .andExpect(handler().methodName("modify"))
+                .andExpect(handler().methodName("approve"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200"))
                 .andExpect(jsonPath("$.msg").value("사업자 승인 정보가 수정되었습니다."));

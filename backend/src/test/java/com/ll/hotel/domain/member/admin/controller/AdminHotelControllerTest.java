@@ -56,11 +56,7 @@ public class AdminHotelControllerTest {
 
     @BeforeEach
     void setUp() {
-        hotelRepository.deleteAll();
-        businessRepository.deleteAll();
-        memberRepository.deleteAll();
-
-        Member member = memberRepository.save(Member
+        Member member = Member
                 .builder()
                 .birthDate(LocalDate.now())
                 .memberEmail("member@gmail.com")
@@ -68,11 +64,14 @@ public class AdminHotelControllerTest {
                 .memberPhoneNumber("01012345678")
                 .memberStatus(MemberStatus.ACTIVE)
                 .role(Role.BUSINESS)
-                .build()
-        );
+                .build();
+        memberRepository.save(member);
+
         Business business = Business
                 .builder()
-                .businessRegistrationNumber(String.format("1234567890"))
+                .businessRegistrationNumber("1234567890")
+                .startDate(LocalDate.now())
+                .ownerName("김사장")
                 .approvalStatus(BusinessApprovalStatus.PENDING)
                 .member(member)
                 .hotel(null)
@@ -107,7 +106,7 @@ public class AdminHotelControllerTest {
     void findAllPagedTest1() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/hotels")
+                        get("/api/admin/hotels")
                 )
                 .andDo(print());
 
@@ -124,7 +123,7 @@ public class AdminHotelControllerTest {
     void findAllPaged2() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/hotels?page=20")
+                        get("/api/admin/hotels?page=20")
                 )
                 .andDo(print());
 
@@ -139,7 +138,7 @@ public class AdminHotelControllerTest {
     void getByIdTest1() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/hotels/{id}", testHotelId)
+                        get("/api/admin/hotels/{id}", testHotelId)
                 )
                 .andDo(print());
 
@@ -156,7 +155,7 @@ public class AdminHotelControllerTest {
     void getByIdTest2() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/hotels/25")
+                        get("/api/admin/hotels/25")
                 )
                 .andDo(print());
 
@@ -171,7 +170,7 @@ public class AdminHotelControllerTest {
     void approveTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        patch("/admin/hotels/{id}", testHotelId)
+                        patch("/api/admin/hotels/{id}", testHotelId)
                                 .content("""
                                         {
                                             "hotelStatus": "AVAILABLE"
