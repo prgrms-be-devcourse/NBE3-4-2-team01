@@ -89,7 +89,7 @@ public class AdminBusinessControllerTest {
                 .andExpect(handler().handlerType(AdminBusinessController.class))
                 .andExpect(handler().methodName("getAll"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK.name()));
     }
 
     @Test
@@ -120,7 +120,7 @@ public class AdminBusinessControllerTest {
                 .andExpect(handler().handlerType(AdminBusinessController.class))
                 .andExpect(handler().methodName("getById"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK.name()));
     }
 
     @Test
@@ -159,6 +159,6 @@ public class AdminBusinessControllerTest {
                 .andExpect(handler().handlerType(AdminBusinessController.class))
                 .andExpect(handler().methodName("approve"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK.name()));
     }
 }
