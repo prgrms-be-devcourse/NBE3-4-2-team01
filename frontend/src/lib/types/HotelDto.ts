@@ -10,6 +10,11 @@ export interface HotelDto { // 호텔 파트 데이터 사용할 때 사용하�
   checkOutTime: string;
   hotelExplainContent: string;
   hotelStatus: string;
-  rooms: any[];
-  hotelOptions: Set<string>;
+  rooms: {
+    id: number;
+    roomName: string;
+    roomNumber: number;
+    basePrice: number;
+  }[];
+  hotelOptions: string[];
 } 
