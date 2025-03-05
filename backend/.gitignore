@@ -44,3 +44,4 @@ src/main/resources/application-secret.yml
 src/main/resources/application-api-keys.yml
 src/main/resources/application-business-api.yml
 src/main/java/com/ll/hotel/global/initData/BaseInit.java
+logs/
