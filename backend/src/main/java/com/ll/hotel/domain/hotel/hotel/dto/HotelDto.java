@@ -1,14 +1,16 @@
 package com.ll.hotel.domain.hotel.hotel.dto;
 
-import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
-import com.ll.hotel.domain.hotel.option.entity.HotelOption;
-import com.ll.hotel.domain.hotel.room.entity.Room;
-import jakarta.validation.constraints.NotBlank;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
+import com.ll.hotel.domain.hotel.option.entity.HotelOption;
+
+import jakarta.validation.constraints.NotBlank;
 import lombok.NonNull;
 
 public record HotelDto(
@@ -44,11 +46,10 @@ public record HotelDto(
         @NotBlank
         String hotelStatus,
 
-        List<Room> rooms,
+        List<?> rooms,
 
         Set<String> hotelOptions
 
-        // 호텔 Favorite
 ) {
     public HotelDto(Hotel hotel) {
         this(
@@ -68,6 +69,41 @@ public record HotelDto(
                         ? hotel.getHotelOptions().stream()
                         .map(HotelOption::getName)
                         .collect(Collectors.toSet())
+                        : new HashSet<>()
+        );
+    }
+    
+    // 즐겨찾기 목록 조회 간소화 DTO
+    public HotelDto(
+            long hotelId,
+            String hotelName,
+            String hotelEmail,
+            String hotelPhoneNumber,
+            String streetAddress,
+            Integer zipCode,
+            Integer hotelGrade,
+            LocalTime checkInTime,
+            LocalTime checkOutTime,
+            String hotelExplainContent,
+            String hotelStatus,
+            List<Map<String, Object>> simplifiedRooms,
+            List<String> hotelOptionNames
+    ) {
+        this(
+                hotelId,
+                hotelName,
+                hotelEmail,
+                hotelPhoneNumber,
+                streetAddress,
+                zipCode,
+                hotelGrade,
+                checkInTime,
+                checkOutTime,
+                hotelExplainContent,
+                hotelStatus,
+                simplifiedRooms,
+                hotelOptionNames != null
+                        ? new HashSet<>(hotelOptionNames)
                         : new HashSet<>()
         );
     }
