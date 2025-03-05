@@ -5,7 +5,6 @@ import com.ll.hotel.domain.member.member.dto.MemberDTO;
 import com.ll.hotel.domain.member.member.dto.MemberResponse;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.service.MemberService;
-import com.ll.hotel.domain.member.member.service.RefreshTokenService;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
 import jakarta.servlet.http.Cookie;
@@ -24,8 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.stream.Collectors;
 
-import static com.ll.hotel.global.exceptions.ErrorCode.EMAIL_ALREADY_EXISTS;
-import static com.ll.hotel.global.exceptions.ErrorCode.UNAUTHORIZED;
+import static com.ll.hotel.global.exceptions.ErrorCode.*;
 
 @Slf4j
 @RestController
@@ -33,7 +31,6 @@ import static com.ll.hotel.global.exceptions.ErrorCode.UNAUTHORIZED;
 @RequestMapping("/api/users")
 public class MemberController {
     private final MemberService memberService;
-    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/join")
     public RsData<MemberResponse> join(@RequestBody @Valid JoinRequest joinRequest, 
@@ -94,7 +91,7 @@ public class MemberController {
         }
         
         if (refreshToken == null) {
-            throw UNAUTHORIZED.throwServiceException();
+            throw REFRESH_TOKEN_NOT_FOUND.throwServiceException();
         }
         
         return memberService.refreshAccessToken(refreshToken);
