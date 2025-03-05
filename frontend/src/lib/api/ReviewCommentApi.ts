@@ -15,6 +15,10 @@ export const postReviewComment = async (reviewId: number, content: string) => {
       }
     );
 
+    if (response.status === 204) {
+      return;
+    }
+
     const rsData = await response.json();
     if (!response.ok) {
       throw new Error(rsData.msg);
@@ -36,6 +40,10 @@ export const deleteReviewComment = async (
         credentials: "include",
       }
     );
+
+    if (response.status === 204) {
+      return;
+    }
 
     const rsData = await response.json();
     if (!response.ok) {
@@ -85,6 +93,10 @@ export const updateReviewComment = async (
         body: JSON.stringify({ content }),
       }
     );
+
+    if (response.status === 204) {
+      return;
+    }
 
     const rsData = await response.json();
     if (!response.ok) {

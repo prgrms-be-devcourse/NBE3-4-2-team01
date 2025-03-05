@@ -15,10 +15,6 @@ export const getFavorites = async (): Promise<RsData<HotelDto[]>> => {
       throw new Error(data.msg || "서버 오류가 발생했습니다.");
     }
 
-    if (data.resultCode !== "200-1") {
-      throw new Error(data.msg);
-    }
-
     return data;
   } catch (error) {
     throw error;
@@ -41,10 +37,6 @@ export const checkFavorite = async (hotelId: number): Promise<boolean> => {
       throw new Error(data.msg || "서버 오류가 발생했습니다.");
     }
 
-    if (data.resultCode !== "200-1") {
-      throw new Error(data.msg);
-    }
-
     return data.data;
   } catch (error) {
     throw error;
@@ -52,7 +44,7 @@ export const checkFavorite = async (hotelId: number): Promise<boolean> => {
 };
 
 // 즐겨찾기 추가
-export const addFavorite = async (hotelId: number): Promise<RsData<Empty>> => {
+export const addFavorite = async (hotelId: number) => {
   try {
     const response = await fetch(
       `http://localhost:8080/api/favorites/${hotelId}`,
@@ -61,26 +53,23 @@ export const addFavorite = async (hotelId: number): Promise<RsData<Empty>> => {
         credentials: "include",
       }
     );
+
+    if (response.status === 204) {
+      return;
+    }
+
     const data = await response.json();
 
     if (!response.ok) {
       throw new Error(data.msg || "서버 오류가 발생했습니다.");
     }
-
-    if (data.resultCode !== "200-1") {
-      throw new Error(data.msg);
-    }
-
-    return data;
   } catch (error) {
     throw error;
   }
 };
 
 // 즐겨찾기 삭제
-export const removeFavorite = async (
-  hotelId: number
-): Promise<RsData<Empty>> => {
+export const removeFavorite = async (hotelId: number) => {
   try {
     const response = await fetch(
       `http://localhost:8080/api/favorites/${hotelId}`,
@@ -89,17 +78,16 @@ export const removeFavorite = async (
         credentials: "include",
       }
     );
+
+    if (response.status === 204) {
+      return;
+    }
+
     const data = await response.json();
 
     if (!response.ok) {
       throw new Error(data.msg || "서버 오류가 발생했습니다.");
     }
-
-    if (data.resultCode !== "200-1") {
-      throw new Error(data.msg);
-    }
-
-    return data;
   } catch (error) {
     throw error;
   }

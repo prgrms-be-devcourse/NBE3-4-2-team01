@@ -7,7 +7,6 @@ import { PutHotelRequest } from "@/lib/types/hotel/PutHotelRequest";
 import { PutHotelResponse } from "@/lib/types/hotel/PutHotelResponse";
 import { PostHotelRequest } from "@/lib/types/hotel/PostHotelRequest";
 import { RsData } from "./../types/RsData";
-import { useParams } from "next/navigation";
 import { PageDto } from "../types/PageDto";
 import { GetHotelResponse } from "../types/hotel/GetHotelResponse";
 
@@ -28,7 +27,7 @@ export const createHotel = async (
     });
 
     const rsData: RsData<PostHotelResponse> = await response.json();
-    if (rsData.resultCode !== "201-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
 
@@ -53,8 +52,12 @@ export const saveHotelImageUrls = async (
       body: JSON.stringify(urls),
     });
 
+    if (response.status === 204) {
+      return;
+    }
+
     const rsData: RsData<Empty> = await response.json();
-    if (rsData.resultCode !== "201-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
   } catch (error) {
@@ -70,7 +73,7 @@ export const findHotelDetail = async (
     const response = await fetch(`${BASE_URL}/${hotelId}/business`);
     const rsData: RsData<GetHotelDetailResponse> = await response.json();
 
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
 
@@ -91,7 +94,7 @@ export const findHotelDetailWithAvailableRooms = async (
     const response = await fetch(`${BASE_URL}/${hotelId}`);
     const rsData: RsData<GetHotelDetailResponse> = await response.json();
 
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
 
@@ -117,7 +120,7 @@ export const modifyHotel = async (
     });
 
     const rsData: RsData<PutHotelResponse> = await response.json();
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
 
@@ -135,8 +138,12 @@ export const deleteHotel = async (hotelId: number): Promise<void> => {
       method: "DELETE",
     });
 
+    if (response.status === 204) {
+      return;
+    }
+
     const rsData: RsData<Empty> = await response.json();
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
   } catch (error) {
@@ -152,7 +159,7 @@ export const findHotelRevenue = async (
     const response = await fetch(`${BASE_URL}/${hotelId}/revenue`);
     const rsData: RsData<GetHotelRevenueResponse> = await response.json();
 
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
 
@@ -171,7 +178,7 @@ export const findAllHotelOptions =
       });
       const rsData: RsData<GetAllHotelOptionResponse> = await response.json();
 
-      if (rsData.resultCode !== "200-1") {
+      if (!response.ok) {
         throw new Error(rsData.msg);
       }
 
@@ -213,7 +220,7 @@ export const getHotelList = async (
     const response = await fetch(url);
     const rsData: RsData<PageDto<GetHotelResponse>> = await response.json();
     console.log(rsData);
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
     return rsData.data;
