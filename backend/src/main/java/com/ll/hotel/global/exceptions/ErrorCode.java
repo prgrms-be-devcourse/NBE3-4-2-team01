@@ -49,8 +49,20 @@ public enum ErrorCode {
 
     BOOKING_CREATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "예약 생성에 실패했습니다."),
     BOOKING_CANCEL_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "예약 취소에 실패했습니다."),
-    BOOKING_COMPLETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "예약 완료 처리에 실패했습니다.");
+    BOOKING_COMPLETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "예약 완료 처리에 실패했습니다."),
 
+    // 결제 관련
+    PAYMENT_TOKEN_FORBIDDEN(HttpStatus.FORBIDDEN, "토큰 발급 권한이 없습니다."),
+    PAYMENT_CANCEL_FORBIDDEN(HttpStatus.FORBIDDEN, "결제 취소 권한이 없습니다."),
+
+    PAYMENT_CANCEL_TO_CANCEL(HttpStatus.BAD_REQUEST, "이미 취소된 결제입니다."),
+
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 정보를 찾을 수 없습니다."),
+
+    PAYMENT_UID_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "Uid 생성에 실패했습니다."),
+    PAYMENT_CREATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "결제 정보 저장에 실패했습니다."),
+    PAYMENT_TOKEN_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 발급에 실패했습니다."),
+    PAYMENT_CANCEL_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "결제 취소에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

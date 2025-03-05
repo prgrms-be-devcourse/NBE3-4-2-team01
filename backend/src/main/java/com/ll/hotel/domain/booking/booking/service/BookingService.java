@@ -67,7 +67,7 @@ public class BookingService {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            ErrorCode.BOOKING_CREATE_FAIL.throwServiceException(e);
+            throw ErrorCode.BOOKING_CREATE_FAIL.throwServiceException(e);
         }
     }
 
@@ -87,14 +87,14 @@ public class BookingService {
     public Page<BookingResponseSummary> tryGetHotelBookings(Member member, int page, int pageSize) {
         // 호텔 사업자만 조회 가능
         if (!member.isBusiness()) {
-            ErrorCode.BOOKING_ACCESS_FORBIDDEN.throwServiceException();
+            throw ErrorCode.BOOKING_ACCESS_FORBIDDEN.throwServiceException();
         }
 
         Hotel myHotel = member.getBusiness().getHotel();
 
         // 내 호텔이 없을 경우
         if (myHotel == null) {
-            ErrorCode.BOOKING_MY_HOTEL_NOT_FOUND.throwServiceException();
+            throw ErrorCode.BOOKING_MY_HOTEL_NOT_FOUND.throwServiceException();
         }
 
         return findByHotel(myHotel, page, pageSize).map((booking) -> bookingDtoMapper.getSummary(booking));
@@ -106,7 +106,7 @@ public class BookingService {
 
         // 관리자, 예약자, 호텔 사업자만 조회 가능
         if (!member.isAdmin() && !booking.isReservedBy(member) && !booking.isOwnedBy(member)) {
-            ErrorCode.BOOKING_ACCESS_FORBIDDEN.throwServiceException();
+            throw ErrorCode.BOOKING_ACCESS_FORBIDDEN.throwServiceException();
         }
 
         return bookingDtoMapper.getDetails(booking);
@@ -121,17 +121,17 @@ public class BookingService {
 
         // 인가, 관리자/예약 당사자/호텔 주인일 경우 가능
         if (!member.isAdmin() && !booking.isReservedBy(member) && !booking.isOwnedBy(member)) {
-            ErrorCode.BOOKING_CANCEL_FORBIDDEN.throwServiceException();
+            throw ErrorCode.BOOKING_CANCEL_FORBIDDEN.throwServiceException();
         }
         // 이미 취소된 예약일 경우
         if (booking.getBookingStatus() == BookingStatus.CANCELLED
                 && booking.getPayment().getPaymentStatus() == PaymentStatus.CANCELLED) {
-            ErrorCode.BOOKING_CANCEL_TO_CANCEL.throwServiceException();
+            throw ErrorCode.BOOKING_CANCEL_TO_CANCEL.throwServiceException();
         }
 
         // 완료된 예약일 경우
         if (booking.getBookingStatus() == BookingStatus.COMPLETED) {
-            ErrorCode.BOOKING_COMPLETE_TO_CANCEL.throwServiceException();
+            throw ErrorCode.BOOKING_COMPLETE_TO_CANCEL.throwServiceException();
         }
 
         cancel(booking);
@@ -151,7 +151,7 @@ public class BookingService {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            ErrorCode.BOOKING_CANCEL_FAIL.throwServiceException(e);
+            throw ErrorCode.BOOKING_CANCEL_FAIL.throwServiceException(e);
         }
     }
 
@@ -161,17 +161,17 @@ public class BookingService {
 
         // 인가, 관리자/호텔 사업자만 완료 처리 가능
         if (!member.isAdmin() && !booking.isOwnedBy(member)) {
-            ErrorCode.BOOKING_COMPLETE_FORBIDDEN.throwServiceException();
+            throw ErrorCode.BOOKING_COMPLETE_FORBIDDEN.throwServiceException();
         }
 
         // 이미 완료 처리된 예약일 경우
         if (booking.getBookingStatus() == BookingStatus.COMPLETED) {
-            ErrorCode.BOOKING_COMPLETE_TO_COMPLETE.throwServiceException();
+            throw ErrorCode.BOOKING_COMPLETE_TO_COMPLETE.throwServiceException();
         }
 
         // 취소된 예약일 경우
         if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
-            ErrorCode.BOOKING_CANCEL_TO_COMPLETE.throwServiceException();
+            throw ErrorCode.BOOKING_CANCEL_TO_COMPLETE.throwServiceException();
         }
 
         setCompleted(booking);
@@ -185,7 +185,7 @@ public class BookingService {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            ErrorCode.BOOKING_COMPLETE_FAIL.throwServiceException(e);
+            throw ErrorCode.BOOKING_COMPLETE_FAIL.throwServiceException(e);
         }
     }
 
