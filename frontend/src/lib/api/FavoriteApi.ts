@@ -1,9 +1,9 @@
 import { RsData } from "../types/RsData";
 import { Empty } from "../types/Empty";
-import { HotelDto } from "../types/HotelDto";
+import { FavoriteHotelDto } from "../types/FavoriteHotelDto";
 
 // 즐겨찾기 목록 조회
-export const getFavorites = async (): Promise<RsData<HotelDto[]>> => {
+export const getFavorites = async (): Promise<RsData<FavoriteHotelDto[]>> => {
   // 호텔 목록 배열로 반환
   try {
     const response = await fetch("http://localhost:8080/api/favorites/me", {
