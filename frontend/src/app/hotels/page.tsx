@@ -1,4 +1,4 @@
-import { getHotelList } from "@/lib/api/BusinessHotelApi";
+import { getHotelList } from "@/lib/api/hotel/BusinessHotelApi";
 import { PageDto } from "@/lib/types/PageDto";
 import { GetHotelResponse } from "@/lib/types/hotel/GetHotelResponse";
 import { FilterName } from "@/lib/enum/FilterName";
