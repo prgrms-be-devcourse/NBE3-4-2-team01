@@ -180,7 +180,7 @@ export const completeBooking = async function (bookingId: number) {
     const response = await fetch(
       `http://localhost:8080/api/bookings/${bookingId}`,
       {
-        method: "POST",
+        method: "PATCH",
         credentials: "include",
       }
     );
