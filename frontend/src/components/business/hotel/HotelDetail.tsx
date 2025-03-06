@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { deleteHotel } from "@/lib/api/BusinessHotelApi";
+import { deleteHotel } from "@/lib/api/hotel/BusinessHotelApi";
 import { HotelDetailDto } from "@/lib/types/hotel/HotelDetailDto";
 import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
 import { useParams, useRouter } from "next/navigation";
@@ -8,7 +8,7 @@ import {
   addFavorite,
   removeFavorite,
   checkFavorite,
-} from "@/lib/api/FavoriteApi";
+} from "@/lib/api/member/FavoriteApi";
 import {
   FaEnvelope,
   FaPhone,

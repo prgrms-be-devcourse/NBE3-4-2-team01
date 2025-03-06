@@ -1,4 +1,4 @@
-import { HotelRevenueResponse } from "@/lib/types/Booking/Revenue/HotelRevenueResponse";
+import { HotelRevenueResponse } from "@/lib/types/booking/revenue/HotelRevenueResponse";
 
 // 예약 상세 조회
 export const getHotelRevenue = async function (
@@ -13,8 +13,8 @@ export const getHotelRevenue = async function (
     );
 
     if (!response.ok) {
-        const body = await response.text();
-        throw new Error(body);
+      const body = await response.text();
+      throw new Error(body);
     }
 
     const rsData = await response.json();

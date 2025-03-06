@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { join } from "@/lib/api/AuthApi";
+import { join } from "@/lib/api/auth/AuthApi";
 import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
 
 export default function JoinPage() {

@@ -7,9 +7,9 @@ import {
   createHotel,
   findAllHotelOptions,
   saveHotelImageUrls,
-} from "@/lib/api/BusinessHotelApi";
+} from "@/lib/api/hotel/BusinessHotelApi";
 import { PostHotelResponse } from "@/lib/types/hotel/PostHotelResponse";
-import { uploadImagesToS3 } from "@/lib/api/AwsS3Api";
+import { uploadImagesToS3 } from "@/lib/api/aws/AwsS3Api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
