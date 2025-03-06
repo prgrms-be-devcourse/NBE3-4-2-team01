@@ -1,9 +1,8 @@
 "use client";
 
-import { approveHotel, getHotelForAdmin } from "@/lib/api/Admin/AdminHotelApi";
+import { approveHotel, getHotelForAdmin } from "@/lib/api/admin/AdminHotelApi";
 import { AdminHotelRequest } from "@/lib/types/admin/request/AdminHotelRequest";
 import { HotelStatus } from "@/lib/types/hotel/HotelStatus";
-import { HotelDto } from "@/lib/types/HotelDto";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";

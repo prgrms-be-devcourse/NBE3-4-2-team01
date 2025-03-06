@@ -1,7 +1,7 @@
-import { BookingFormResponse } from "@/lib/types/Booking/BookingFormResponse";
-import { BookingRequest } from "@/lib/types/Booking/BookingRequest";
-import { BookingResponseDetails } from "@/lib/types/Booking/BookingResponseDetails";
-import { BookingResponseSummary } from "@/lib/types/Booking/BookingResponseSummary";
+import { BookingFormResponse } from "@/lib/types/booking/BookingFormResponse";
+import { BookingRequest } from "@/lib/types/booking/BookingRequest";
+import { BookingResponseDetails } from "@/lib/types/booking/BookingResponseDetails";
+import { BookingResponseSummary } from "@/lib/types/booking/BookingResponseSummary";
 import { PageDto } from "@/lib/types/PageDto";
 
 // 예약 페이지 정보 조회
@@ -22,8 +22,8 @@ export const preBook = async function (
     );
 
     if (!response.ok) {
-        const body = await response.text();
-        throw new Error(body);
+      const body = await response.text();
+      throw new Error(body);
     }
 
     const rsData = await response.json();
@@ -46,8 +46,8 @@ export const book = async function (bookingRequest: BookingRequest) {
     });
 
     if (!response.ok) {
-        const body = await response.text();
-        throw new Error(body);
+      const body = await response.text();
+      throw new Error(body);
     }
 
     return;
@@ -79,8 +79,8 @@ export const getMyBookings = async function (
     );
 
     if (!response.ok) {
-        const body = await response.text();
-        throw new Error(body);
+      const body = await response.text();
+      throw new Error(body);
     }
 
     const rsData = await response.json();
@@ -113,8 +113,8 @@ export const getHotelBookings = async function (
     );
 
     if (!response.ok) {
-        const body = await response.text();
-        throw new Error(body);
+      const body = await response.text();
+      throw new Error(body);
     }
 
     const rsData = await response.json();
@@ -137,8 +137,8 @@ export const getBookingDetails = async function (
     );
 
     if (!response.ok) {
-        const body = await response.text();
-        throw new Error(body);
+      const body = await response.text();
+      throw new Error(body);
     }
 
     const rsData = await response.json();
@@ -160,8 +160,8 @@ export const cancelBooking = async function (bookingId: number) {
     );
 
     if (!response.ok) {
-        const body = await response.text();
-        throw new Error(body);
+      const body = await response.text();
+      throw new Error(body);
     }
 
     return;
@@ -182,8 +182,8 @@ export const completeBooking = async function (bookingId: number) {
     );
 
     if (!response.ok) {
-        const body = await response.text();
-        throw new Error(`${body}`);
+      const body = await response.text();
+      throw new Error(`${body}`);
     }
 
     return;

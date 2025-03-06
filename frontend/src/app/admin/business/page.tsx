@@ -5,7 +5,7 @@ import Navigation from "@/components/navigation/Navigation";
 import Pagination from "@/components/pagination/Pagination";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getAllBusinesses } from "@/lib/api/Admin/AdminBusinessApi";
+import { getAllBusinesses } from "@/lib/api/admin/AdminBusinessApi";
 import { AdminBusinessSummaryReponse } from "@/lib/types/admin/response/AdminBusinessResponse";
 import { PageDto } from "@/lib/types/PageDto";
 import { Building2, MapPin, Star } from "lucide-react";

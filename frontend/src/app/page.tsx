@@ -1,7 +1,7 @@
 "use client";
 
 import Navigation from "@/components/navigation/Navigation";
-import SearchComponent from "@/components/Search/SearchComponent";
+import SearchComponent from "@/components/search/SearchComponent";
 import { Building2, MapPin, Star, Waves } from "lucide-react";
 
 export default function Page() {

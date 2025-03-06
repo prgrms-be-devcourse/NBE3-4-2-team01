@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { GetRoomResponse } from "@/lib/types/room/GetRoomResponse";
-import { deleteRoom } from "@/lib/api/BusinessRoomApi";
+import { deleteRoom } from "@/lib/api/hotel/room/BusinessRoomApi";
 import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
