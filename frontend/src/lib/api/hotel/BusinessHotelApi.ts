@@ -1,4 +1,3 @@
-import { Empty } from "../../types/Empty";
 import { GetAllHotelOptionResponse } from "../../types/hotel/GetAllHotelOptionResponse";
 import { GetHotelDetailResponse } from "../../types/hotel/GetHotelDetailResponse";
 import { GetHotelRevenueResponse } from "../../types/hotel/GetHotelRevenueResponse";
@@ -91,12 +90,17 @@ export const findHotelDetail = async (
 // 예약 가능한 객실이 존재하는 호텔 상세 조회
 export const findHotelDetailWithAvailableRooms = async (
   hotelId: number,
-  checkIndate?: string,
+  checkInDate?: string,
   checkoutDate?: string,
   personal?: string
 ): Promise<GetHotelDetailResponse> => {
   try {
-    const response = await fetch(`${BASE_URL}/${hotelId}`);
+    const params = new URLSearchParams();
+    if (checkInDate) params.set("checkInDate", checkInDate);
+    if (checkoutDate) params.set("checkoutDate", checkoutDate);
+    if (personal) params.set("personal", personal);
+
+    const response = await fetch(`${BASE_URL}/${hotelId}?${params.toString()}`);
 
     const rsData = await response
       .clone()
