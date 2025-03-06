@@ -1,28 +1,24 @@
 package com.ll.hotel.domain.member.member.service;
 
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
+import com.ll.hotel.domain.member.member.repository.RefreshTokenRepository;
+import com.ll.hotel.global.jwt.dto.JwtProperties;
+import com.ll.hotel.global.jwt.dto.RefreshToken;
+import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.standard.util.Ut;
+import io.jsonwebtoken.MalformedJwtException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.hotel.domain.member.member.repository.RefreshTokenRepository;
-import static com.ll.hotel.global.exceptions.ErrorCode.INTERNAL_SERVER_ERROR;
-import static com.ll.hotel.global.exceptions.ErrorCode.REFRESH_TOKEN_INVALID;
-import static com.ll.hotel.global.exceptions.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
-import static com.ll.hotel.global.exceptions.ErrorCode.TOKEN_INVALID;
-import com.ll.hotel.global.jwt.dto.JwtProperties;
-import com.ll.hotel.global.jwt.dto.RefreshToken;
-import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.standard.util.Ut;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import io.jsonwebtoken.MalformedJwtException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static com.ll.hotel.global.exceptions.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +40,6 @@ public class RefreshTokenService {
             redisTemplate.expire(key, 86400, TimeUnit.SECONDS);
             log.debug("Token saved successfully for email: {}", email);
         } catch (Exception e) {
-            log.error("Failed to save token", e);
             throw e;
         }
     }
@@ -87,7 +82,6 @@ public class RefreshTokenService {
         } catch (MalformedJwtException e) {
             throw TOKEN_INVALID.throwServiceException();
         } catch (Exception e) {
-            log.error("토큰 갱신 중 오류 발생", e);
             throw INTERNAL_SERVER_ERROR.throwServiceException();
         }
     }
@@ -104,7 +98,6 @@ public class RefreshTokenService {
                 // 토큰이 없어도 오류로 처리하지 않음
             }
         } catch (Exception e) {
-            log.error("Failed to remove token for email: {}", email, e);
             throw e;
         }
     }
