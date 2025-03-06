@@ -8,6 +8,8 @@ import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.page.dto.PageDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,9 +19,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/admin/businesses")
 @RequiredArgsConstructor
+@Tag(name = "AdminBusinessController")
 public class AdminBusinessController {
     private final AdminBusinessService adminBusinessService;
 
+    @Operation(summary = "사업자 전체 조회")
     @GetMapping
     public RsData<PageDto<AdminBusinessResponse.Summary>> getAll(
             @RequestParam(value = "page", defaultValue = "0") int page) {
@@ -30,6 +34,7 @@ public class AdminBusinessController {
         return RsData.success(HttpStatus.OK, new PageDto<>(pagedBusinessSummaries));
     }
 
+    @Operation(summary = "사업자 단건 조회")
     @GetMapping("/{id}")
     public RsData<AdminBusinessResponse.Detail> getById(@PathVariable("id") Long id) {
 
@@ -38,6 +43,7 @@ public class AdminBusinessController {
         return RsData.success(HttpStatus.OK, AdminBusinessResponse.Detail.from(business));
     }
 
+    @Operation(summary = "사업자 승인")
     @PatchMapping("/{id}")
     public RsData<AdminBusinessResponse.ApprovalResult> approve(@PathVariable("id") Long id,
                                                  @RequestBody @Valid AdminBusinessRequest adminBusinessRequest) {
