@@ -41,11 +41,13 @@ public class RoomOptionController {
         return RsData.success(HttpStatus.OK, roomAmenityList);
     }
 
-    @Operation(summary = "객실 옵션 단건 조회")
-    @GetMapping("/{id}")
-    public RsData<OptionResponse> getById(@PathVariable("id") Long id) {
-
+    @PatchMapping("/{id}")
+    public RsData<OptionResponse> modify(@PathVariable("id") Long id,
+                                         @RequestBody OptionRequest optionRequest) {
         RoomOption roomOption = roomOptionService.findById(id);
+        roomOptionService.modify(roomOption, optionRequest);
+
+        roomOptionService.flush();
 
         return RsData.success(HttpStatus.OK, OptionResponse.from(roomOption));
     }
