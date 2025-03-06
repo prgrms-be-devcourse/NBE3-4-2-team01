@@ -1,11 +1,9 @@
-import { Empty } from "../../../types/Empty";
 import { GetAllRoomOptionsResponse } from "@/lib/types/room/GetAllRoomOptionsResponse";
 import { GetRoomDetailResponse } from "@/lib/types/room/GetRoomDetailResponse";
 import { GetRoomResponse } from "@/lib/types/room/GetRoomResponse";
 import { PostRoomResponse } from "@/lib/types/room/PostRoomResponse";
 import { PutRoomRequest } from "@/lib/types/room/PutRoomRequest";
 import { PutRoomResponse } from "@/lib/types/room/PutRoomResponse";
-import { RsData } from "../../../types/RsData";
 import { PostRoomRequest } from "@/lib/types/room/PostRoomRequest";
 
 const BASE_URL = "http://localhost:8080/api/hotels";

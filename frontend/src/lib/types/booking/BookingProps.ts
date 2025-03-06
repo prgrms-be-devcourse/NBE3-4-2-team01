@@ -1,5 +1,3 @@
-import { GetHotelDetailResponse } from "../hotel/GetHotelDetailResponse";
-import { GetRoomDetailResponse } from "../room/GetRoomDetailResponse";
 import { KakaoPaymentRequest } from "./payment/KakaoPaymentRequest";
 
 export const enum View {

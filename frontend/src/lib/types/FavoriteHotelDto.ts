@@ -4,4 +4,4 @@ export interface FavoriteHotelDto {
   streetAddress: string;
   hotelGrade: number;
   hotelStatus: string;
-} 
+}
