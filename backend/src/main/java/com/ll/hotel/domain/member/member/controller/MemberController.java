@@ -40,7 +40,7 @@ public class MemberController {
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.joining(", "));
 
-            throw EMAIL_ALREADY_EXISTS.throwServiceException();
+            EMAIL_ALREADY_EXISTS.throwServiceException();
         }
         
         try {
@@ -57,7 +57,9 @@ public class MemberController {
             );
             return RsData.success(HttpStatus.OK, memberResponse);
         } catch (ServiceException e) {
-            throw EMAIL_ALREADY_EXISTS.throwServiceException();
+            EMAIL_ALREADY_EXISTS.throwServiceException(e);
+            // ErrorCode 쪽에 getException 이 없고, ServiceException 쪽에 ErrorCode 를 던질 수 없는 상황이라, null 중복 처리
+            return null; // 단순 컴파일 오류 회피용, 위에서 null 값을 출력하고 끝내기에 중복 출력 될 우려는 없음
         }
     }
 
@@ -89,7 +91,7 @@ public class MemberController {
         }
         
         if (refreshToken == null) {
-            throw REFRESH_TOKEN_NOT_FOUND.throwServiceException();
+            REFRESH_TOKEN_NOT_FOUND.throwServiceException();
         }
         
         return memberService.refreshAccessToken(refreshToken);
