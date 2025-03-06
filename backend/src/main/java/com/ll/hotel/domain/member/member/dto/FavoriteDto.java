@@ -1,11 +1,11 @@
-package com.ll.hotel.domain.hotel.hotel.dto;
+package com.ll.hotel.domain.member.member.dto;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.NonNull;
 
-public record FavoriteHotelDto(
+public record FavoriteDto(
         long hotelId,
 
         @NotBlank
@@ -20,8 +20,8 @@ public record FavoriteHotelDto(
         @NotBlank
         String hotelStatus
 ) {
-    public static FavoriteHotelDto from(Hotel hotel) {
-        return new FavoriteHotelDto(
+    public static FavoriteDto from(Hotel hotel) {
+        return new FavoriteDto(
                 hotel.getId(),
                 hotel.getHotelName(),
                 hotel.getStreetAddress(),
