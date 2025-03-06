@@ -1,19 +1,13 @@
 package com.ll.hotel.domain.booking.booking.dto;
 
+
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.booking.booking.type.BookingStatus;
 import com.ll.hotel.domain.booking.payment.dto.PaymentResponse;
-import com.ll.hotel.domain.booking.payment.entity.Payment;
-import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDetailDto;
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.RoomDto;
 import com.ll.hotel.domain.member.member.dto.MemberDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 public record BookingResponse(
         long bookingId,

@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.member.member.controller;
 
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
+import com.ll.hotel.domain.member.member.dto.FavoriteDto;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +28,8 @@ public class FavoriteController {
     }
 
     @GetMapping("/me")
-    public RsData<List<HotelDto>> getFavorites() {
-        List<HotelDto> favorites = memberService.getFavoriteHotels();
+    public RsData<List<FavoriteDto>> getFavorites() {
+        List<FavoriteDto> favorites = memberService.getFavoriteHotels();
         
         if (favorites.isEmpty()) {
             return RsData.success(HttpStatus.OK, List.of());
