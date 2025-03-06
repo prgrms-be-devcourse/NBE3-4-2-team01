@@ -2,7 +2,7 @@ package com.ll.hotel.global.aspect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ll.hotel.global.app.AppConfig;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.response.RsData;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

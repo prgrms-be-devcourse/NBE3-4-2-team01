@@ -1,4 +1,4 @@
-package com.ll.hotel.global.rq;
+package com.ll.hotel.global.request;
 
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;

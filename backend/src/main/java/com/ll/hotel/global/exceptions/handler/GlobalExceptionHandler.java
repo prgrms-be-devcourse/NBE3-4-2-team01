@@ -1,4 +1,4 @@
-package com.ll.hotel.global.globalExceptionHandler;
+package com.ll.hotel.global.exceptions.handler;
 
 import com.ll.hotel.global.exceptions.CustomS3Exception;
 import com.ll.hotel.global.exceptions.ServiceException;

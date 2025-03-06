@@ -8,7 +8,7 @@ import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
-import com.ll.hotel.global.rq.Rq;
+import com.ll.hotel.global.request.Rq;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

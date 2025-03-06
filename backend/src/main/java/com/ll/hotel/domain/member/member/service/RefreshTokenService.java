@@ -17,7 +17,7 @@ import static com.ll.hotel.global.exceptions.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import static com.ll.hotel.global.exceptions.ErrorCode.TOKEN_INVALID;
 import com.ll.hotel.global.jwt.dto.JwtProperties;
 import com.ll.hotel.global.jwt.dto.RefreshToken;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.response.RsData;
 import com.ll.hotel.standard.util.Ut;
 
 import io.jsonwebtoken.MalformedJwtException;
