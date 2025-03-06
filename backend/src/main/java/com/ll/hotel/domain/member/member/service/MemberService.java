@@ -1,7 +1,7 @@
 package com.ll.hotel.domain.member.member.service;
 
 
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
+import com.ll.hotel.domain.member.member.dto.FavoriteDto;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.member.member.dto.JoinRequest;
@@ -10,8 +10,8 @@ import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.jwt.dto.GeneratedToken;
 import com.ll.hotel.global.jwt.dto.JwtProperties;
-import com.ll.hotel.global.rq.Rq;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.request.Rq;
+import com.ll.hotel.global.response.RsData;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import com.ll.hotel.global.security.oauth2.repository.OAuthRepository;
 import com.ll.hotel.standard.util.Ut;
@@ -72,7 +72,7 @@ public class MemberService {
                 return member;
             }
             
-            throw EMAIL_ALREADY_EXISTS.throwServiceException();
+            EMAIL_ALREADY_EXISTS.throwServiceException();
         }
 
         Member newMember = Member.builder()
@@ -144,7 +144,7 @@ public class MemberService {
         }
 
         if (accessToken == null) {
-            throw UNAUTHORIZED.throwServiceException();
+            UNAUTHORIZED.throwServiceException();
         }
 
         String email = authTokenService.getEmail(accessToken);
@@ -196,10 +196,10 @@ public class MemberService {
 
     public String extractEmailIfValid(String token) {
         if (isLoggedOut(token)) {
-            throw TOKEN_LOGGED_OUT.throwServiceException();
+            TOKEN_LOGGED_OUT.throwServiceException();
         }
         if (!verifyToken(token)) {
-            throw TOKEN_INVALID.throwServiceException();
+            TOKEN_INVALID.throwServiceException();
         }
         return getEmailFromToken(token);
     }
@@ -208,14 +208,14 @@ public class MemberService {
     public void addFavorite(Long hotelId) {
         Member actor = rq.getActor();
         if (actor == null) {
-            throw UNAUTHORIZED.throwServiceException();
+            UNAUTHORIZED.throwServiceException();
         }
 
         Hotel hotel = hotelRepository.findById(hotelId)
             .orElseThrow(HOTEL_NOT_FOUND::throwServiceException);
 
         if (actor.getFavoriteHotels().contains(hotel)) {
-            throw FAVORITE_ALREADY_EXISTS.throwServiceException();
+            FAVORITE_ALREADY_EXISTS.throwServiceException();
         }
 
         actor.getFavoriteHotels().add(hotel);
@@ -229,14 +229,14 @@ public class MemberService {
     public void removeFavorite(Long hotelId) {
         Member actor = rq.getActor();
         if (actor == null) {
-            throw UNAUTHORIZED.throwServiceException();
+            UNAUTHORIZED.throwServiceException();
         }
 
         Hotel hotel = hotelRepository.findById(hotelId)
             .orElseThrow(HOTEL_NOT_FOUND::throwServiceException);
 
         if (!actor.getFavoriteHotels().contains(hotel)) {
-            throw FAVORITE_NOT_FOUND.throwServiceException();
+            FAVORITE_NOT_FOUND.throwServiceException();
         }
 
         actor.getFavoriteHotels().remove(hotel);
@@ -246,12 +246,12 @@ public class MemberService {
         hotelRepository.save(hotel);
     }
 
-    public List<HotelDto> getFavoriteHotels() {
+    public List<FavoriteDto> getFavoriteHotels() {
         Member actor = rq.getActor();
         log.debug("getFavoriteHotels - actor: {}", actor);
         
         if (actor == null) {
-            throw UNAUTHORIZED.throwServiceException();
+            UNAUTHORIZED.throwServiceException();
         }
 
         Set<Hotel> favorites = actor.getFavoriteHotels();
@@ -260,7 +260,7 @@ public class MemberService {
         return favorites.stream()
             .map(hotel -> {
                 log.debug("getFavoriteHotels - hotel: {}", hotel.getHotelName());
-                return new HotelDto(hotel);
+                return FavoriteDto.from(hotel);
             })
             .collect(Collectors.toList());
     }
@@ -269,7 +269,7 @@ public class MemberService {
         Member actor = rq.getActor();
 
         if (actor == null) {
-            throw UNAUTHORIZED.throwServiceException();
+            UNAUTHORIZED.throwServiceException();
         }
 
         Set<Hotel> favorites = actor.getFavoriteHotels();

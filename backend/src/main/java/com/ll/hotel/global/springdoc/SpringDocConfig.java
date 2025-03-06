@@ -1,4 +1,4 @@
-package com.ll.hotel.global.springDoc;
+package com.ll.hotel.global.springdoc;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;

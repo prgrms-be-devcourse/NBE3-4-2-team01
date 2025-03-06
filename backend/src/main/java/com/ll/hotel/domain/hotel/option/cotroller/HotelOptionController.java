@@ -4,7 +4,9 @@ import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
 import com.ll.hotel.domain.hotel.option.dto.response.OptionResponse;
 import com.ll.hotel.domain.hotel.option.entity.HotelOption;
 import com.ll.hotel.domain.hotel.option.service.HotelOptionService;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.response.RsData;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,9 +17,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/hotel-options")
 @RequiredArgsConstructor
+@Tag(name = "HotelOptionController")
 public class HotelOptionController {
     private final HotelOptionService hotelOptionService;
 
+    @Operation(summary = "호텔 옵션 추가")
     @PostMapping
     public RsData<OptionResponse> add(@RequestBody @Valid OptionRequest optionRequest) {
 
@@ -26,6 +30,7 @@ public class HotelOptionController {
         return RsData.success(HttpStatus.CREATED, OptionResponse.from(hotelOption));
     }
 
+    @Operation(summary = "호텔 옵션 전체 조회")
     @GetMapping
     public RsData<List<OptionResponse>> getAll() {
 
@@ -36,14 +41,7 @@ public class HotelOptionController {
         return RsData.success(HttpStatus.OK, hotelOptionList);
     }
 
-    @GetMapping("/{id}")
-    public RsData<OptionResponse> getById(@PathVariable("id") Long id) {
-
-        HotelOption hotelOption = hotelOptionService.findById(id);
-
-        return RsData.success(HttpStatus.OK, OptionResponse.from(hotelOption));
-    }
-
+    @Operation(summary = "호텔 옵션 수정")
     @PatchMapping("/{id}")
     public RsData<OptionResponse> modify(@PathVariable("id") Long id,
                                          @RequestBody OptionRequest optionRequest) {
@@ -55,6 +53,7 @@ public class HotelOptionController {
         return RsData.success(HttpStatus.OK, OptionResponse.from(hotelOption));
     }
 
+    @Operation(summary = "호텔 옵션 삭제")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") Long id) {

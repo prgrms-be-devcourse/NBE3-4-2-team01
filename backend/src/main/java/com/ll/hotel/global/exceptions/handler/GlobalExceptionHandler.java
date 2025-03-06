@@ -1,9 +1,11 @@
-package com.ll.hotel.global.globalExceptionHandler;
+package com.ll.hotel.global.exceptions.handler;
 
 import com.ll.hotel.global.exceptions.CustomS3Exception;
 import com.ll.hotel.global.exceptions.ServiceException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,7 +35,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidationException(MethodArgumentNotValidException ex) {
-        return ResponseEntity.badRequest().body("Validation failed: " + ex.getBindingResult().toString());
+        List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
+
+        StringBuilder errorMessages = new StringBuilder();
+        for (FieldError fieldError : fieldErrors) {
+            errorMessages.append(fieldError.getField())
+                    .append(": ")
+                    .append(fieldError.getDefaultMessage())
+                    .append("\n");
+        }
+
+        return ResponseEntity.badRequest().body(errorMessages.toString());
     }
 
 }

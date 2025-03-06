@@ -1,11 +1,9 @@
 package com.ll.hotel.domain.review.comment.controller;
 
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.comment.dto.ReviewCommentDto;
 import com.ll.hotel.domain.review.comment.dto.request.ReviewCommentContentRequest;
 import com.ll.hotel.domain.review.comment.service.ReviewCommentService;
-import com.ll.hotel.global.rq.Rq;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.request.Rq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -31,16 +29,6 @@ public class ReviewCommentController {
         Member actor = rq.getActor();
 
         reviewCommentService.createReviewComment(actor, reviewId, contentRequest.content());
-    }
-
-    @GetMapping("/{commentId}")
-    @Operation(summary = "리뷰 답변 조회")
-    public RsData<ReviewCommentDto> getReviewComment(
-            @PathVariable("reviewId") long reviewId,
-            @PathVariable("commentId") long commentId
-    ) {
-
-        return RsData.success(HttpStatus.OK, reviewCommentService.getReviewComment(commentId));
     }
 
     @PutMapping("/{commentId}")

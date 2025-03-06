@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.member.member.service;
 
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
+import com.ll.hotel.domain.member.member.dto.FavoriteDto;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
@@ -9,7 +9,7 @@ import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.global.rq.Rq;
+import com.ll.hotel.global.request.Rq;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -160,7 +160,7 @@ class MemberServiceFavoriteTest {
         memberService.addFavorite(testHotel.getId());
         
         // when
-        List<HotelDto> favorites = memberService.getFavoriteHotels();
+        List<FavoriteDto> favorites = memberService.getFavoriteHotels();
         
         // then
         assertThat(favorites).hasSize(1);

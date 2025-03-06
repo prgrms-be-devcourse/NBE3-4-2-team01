@@ -1,15 +1,14 @@
-import { Empty } from "../types/Empty";
-import { GetAllHotelOptionResponse } from "../types/hotel/GetAllHotelOptionResponse";
-import { GetHotelDetailResponse } from "../types/hotel/GetHotelDetailResponse";
-import { GetHotelRevenueResponse } from "../types/hotel/GetHotelRevenueResponse";
+import { Empty } from "../../types/Empty";
+import { GetAllHotelOptionResponse } from "../../types/hotel/GetAllHotelOptionResponse";
+import { GetHotelDetailResponse } from "../../types/hotel/GetHotelDetailResponse";
+import { GetHotelRevenueResponse } from "../../types/hotel/GetHotelRevenueResponse";
 import { PostHotelResponse } from "@/lib/types/hotel/PostHotelResponse";
 import { PutHotelRequest } from "@/lib/types/hotel/PutHotelRequest";
 import { PutHotelResponse } from "@/lib/types/hotel/PutHotelResponse";
 import { PostHotelRequest } from "@/lib/types/hotel/PostHotelRequest";
-import { RsData } from "./../types/RsData";
-import { useParams } from "next/navigation";
-import { PageDto } from "../types/PageDto";
-import { GetHotelResponse } from "../types/hotel/GetHotelResponse";
+import { RsData } from "../../types/RsData";
+import { PageDto } from "../../types/PageDto";
+import { GetHotelResponse } from "../../types/hotel/GetHotelResponse";
 
 const BASE_URL = "http://localhost:8080/api/hotels";
 
@@ -27,9 +26,13 @@ export const createHotel = async (
       body: JSON.stringify(postHotelRequest),
     });
 
-    const rsData: RsData<PostHotelResponse> = await response.json();
-    if (rsData.resultCode !== "201-1") {
-      throw new Error(rsData.msg);
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
+
+    if (!response.ok) {
+      throw rsData;
     }
 
     return rsData.data;
@@ -53,10 +56,11 @@ export const saveHotelImageUrls = async (
       body: JSON.stringify(urls),
     });
 
-    const rsData: RsData<Empty> = await response.json();
-    if (rsData.resultCode !== "201-1") {
-      throw new Error(rsData.msg);
+    if (response.status === 204) {
+      return;
     }
+
+    throw await response.text();
   } catch (error) {
     throw error;
   }
@@ -68,10 +72,14 @@ export const findHotelDetail = async (
 ): Promise<GetHotelDetailResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/business`);
-    const rsData: RsData<GetHotelDetailResponse> = await response.json();
 
-    if (rsData.resultCode !== "200-1") {
-      throw new Error(rsData.msg);
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
+
+    if (!response.ok) {
+      throw rsData;
     }
 
     return rsData.data;
@@ -89,10 +97,14 @@ export const findHotelDetailWithAvailableRooms = async (
 ): Promise<GetHotelDetailResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}`);
-    const rsData: RsData<GetHotelDetailResponse> = await response.json();
 
-    if (rsData.resultCode !== "200-1") {
-      throw new Error(rsData.msg);
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
+
+    if (!response.ok) {
+      throw rsData;
     }
 
     return rsData.data;
@@ -116,9 +128,13 @@ export const modifyHotel = async (
       body: JSON.stringify(request),
     });
 
-    const rsData: RsData<PutHotelResponse> = await response.json();
-    if (rsData.resultCode !== "200-1") {
-      throw new Error(rsData.msg);
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
+
+    if (!response.ok) {
+      throw rsData;
     }
 
     return rsData.data;
@@ -135,10 +151,11 @@ export const deleteHotel = async (hotelId: number): Promise<void> => {
       method: "DELETE",
     });
 
-    const rsData: RsData<Empty> = await response.json();
-    if (rsData.resultCode !== "200-1") {
-      throw new Error(rsData.msg);
+    if (response.status === 204) {
+      return;
     }
+
+    throw await response.text();
   } catch (error) {
     throw error;
   }
@@ -150,10 +167,14 @@ export const findHotelRevenue = async (
 ): Promise<GetHotelRevenueResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/revenue`);
-    const rsData: RsData<GetHotelRevenueResponse> = await response.json();
 
-    if (rsData.resultCode !== "200-1") {
-      throw new Error(rsData.msg);
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
+
+    if (!response.ok) {
+      throw rsData;
     }
 
     return rsData.data;
@@ -169,10 +190,14 @@ export const findAllHotelOptions =
       const response = await fetch(`${BASE_URL}/hotel-option`, {
         credentials: "include",
       });
-      const rsData: RsData<GetAllHotelOptionResponse> = await response.json();
 
-      if (rsData.resultCode !== "200-1") {
-        throw new Error(rsData.msg);
+      const rsData = await response
+        .clone()
+        .json()
+        .catch(() => response.text());
+
+      if (!response.ok) {
+        throw rsData;
       }
 
       return rsData.data;
@@ -213,7 +238,7 @@ export const getHotelList = async (
     const response = await fetch(url);
     const rsData: RsData<PageDto<GetHotelResponse>> = await response.json();
     console.log(rsData);
-    if (rsData.resultCode !== "200-1") {
+    if (!response.ok) {
       throw new Error(rsData.msg);
     }
     return rsData.data;

@@ -6,9 +6,8 @@ import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.service.BusinessService;
 import com.ll.hotel.domain.member.member.service.BusinessValidationService;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
-import com.ll.hotel.global.exceptions.ErrorCode;
-import com.ll.hotel.global.globalExceptionHandler.GlobalExceptionHandler;
-import com.ll.hotel.global.rq.Rq;
+import com.ll.hotel.global.exceptions.handler.GlobalExceptionHandler;
+import com.ll.hotel.global.request.Rq;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 public class BusinessControllerTest {

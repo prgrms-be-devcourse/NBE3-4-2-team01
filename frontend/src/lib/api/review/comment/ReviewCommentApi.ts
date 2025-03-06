@@ -1,6 +1,4 @@
-import { ReviewCommentDto } from "../types/review/ReviewCommentDto";
-import { RsData } from "../types/RsData";
-
+// 리뷰 답변 생성
 export const postReviewComment = async (reviewId: number, content: string) => {
   try {
     const response = await fetch(
@@ -15,15 +13,19 @@ export const postReviewComment = async (reviewId: number, content: string) => {
       }
     );
 
-    const rsData = await response.json();
+    if (response.status === 204) {
+      return;
+    }
+
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw new Error(await response.text());
     }
   } catch (error) {
     throw error;
   }
 };
 
+// 리뷰 답변 삭제
 export const deleteReviewComment = async (
   reviewId: number,
   commentId: number
@@ -37,37 +39,19 @@ export const deleteReviewComment = async (
       }
     );
 
-    const rsData = await response.json();
+    if (response.status === 204) {
+      return;
+    }
+
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw new Error(await response.text());
     }
   } catch (error) {
     throw error;
   }
 };
 
-export const fetchReviewComment = async (
-  reviewId: number,
-  commentId: number
-): Promise<ReviewCommentDto> => {
-  try {
-    const response = await fetch(
-      `http://localhost:8080/api/reviews/${reviewId}/comments/${commentId}`,
-      {
-        credentials: "include",
-      }
-    );
-    const rsData: RsData<ReviewCommentDto> = await response.json();
-
-    if (!response.ok) {
-      throw new Error(rsData.msg);
-    }
-    return rsData.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
+// 리뷰 답변 수정
 export const updateReviewComment = async (
   reviewId: number,
   commentId: number,
@@ -86,9 +70,12 @@ export const updateReviewComment = async (
       }
     );
 
-    const rsData = await response.json();
+    if (response.status === 204) {
+      return;
+    }
+
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw new Error(await response.text());
     }
   } catch (error) {
     throw error;
