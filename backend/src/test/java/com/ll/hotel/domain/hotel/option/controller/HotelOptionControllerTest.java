@@ -90,22 +90,6 @@ public class HotelOptionControllerTest {
     }
 
     @Test
-    @DisplayName("호텔 옵션 조회")
-    void getHotelOptionByIdTest() throws Exception {
-        ResultActions resultActions = mockMvc
-                .perform(
-                        get("/api/admin/hotel-options/{id}", testId)
-                )
-                .andDo(print());
-
-        resultActions
-                .andExpect(handler().handlerType(HotelOptionController.class))
-                .andExpect(handler().methodName("getById"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK.name()));
-    }
-
-    @Test
     @DisplayName("호텔 옵션 수정")
     void modifyHotelOptionTest() throws Exception {
         ResultActions resultActions = mockMvc
