@@ -1,10 +1,9 @@
 package com.ll.hotel.domain.member.member.service;
 
 
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
+import com.ll.hotel.domain.member.member.dto.FavoriteDto;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
-import com.ll.hotel.domain.hotel.option.entity.HotelOption;
 import com.ll.hotel.domain.member.member.dto.JoinRequest;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
@@ -73,7 +72,7 @@ public class MemberService {
                 return member;
             }
             
-            throw EMAIL_ALREADY_EXISTS.throwServiceException();
+            EMAIL_ALREADY_EXISTS.throwServiceException();
         }
 
         Member newMember = Member.builder()
@@ -145,7 +144,7 @@ public class MemberService {
         }
 
         if (accessToken == null) {
-            throw UNAUTHORIZED.throwServiceException();
+            UNAUTHORIZED.throwServiceException();
         }
 
         String email = authTokenService.getEmail(accessToken);
@@ -197,10 +196,10 @@ public class MemberService {
 
     public String extractEmailIfValid(String token) {
         if (isLoggedOut(token)) {
-            throw TOKEN_LOGGED_OUT.throwServiceException();
+            TOKEN_LOGGED_OUT.throwServiceException();
         }
         if (!verifyToken(token)) {
-            throw TOKEN_INVALID.throwServiceException();
+            TOKEN_INVALID.throwServiceException();
         }
         return getEmailFromToken(token);
     }
@@ -209,14 +208,14 @@ public class MemberService {
     public void addFavorite(Long hotelId) {
         Member actor = rq.getActor();
         if (actor == null) {
-            throw UNAUTHORIZED.throwServiceException();
+            UNAUTHORIZED.throwServiceException();
         }
 
         Hotel hotel = hotelRepository.findById(hotelId)
             .orElseThrow(HOTEL_NOT_FOUND::throwServiceException);
 
         if (actor.getFavoriteHotels().contains(hotel)) {
-            throw FAVORITE_ALREADY_EXISTS.throwServiceException();
+            FAVORITE_ALREADY_EXISTS.throwServiceException();
         }
 
         actor.getFavoriteHotels().add(hotel);
@@ -230,14 +229,14 @@ public class MemberService {
     public void removeFavorite(Long hotelId) {
         Member actor = rq.getActor();
         if (actor == null) {
-            throw UNAUTHORIZED.throwServiceException();
+            UNAUTHORIZED.throwServiceException();
         }
 
         Hotel hotel = hotelRepository.findById(hotelId)
             .orElseThrow(HOTEL_NOT_FOUND::throwServiceException);
 
         if (!actor.getFavoriteHotels().contains(hotel)) {
-            throw FAVORITE_NOT_FOUND.throwServiceException();
+            FAVORITE_NOT_FOUND.throwServiceException();
         }
 
         actor.getFavoriteHotels().remove(hotel);
@@ -247,12 +246,12 @@ public class MemberService {
         hotelRepository.save(hotel);
     }
 
-    public List<HotelDto> getFavoriteHotels() {
+    public List<FavoriteDto> getFavoriteHotels() {
         Member actor = rq.getActor();
         log.debug("getFavoriteHotels - actor: {}", actor);
         
         if (actor == null) {
-            throw UNAUTHORIZED.throwServiceException();
+            UNAUTHORIZED.throwServiceException();
         }
 
         Set<Hotel> favorites = actor.getFavoriteHotels();
@@ -261,40 +260,7 @@ public class MemberService {
         return favorites.stream()
             .map(hotel -> {
                 log.debug("getFavoriteHotels - hotel: {}", hotel.getHotelName());
-                
-                // 즐겨찾기를 프론트로 넘길 때 많은 데이터를 넘기면 프론트에서 받지 못하는 부분이 있어 간소화
-                List<Map<String, Object>> simplifiedRooms = hotel.getRooms().stream()
-                    .map(room -> {
-                        Map<String, Object> roomMap = new HashMap<>();
-                        roomMap.put("id", room.getId());
-                        roomMap.put("roomName", room.getRoomName());
-                        roomMap.put("roomNumber", room.getRoomNumber());
-                        roomMap.put("basePrice", room.getBasePrice());
-                        return roomMap;
-                    })
-                    .collect(Collectors.toList());
-                
-                List<String> hotelOptionNames = hotel.getHotelOptions() != null
-                    ? hotel.getHotelOptions().stream()
-                        .map(HotelOption::getName)
-                        .collect(Collectors.toList())
-                    : new ArrayList<>();
-                
-                return new HotelDto(
-                    hotel.getId(),
-                    hotel.getHotelName(),
-                    hotel.getHotelEmail(),
-                    hotel.getHotelPhoneNumber(),
-                    hotel.getStreetAddress(),
-                    hotel.getZipCode(),
-                    hotel.getHotelGrade(),
-                    hotel.getCheckInTime(),
-                    hotel.getCheckOutTime(),
-                    hotel.getHotelExplainContent(),
-                    hotel.getHotelStatus().getValue(),
-                    simplifiedRooms,
-                    hotelOptionNames
-                );
+                return FavoriteDto.from(hotel);
             })
             .collect(Collectors.toList());
     }
@@ -303,7 +269,7 @@ public class MemberService {
         Member actor = rq.getActor();
 
         if (actor == null) {
-            throw UNAUTHORIZED.throwServiceException();
+            UNAUTHORIZED.throwServiceException();
         }
 
         Set<Hotel> favorites = actor.getFavoriteHotels();
