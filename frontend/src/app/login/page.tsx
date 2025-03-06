@@ -1,12 +1,12 @@
-'use client';
-import Image from 'next/image';
+"use client";
+import Image from "next/image";
 
 export default function LoginPage() {
   const handleOAuthLogin = (provider: string) => {
     window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
   };
-  
-    return (
+
+  return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-[460px] w-full space-y-8 p-10 bg-white rounded-xl shadow-lg">
         <div className="text-center">
@@ -18,7 +18,7 @@ export default function LoginPage() {
 
         <div className="mt-10 space-y-5">
           <button
-            onClick={() => handleOAuthLogin('kakao')}
+            onClick={() => handleOAuthLogin("kakao")}
             className="w-full flex items-center justify-center h-[52px] border border-transparent rounded-xl text-base font-medium text-gray-800 bg-[#FEE500] hover:bg-[#FEE500]/90"
           >
             <Image
@@ -32,7 +32,7 @@ export default function LoginPage() {
           </button>
 
           <button
-            onClick={() => handleOAuthLogin('naver')}
+            onClick={() => handleOAuthLogin("naver")}
             className="w-full flex items-center justify-center h-[52px] border border-transparent rounded-xl text-base font-medium text-white bg-[#03C75A] hover:bg-[#03C75A]/90"
           >
             <Image
@@ -46,7 +46,7 @@ export default function LoginPage() {
           </button>
 
           <button
-            onClick={() => handleOAuthLogin('google')}
+            onClick={() => handleOAuthLogin("google")}
             className="w-full flex items-center justify-center h-[52px] border border-gray-300 rounded-xl text-base font-medium text-gray-700 bg-white hover:bg-gray-50"
           >
             <Image

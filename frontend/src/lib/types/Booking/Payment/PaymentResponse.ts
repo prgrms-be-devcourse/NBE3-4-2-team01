@@ -1,7 +1,7 @@
 export interface PaymentResponse {
-    paymentId : number;
-    merchantUid : number;
-    amount : number;
-    paymentStatus : string;
-    paidAt : string;
+  paymentId: number;
+  merchantUid: number;
+  amount: number;
+  paymentStatus: string;
+  paidAt: string;
 }

@@ -1,5 +1,5 @@
 export interface KakaoPaymentRequest {
-    merchantUid : string;
-    amount : number;
-    paidAtTimestamp : number;
+  merchantUid: string;
+  amount: number;
+  paidAtTimestamp: number;
 }

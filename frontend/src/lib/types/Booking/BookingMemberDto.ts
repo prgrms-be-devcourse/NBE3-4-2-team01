@@ -1,5 +1,5 @@
 export interface BookingMemberDto {
-    id : number;
-    memberEmail : string;
-    memberName : string;
+  id: number;
+  memberEmail: string;
+  memberName: string;
 }
