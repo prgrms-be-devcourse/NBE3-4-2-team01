@@ -5,7 +5,7 @@ import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.response.RsData;
 import com.ll.hotel.global.security.oauth2.dto.SecurityUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

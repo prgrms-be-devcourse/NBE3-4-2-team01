@@ -1,21 +1,14 @@
 package com.ll.hotel.domain.booking.payment.controller;
 
-import com.ll.hotel.domain.booking.payment.dto.PaymentRequest;
-import com.ll.hotel.domain.booking.payment.dto.PaymentResponse;
 import com.ll.hotel.domain.booking.payment.dto.UidResponse;
-import com.ll.hotel.domain.booking.payment.entity.Payment;
 import com.ll.hotel.domain.booking.payment.service.PaymentService;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.global.rq.Rq;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.request.Rq;
+import com.ll.hotel.global.response.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

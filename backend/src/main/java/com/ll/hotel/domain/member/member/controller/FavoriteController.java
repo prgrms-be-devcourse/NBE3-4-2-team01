@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.hotel.domain.member.member.dto.FavoriteDto;
 import com.ll.hotel.domain.member.member.service.MemberService;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.response.RsData;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
