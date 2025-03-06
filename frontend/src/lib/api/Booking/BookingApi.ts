@@ -20,12 +20,13 @@ export const preBook = async function (
         credentials: "include",
       }
     );
-    const rsData = await response.json();
-    console.log(response);
+
     if (!response.ok) {
-      throw new Error(`${rsData.msg}`);
+        const body = await response.text();
+        throw new Error(body);
     }
 
+    const rsData = await response.json();
     return rsData.data;
   } catch (error) {
     throw error;
@@ -44,17 +45,12 @@ export const book = async function (bookingRequest: BookingRequest) {
       body: JSON.stringify(bookingRequest),
     });
 
-    if (response.status === 201) {
-      return;
-    }
-
-    const rsData = await response.json();
-
     if (!response.ok) {
-      throw new Error(`${rsData.msg}`);
+        const body = await response.text();
+        throw new Error(body);
     }
 
-    return rsData;
+    return;
   } catch (error) {
     throw error;
   }
@@ -81,12 +77,13 @@ export const getMyBookings = async function (
         credentials: "include",
       }
     );
-    const rsData = await response.json();
 
     if (!response.ok) {
-      throw new Error(`${rsData.msg}`);
+        const body = await response.text();
+        throw new Error(body);
     }
 
+    const rsData = await response.json();
     return rsData.data;
   } catch (error) {
     throw error;
@@ -114,12 +111,13 @@ export const getHotelBookings = async function (
         credentials: "include",
       }
     );
-    const rsData = await response.json();
 
     if (!response.ok) {
-      throw new Error(`${rsData.msg}`);
+        const body = await response.text();
+        throw new Error(body);
     }
 
+    const rsData = await response.json();
     return rsData.data;
   } catch (error) {
     throw error;
@@ -137,12 +135,13 @@ export const getBookingDetails = async function (
         credentials: "include",
       }
     );
-    const rsData = await response.json();
 
     if (!response.ok) {
-      throw new Error(`${rsData.msg}`);
+        const body = await response.text();
+        throw new Error(body);
     }
 
+    const rsData = await response.json();
     return rsData.data;
   } catch (error) {
     throw error;
@@ -160,15 +159,12 @@ export const cancelBooking = async function (bookingId: number) {
       }
     );
 
-    if (response.status === 204) {
-      return;
-    }
-
-    const rsData = await response.json();
-
     if (!response.ok) {
-      throw new Error(`${rsData.msg}`);
+        const body = await response.text();
+        throw new Error(body);
     }
+
+    return;
   } catch (error) {
     throw error;
   }
@@ -185,15 +181,12 @@ export const completeBooking = async function (bookingId: number) {
       }
     );
 
-    if (response.status === 204) {
-      return;
-    }
-
-    const rsData = await response.json();
-
     if (!response.ok) {
-      throw new Error(`${rsData.msg}`);
+        const body = await response.text();
+        throw new Error(`${body}`);
     }
+
+    return;
   } catch (error) {
     throw error;
   }

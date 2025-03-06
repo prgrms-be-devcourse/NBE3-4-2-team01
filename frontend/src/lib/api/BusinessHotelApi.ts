@@ -26,9 +26,13 @@ export const createHotel = async (
       body: JSON.stringify(postHotelRequest),
     });
 
-    const rsData: RsData<PostHotelResponse> = await response.json();
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
+
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw rsData;
     }
 
     return rsData.data;
@@ -56,10 +60,7 @@ export const saveHotelImageUrls = async (
       return;
     }
 
-    const rsData: RsData<Empty> = await response.json();
-    if (!response.ok) {
-      throw new Error(rsData.msg);
-    }
+    throw await response.text();
   } catch (error) {
     throw error;
   }
@@ -71,10 +72,14 @@ export const findHotelDetail = async (
 ): Promise<GetHotelDetailResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/business`);
-    const rsData: RsData<GetHotelDetailResponse> = await response.json();
+
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
 
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw rsData;
     }
 
     return rsData.data;
@@ -92,10 +97,14 @@ export const findHotelDetailWithAvailableRooms = async (
 ): Promise<GetHotelDetailResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}`);
-    const rsData: RsData<GetHotelDetailResponse> = await response.json();
+
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
 
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw rsData;
     }
 
     return rsData.data;
@@ -119,9 +128,13 @@ export const modifyHotel = async (
       body: JSON.stringify(request),
     });
 
-    const rsData: RsData<PutHotelResponse> = await response.json();
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
+
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw rsData;
     }
 
     return rsData.data;
@@ -142,10 +155,7 @@ export const deleteHotel = async (hotelId: number): Promise<void> => {
       return;
     }
 
-    const rsData: RsData<Empty> = await response.json();
-    if (!response.ok) {
-      throw new Error(rsData.msg);
-    }
+    throw await response.text();
   } catch (error) {
     throw error;
   }
@@ -157,10 +167,14 @@ export const findHotelRevenue = async (
 ): Promise<GetHotelRevenueResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/revenue`);
-    const rsData: RsData<GetHotelRevenueResponse> = await response.json();
+
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
 
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw rsData;
     }
 
     return rsData.data;
@@ -176,10 +190,14 @@ export const findAllHotelOptions =
       const response = await fetch(`${BASE_URL}/hotel-option`, {
         credentials: "include",
       });
-      const rsData: RsData<GetAllHotelOptionResponse> = await response.json();
+
+      const rsData = await response
+        .clone()
+        .json()
+        .catch(() => response.text());
 
       if (!response.ok) {
-        throw new Error(rsData.msg);
+        throw rsData;
       }
 
       return rsData.data;
