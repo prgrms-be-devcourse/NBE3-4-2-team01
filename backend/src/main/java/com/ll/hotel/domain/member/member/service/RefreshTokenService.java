@@ -1,24 +1,28 @@
 package com.ll.hotel.domain.member.member.service;
 
 
-import com.ll.hotel.domain.member.member.repository.RefreshTokenRepository;
-import com.ll.hotel.global.jwt.dto.JwtProperties;
-import com.ll.hotel.global.jwt.dto.RefreshToken;
-import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.standard.util.Ut;
-import io.jsonwebtoken.MalformedJwtException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import com.ll.hotel.domain.member.member.repository.RefreshTokenRepository;
+import static com.ll.hotel.global.exceptions.ErrorCode.INTERNAL_SERVER_ERROR;
+import static com.ll.hotel.global.exceptions.ErrorCode.REFRESH_TOKEN_INVALID;
+import static com.ll.hotel.global.exceptions.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
+import static com.ll.hotel.global.exceptions.ErrorCode.TOKEN_INVALID;
+import com.ll.hotel.global.jwt.dto.JwtProperties;
+import com.ll.hotel.global.jwt.dto.RefreshToken;
+import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.standard.util.Ut;
 
-import static com.ll.hotel.global.exceptions.ErrorCode.*;
+import io.jsonwebtoken.MalformedJwtException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
