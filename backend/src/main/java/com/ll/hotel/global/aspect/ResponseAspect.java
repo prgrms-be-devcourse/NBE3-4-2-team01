@@ -41,10 +41,10 @@ public class ResponseAspect {
             @annotation(org.springframework.web.bind.annotation.ResponseBody)
             """)
     public Object handleResponse(ProceedingJoinPoint joinPoint) throws Throwable {
-        String className = joinPoint.getSignature().getDeclaringTypeName();
+        String className = joinPoint.getSignature().getDeclaringType().getSimpleName();
         String methodName = joinPoint.getSignature().getName();
 
-        log.info("Request = [{}.{}]", className, methodName);
+        log.info("Request Controller = [{}.{}]", className, methodName);
 
         Object proceed = joinPoint.proceed();
 
@@ -52,7 +52,7 @@ public class ResponseAspect {
             ObjectMapper objectMapper = AppConfig.getObjectMapper();
             String jsonData = objectMapper.writeValueAsString(rsData.getData());
 
-            log.info("Response = [{}.{}], status: [{}], message: [{}], data: [{}]",
+            log.info("Response Controller = [{}.{}], status: [{}], message: [{}], data: [{}]",
                     className, methodName, rsData.getResultCode(), rsData.getMsg(), jsonData
             );
 
