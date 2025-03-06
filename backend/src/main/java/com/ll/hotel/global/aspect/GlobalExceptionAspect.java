@@ -24,21 +24,23 @@ public class GlobalExceptionAspect {
         String status;
         String msg;
 
-        if (ex instanceof ServiceException) {
-            ServiceException exception = (ServiceException) ex;
-            status = exception.getResultCode().toString();
-            msg = exception.getMsg();
-        } else if (ex instanceof CustomS3Exception) {
-            CustomS3Exception exception = (CustomS3Exception) ex;
-            status = exception.getResultCode().toString();
-            msg = exception.getMsg();
-        } else if (ex instanceof MethodArgumentNotValidException) {
-            MethodArgumentNotValidException exception = (MethodArgumentNotValidException) ex;
-            status = HttpStatus.BAD_REQUEST.toString();
-            msg = exception.getMessage();
-        } else {
-            status = "UNKNOWN";
-            msg = ex.getMessage();
+        switch (ex) {
+            case ServiceException exception -> {
+                status = exception.getResultCode().toString();
+                msg = exception.getMsg();
+            }
+            case CustomS3Exception exception -> {
+                status = exception.getResultCode().toString();
+                msg = exception.getMsg();
+            }
+            case MethodArgumentNotValidException exception -> {
+                status = HttpStatus.BAD_REQUEST.toString();
+                msg = exception.getMessage();
+            }
+            default -> {
+                status = "UNKNOWN";
+                msg = ex.getMessage();
+            }
         }
 
         log.error("ERROR = [{}.{}], status: [{}], message: [{}]",
