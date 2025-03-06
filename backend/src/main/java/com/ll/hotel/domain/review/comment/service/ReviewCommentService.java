@@ -2,7 +2,6 @@ package com.ll.hotel.domain.review.comment.service;
 
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.comment.dto.ReviewCommentDto;
 import com.ll.hotel.domain.review.comment.entity.ReviewComment;
 import com.ll.hotel.domain.review.comment.repository.ReviewCommentRepository;
 import com.ll.hotel.domain.review.review.entity.Review;
@@ -58,12 +57,5 @@ public class ReviewCommentService {
         }
 
         reviewComment.getReview().setReviewComment(null);
-    }
-
-    public ReviewCommentDto getReviewComment(long reviewCommentId) {
-        ReviewComment reviewComment = reviewCommentRepository.findById(reviewCommentId)
-                .orElseThrow(ErrorCode.REVIEW_COMMENT_NOT_FOUND::throwServiceException);
-
-        return new ReviewCommentDto(reviewComment);
     }
 }
