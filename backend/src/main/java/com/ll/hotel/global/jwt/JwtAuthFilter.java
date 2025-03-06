@@ -120,7 +120,6 @@ public class JwtAuthFilter extends OncePerRequestFilter implements Ordered {
                             SecurityContextHolder.getContext().setAuthentication(auth);
                         }
                     } catch (Exception refreshError) {
-                        log.error("Refresh Token 갱신 실패: {}", refreshError.getMessage());
                         TOKEN_EXPIRED.throwServiceException();
                     }
                 } else {
