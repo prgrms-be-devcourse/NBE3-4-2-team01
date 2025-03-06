@@ -4,7 +4,7 @@ package com.ll.hotel.domain.member.member.service;
 import com.ll.hotel.domain.member.member.repository.RefreshTokenRepository;
 import com.ll.hotel.global.jwt.dto.JwtProperties;
 import com.ll.hotel.global.jwt.dto.RefreshToken;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.response.RsData;
 import com.ll.hotel.standard.util.Ut;
 import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
