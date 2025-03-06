@@ -42,8 +42,7 @@ public class BusinessValidationService {
             return (String) result.get("valid");
 
         } catch (Exception e) {
-            ErrorCode.EXTERNAL_API_COMMUNICATION_ERROR.throwServiceException(e);
-            return null; // 실행 X
+            throw ErrorCode.EXTERNAL_API_COMMUNICATION_ERROR.throwServiceException(e);
         }
     }
 

@@ -81,12 +81,10 @@ public class RefreshTokenService {
 
             return RsData.success(HttpStatus.OK, newAccessToken);
         } catch (MalformedJwtException e) {
-            TOKEN_INVALID.throwServiceException();
-            return null; // 컴파일 오류 회피용
+            throw TOKEN_INVALID.throwServiceException();
         } catch (Exception e) {
             log.error("토큰 갱신 중 오류 발생", e);
-            INTERNAL_SERVER_ERROR.throwServiceException();
-            return null; // 컴파일 오류 회피용
+            throw INTERNAL_SERVER_ERROR.throwServiceException();
         }
     }
 

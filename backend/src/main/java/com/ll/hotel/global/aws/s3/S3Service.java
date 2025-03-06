@@ -36,8 +36,7 @@ public class S3Service {
                     .map(fileType -> createPresignedUrlResponse(imageType, id, fileType))
                     .toList();
         } catch (SdkException e) {
-            ErrorCode.S3_PRESIGNED_GENERATION_FAIL.throwS3Exception(e);
-            return List.of();
+            throw ErrorCode.S3_PRESIGNED_GENERATION_FAIL.throwS3Exception(e);
         }
     }
 
@@ -54,8 +53,7 @@ public class S3Service {
 
             return presignedRequest.url();
         } catch (SdkException e) {
-            ErrorCode.S3_PRESIGNED_GENERATION_FAIL.throwS3Exception(e);
-            return null;
+            throw ErrorCode.S3_PRESIGNED_GENERATION_FAIL.throwS3Exception(e);
         }
     }
 
