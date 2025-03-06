@@ -60,14 +60,14 @@ public class RefreshTokenService {
 
             String tokenType = Ut.jwt.getClaims(jwtProperties, token).get("type", String.class);
             if (!"refresh".equals(tokenType)) {
-                throw REFRESH_TOKEN_INVALID.throwServiceException();
+                REFRESH_TOKEN_INVALID.throwServiceException();
             }
 
             boolean tokenExists = repository.existsByRefreshToken(token);
             log.debug("Found refresh token in repository: {}", tokenExists);
 
             if (!tokenExists) {
-                throw REFRESH_TOKEN_NOT_FOUND.throwServiceException();
+                REFRESH_TOKEN_NOT_FOUND.throwServiceException();
             }
             RefreshToken resultToken = repository.findByRefreshToken(token)
                 .orElseThrow(REFRESH_TOKEN_NOT_FOUND::throwServiceException);
@@ -81,10 +81,12 @@ public class RefreshTokenService {
 
             return RsData.success(HttpStatus.OK, newAccessToken);
         } catch (MalformedJwtException e) {
-            throw TOKEN_INVALID.throwServiceException();
+            TOKEN_INVALID.throwServiceException();
+            return null; // 컴파일 오류 회피용
         } catch (Exception e) {
             log.error("토큰 갱신 중 오류 발생", e);
-            throw INTERNAL_SERVER_ERROR.throwServiceException();
+            INTERNAL_SERVER_ERROR.throwServiceException();
+            return null; // 컴파일 오류 회피용
         }
     }
 

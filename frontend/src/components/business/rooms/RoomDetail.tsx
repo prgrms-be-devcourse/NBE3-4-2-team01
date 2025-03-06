@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { deleteRoom } from "@/lib/api/BusinessRoomApi";
+import { deleteRoom } from "@/lib/api/hotel/room/BusinessRoomApi";
 import { GetRoomDetailResponse } from "@/lib/types/room/GetRoomDetailResponse";
 import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
 import { useParams, useRouter, useSearchParams } from "next/navigation";

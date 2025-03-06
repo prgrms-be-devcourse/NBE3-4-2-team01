@@ -5,13 +5,13 @@ import {
   findHotelDetail,
   modifyHotel,
   saveHotelImageUrls,
-} from "@/lib/api/BusinessHotelApi";
+} from "@/lib/api/hotel/BusinessHotelApi";
 import { PutHotelRequest } from "@/lib/types/hotel/PutHotelRequest";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PresignedUrlsResponse } from "@/lib/types/review/PresignedUrlsResponse";
 import { PutHotelResponse } from "@/lib/types/hotel/PutHotelResponse";
-import { uploadImagesToS3 } from "@/lib/api/AwsS3Api";
+import { uploadImagesToS3 } from "@/lib/api/aws/AwsS3Api";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import DatePicker from "react-datepicker";

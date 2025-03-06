@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.member.member.service;
 
-import com.ll.hotel.domain.hotel.hotel.dto.HotelDto;
+import com.ll.hotel.domain.member.member.dto.FavoriteDto;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
@@ -160,7 +160,7 @@ class MemberServiceFavoriteTest {
         memberService.addFavorite(testHotel.getId());
         
         // when
-        List<HotelDto> favorites = memberService.getFavoriteHotels();
+        List<FavoriteDto> favorites = memberService.getFavoriteHotels();
         
         // then
         assertThat(favorites).hasSize(1);
