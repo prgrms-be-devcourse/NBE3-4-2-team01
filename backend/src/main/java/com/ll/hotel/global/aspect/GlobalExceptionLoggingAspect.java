@@ -15,10 +15,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class GlobalExceptionAspect {
+public class GlobalExceptionLoggingAspect {
     @AfterThrowing(pointcut = "@within(org.springframework.stereotype.Service)", throwing = "ex")
-
-    public void handleException(JoinPoint joinPoint, Exception ex) {
+    public void logGlobalException(JoinPoint joinPoint, Throwable ex) {
         String className = joinPoint.getSignature().getDeclaringType().getSimpleName();
         String methodName = joinPoint.getSignature().getName();
         String status;

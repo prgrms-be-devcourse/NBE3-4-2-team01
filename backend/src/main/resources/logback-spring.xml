@@ -54,13 +54,13 @@
     </springProfile>
 
     <!-- INFO 로거 -->
-    <logger name="com.ll.hotel.global.aspect.ResponseAspect" level="INFO" additivity="false">
+    <logger name="com.ll.hotel.global" level="INFO" additivity="false">
         <appender-ref ref="LOG_FILE"/>
         <appender-ref ref="CONSOLE"/>
     </logger>
 
     <!-- ERROR 로거 -->
-    <logger name="com.ll.hotel.global.aspect.GlobalExceptionAspect" level="ERROR" additivity="false">
+    <logger name="com.ll.hotel.global.aspect.GlobalExceptionLoggingAspect" level="ERROR" additivity="false">
         <appender-ref ref="ERROR_LOG_FILE"/>
         <appender-ref ref="CONSOLE"/>
     </logger>
