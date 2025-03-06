@@ -21,15 +21,11 @@ export default function AdminHotelsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("현재 페이지:", currentPage);
-
     const fetchHotels = async () => {
       try {
         const data = await getAllHotelsForAdmin(currentPage);
-        console.log("API에서 가져온 데이터:", data);
         setHotels(data.items ?? []);
       } catch (err) {
-        console.error("호텔 데이터를 불러오는 중 오류 발생:", err);
         setError("호텔 데이터를 불러오는 중 오류가 발생했습니다.");
       } finally {
         setLoading(false);

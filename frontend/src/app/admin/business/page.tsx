@@ -2,7 +2,7 @@
 
 import Loading from "@/components/hotellist/Loading";
 import Navigation from "@/components/navigation/Navigation";
-import Pagination from "@/components/pagination/Pagination";
+import Pagination from "@/components/Pagination/Pagination";
 import { Button } from "@/components/ui/button";
 import { getAllBusinesses } from "@/lib/api/admin/AdminBusinessApi";
 import { AdminBusinessSummaryReponse } from "@/lib/types/admin/response/AdminBusinessResponse";
@@ -22,12 +22,9 @@ export default function AdminBusinessesPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("현재 페이지:", currentPage);
-
     const fetchBusinesses = async () => {
       try {
         const data = await getAllBusinesses(currentPage);
-        console.log("API에서 가져온 데이터:", data);
         setBusinesses(data);
       } catch (err) {
         setError((err as Error).message);

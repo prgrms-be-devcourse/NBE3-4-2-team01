@@ -63,6 +63,7 @@ export default function AdminBusinessDetailPage() {
         Error: Business ID is missing from the URL.
       </p>
     );
+
   if (loading) return <Loading />;
   if (error) return <p className="text-center text-red-500">Error: {error}</p>;
   if (!business)
