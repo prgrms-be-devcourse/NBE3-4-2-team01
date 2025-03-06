@@ -19,7 +19,7 @@ import com.ll.hotel.domain.member.member.service.MemberService;
 import static com.ll.hotel.global.exceptions.ErrorCode.EMAIL_ALREADY_EXISTS;
 import static com.ll.hotel.global.exceptions.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.response.RsData;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

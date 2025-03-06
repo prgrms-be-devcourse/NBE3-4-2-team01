@@ -1,4 +1,4 @@
-package com.ll.hotel.global.rsData;
+package com.ll.hotel.global.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
