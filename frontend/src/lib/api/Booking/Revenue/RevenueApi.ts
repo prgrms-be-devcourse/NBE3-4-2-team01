@@ -11,12 +11,13 @@ export const getHotelRevenue = async function (
         credentials: "include",
       }
     );
-    const rsData = await response.json();
 
     if (!response.ok) {
-      throw new Error(`${rsData.msg}`);
+        const body = await response.text();
+        throw new Error(body);
     }
 
+    const rsData = await response.json();
     return rsData.data;
   } catch (error) {
     throw error;
