@@ -1,14 +1,14 @@
-import { Empty } from "../types/Empty";
-import { GetAllHotelOptionResponse } from "../types/hotel/GetAllHotelOptionResponse";
-import { GetHotelDetailResponse } from "../types/hotel/GetHotelDetailResponse";
-import { GetHotelRevenueResponse } from "../types/hotel/GetHotelRevenueResponse";
+import { Empty } from "../../types/Empty";
+import { GetAllHotelOptionResponse } from "../../types/hotel/GetAllHotelOptionResponse";
+import { GetHotelDetailResponse } from "../../types/hotel/GetHotelDetailResponse";
+import { GetHotelRevenueResponse } from "../../types/hotel/GetHotelRevenueResponse";
 import { PostHotelResponse } from "@/lib/types/hotel/PostHotelResponse";
 import { PutHotelRequest } from "@/lib/types/hotel/PutHotelRequest";
 import { PutHotelResponse } from "@/lib/types/hotel/PutHotelResponse";
 import { PostHotelRequest } from "@/lib/types/hotel/PostHotelRequest";
-import { RsData } from "./../types/RsData";
-import { PageDto } from "../types/PageDto";
-import { GetHotelResponse } from "../types/hotel/GetHotelResponse";
+import { RsData } from "../../types/RsData";
+import { PageDto } from "../../types/PageDto";
+import { GetHotelResponse } from "../../types/hotel/GetHotelResponse";
 
 const BASE_URL = "http://localhost:8080/api/hotels";
 

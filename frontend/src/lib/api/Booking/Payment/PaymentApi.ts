@@ -1,4 +1,4 @@
-import { UidResponse } from "@/lib/types/Booking/Payment/UidResponse";
+import { UidResponse } from "@/lib/types/booking/payment/UidResponse";
 
 // Uid 및 API Key 발급
 export const getUid = async function (): Promise<UidResponse> {
@@ -11,8 +11,8 @@ export const getUid = async function (): Promise<UidResponse> {
     );
 
     if (!response.ok) {
-        const body = await response.text();
-        throw new Error(body);
+      const body = await response.text();
+      throw new Error(body);
     }
 
     const rsData = await response.json();

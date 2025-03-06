@@ -5,7 +5,7 @@ import {
   createRoom,
   findAllRoomOptions,
   saveRoomImageUrls,
-} from "@/lib/api/BusinessRoomApi";
+} from "@/lib/api/hotel/room/BusinessRoomApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { BED_TYPES, BedTypeNumber } from "@/lib/types/room/BedTypeNumber";
 import { PostRoomResponse } from "@/lib/types/room/PostRoomResponse";
 import { PostRoomRequest } from "@/lib/types/room/PostRoomRequest";
 import { GetAllRoomOptionsResponse } from "@/lib/types/room/GetAllRoomOptionsResponse";
-import { uploadImagesToS3 } from "@/lib/api/AwsS3Api";
+import { uploadImagesToS3 } from "@/lib/api/aws/AwsS3Api";
 import { PresignedUrlsResponse } from "@/lib/types/review/PresignedUrlsResponse";
 import { useRouter } from "next/navigation";
 import { MoveLeft, XCircle } from "lucide-react";

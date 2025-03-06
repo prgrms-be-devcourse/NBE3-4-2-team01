@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { getFavorites, removeFavorite } from '@/lib/api/FavoriteApi';
-import { FavoriteHotelDto } from '@/lib/types/FavoriteHotelDto';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import Link from 'next/link';
-import { Heart, Hotel, Star, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import Navigation from '@/components/navigation/Navigation';
+import { useEffect, useState } from "react";
+import { getFavorites, removeFavorite } from "@/lib/api/member/FavoriteApi";
+import { FavoriteHotelDto } from "@/lib/types/FavoriteHotelDto";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { Heart, Hotel, Star, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import Navigation from "@/components/navigation/Navigation";
 
 interface Alert {
-  type: 'success' | 'error' | 'warning';
+  type: "success" | "error" | "warning";
   message: string;
 }
 
@@ -29,18 +29,18 @@ export default function FavoritesPage() {
         setFavorites(response.data);
       } catch (error) {
         if (error instanceof Error) {
-          if (error.message.includes('로그인이 필요합니다')) {
-            router.push('/login');
+          if (error.message.includes("로그인이 필요합니다")) {
+            router.push("/login");
             return;
           }
           setAlert({
-            type: 'error',
-            message: error.message
+            type: "error",
+            message: error.message,
           });
         } else {
           setAlert({
-            type: 'error',
-            message: '즐겨찾기 목록을 불러오는데 실패했습니다.'
+            type: "error",
+            message: "즐겨찾기 목록을 불러오는데 실패했습니다.",
           });
         }
       } finally {
@@ -55,20 +55,20 @@ export default function FavoritesPage() {
     e.preventDefault();
     try {
       const response = await removeFavorite(hotelId);
-      setFavorites(favorites.filter(hotel => hotel.hotelId !== hotelId));
+      setFavorites(favorites.filter((hotel) => hotel.hotelId !== hotelId));
       setAlert({
-        type: 'warning',
-        message: '즐겨찾기가 삭제되었습니다.'
+        type: "warning",
+        message: "즐겨찾기가 삭제되었습니다.",
       });
-      
+
       setTimeout(() => {
         setAlert(null);
       }, 3000);
     } catch (error) {
       if (error instanceof Error) {
         setAlert({
-          type: 'error',
-          message: error.message
+          type: "error",
+          message: error.message,
         });
       }
     }
@@ -93,15 +93,17 @@ export default function FavoritesPage() {
           <Heart className="w-8 h-8 text-red-500" />
           <h1 className="text-2xl font-bold">내 즐겨찾기</h1>
         </div>
-        
+
         {alert && (
-          <div className={`text-center mb-4 p-3 rounded-lg ${
-            alert.type === 'success' 
-              ? 'bg-green-100 text-green-700 border border-green-200'
-              : alert.type === 'warning'
-                ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
-                : 'bg-red-100 text-red-700 border border-red-200'
-          }`}>
+          <div
+            className={`text-center mb-4 p-3 rounded-lg ${
+              alert.type === "success"
+                ? "bg-green-100 text-green-700 border border-green-200"
+                : alert.type === "warning"
+                ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
+                : "bg-red-100 text-red-700 border border-red-200"
+            }`}
+          >
             {alert.message}
           </div>
         )}
@@ -113,7 +115,7 @@ export default function FavoritesPage() {
             <p className="text-gray-400 mt-2">
               마음에 드는 호텔을 즐겨찾기에 추가해보세요!
             </p>
-            <Link 
+            <Link
               href="/"
               className="inline-block mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
@@ -142,7 +144,9 @@ export default function FavoritesPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-600 mb-2">{hotel.streetAddress}</p>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {hotel.streetAddress}
+                    </p>
                     <div className="flex items-center gap-1 text-yellow-500">
                       <Star className="w-4 h-4 fill-current" />
                       <span>{hotel.hotelGrade}</span>

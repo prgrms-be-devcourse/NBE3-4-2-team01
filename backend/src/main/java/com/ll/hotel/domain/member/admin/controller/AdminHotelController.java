@@ -7,6 +7,8 @@ import com.ll.hotel.domain.member.admin.service.AdminHotelService;
 import com.ll.hotel.global.exceptions.ServiceException;
 import com.ll.hotel.global.rsData.RsData;
 import com.ll.hotel.standard.page.dto.PageDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,9 +18,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/admin/hotels")
 @RequiredArgsConstructor
+@Tag(name = "AdminHotelController")
 public class AdminHotelController {
     private final AdminHotelService adminHotelService;
 
+    @Operation(summary = "호텔 전체 조회")
     @GetMapping
     public RsData<PageDto<AdminHotelResponse.Summary>> getAll(
 
@@ -30,6 +34,7 @@ public class AdminHotelController {
         return RsData.success(HttpStatus.OK, new PageDto<>(pagedHotelSummaries));
     }
 
+    @Operation(summary = "호텔 단건 조회")
     @GetMapping("/{id}")
     public RsData<AdminHotelResponse.Detail> getById(@PathVariable("id") Long id) {
 
@@ -38,6 +43,7 @@ public class AdminHotelController {
         return RsData.success(HttpStatus.OK, AdminHotelResponse.Detail.from(hotel));
     }
 
+    @Operation(summary = "호텔 승인")
     @PatchMapping("/{id}")
     public RsData<AdminHotelResponse.ApprovalResult> approve(@PathVariable("id") Long id,
                                               @RequestBody @Valid AdminHotelRequest adminHotelRequest) {
