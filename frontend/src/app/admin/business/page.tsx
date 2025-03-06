@@ -2,7 +2,7 @@
 
 import Loading from "@/components/hotellist/Loading";
 import Navigation from "@/components/navigation/Navigation";
-import Pagination from "@/components/Pagination/Pagination";
+import Pagination from "@/components/pagination/Pagination";
 import { Button } from "@/components/ui/button";
 import { getAllBusinesses } from "@/lib/api/admin/AdminBusinessApi";
 import { AdminBusinessSummaryReponse } from "@/lib/types/admin/response/AdminBusinessResponse";
