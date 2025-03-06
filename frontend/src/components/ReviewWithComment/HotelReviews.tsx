@@ -2,7 +2,7 @@ import { HotelReviewResponse } from "@/lib/types/review/HotelReviewResponse";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ReviewList from "./ReviewList";
-import { getHotelReviews } from "@/lib/api/review/ReviewApi";
+import { getHotelReviews } from "@/lib/api/ReviewApi";
 import { HotelReviewListResponse } from "@/lib/types/review/HotelReviewListResponse";
 import { PageDto } from "@/lib/types/PageDto";
 import Pagination from "../pagination/Pagination";

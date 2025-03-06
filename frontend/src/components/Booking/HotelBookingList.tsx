@@ -1,13 +1,6 @@
 import { PageDto } from "@/lib/types/PageDto";
-import { BookingResponseSummary } from "@/lib/types/booking/BookingResponseSummary";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { BookingResponseSummary } from "@/lib/types/Booking/BookingResponseSummary";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -17,16 +10,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { useState, useEffect } from "react";
-import { cancelBooking, completeBooking } from "@/lib/api/booking/BookingApi";
+import { cancelBooking, completeBooking } from "@/lib/api/Booking/BookingApi";
 
-const HotelBookingList = function ({
-  bookings,
-}: {
-  bookings: PageDto<BookingResponseSummary>;
-}) {
-  const [bookingList, setBookingList] = useState<BookingResponseSummary[]>(
-    bookings.items
-  );
+const HotelBookingList = function({ bookings }: { bookings: PageDto<BookingResponseSummary> }) {
+  const [bookingList, setBookingList] = useState<BookingResponseSummary[]>(bookings.items);
   const [isStatusChanged, setIsStatusChanged] = useState(false);
 
   useEffect(() => {
@@ -41,7 +28,7 @@ const HotelBookingList = function ({
     }
   }, [isStatusChanged]);
 
-  const openBookingDetailsPopup = function (bookingId: number) {
+  const openBookingDetailsPopup = function(bookingId: number) {
     window.open(
       `/orders/${bookingId}`,
       "OrderPopup",
@@ -49,20 +36,17 @@ const HotelBookingList = function ({
     );
   };
 
-  const handleComplete = async function (
-    bookingId: number,
-    e: React.MouseEvent
-  ) {
+  const handleComplete = async function(bookingId: number, e: React.MouseEvent) {
     e.stopPropagation(); // 이벤트 전파 방지
-
+    
     if (confirm("예약을 완료 처리하시겠습니까?")) {
       try {
         await completeBooking(bookingId);
         // 로컬 상태 업데이트
-        setBookingList((prevList) =>
-          prevList.map((booking) =>
-            booking.bookingId === bookingId
-              ? { ...booking, bookingStatus: "COMPLETED" }
+        setBookingList(prevList => 
+          prevList.map(booking => 
+            booking.bookingId === bookingId 
+              ? { ...booking, bookingStatus: 'COMPLETED' }
               : booking
           )
         );
@@ -74,17 +58,17 @@ const HotelBookingList = function ({
     }
   };
 
-  const handleCancel = async function (bookingId: number, e: React.MouseEvent) {
+  const handleCancel = async function(bookingId: number, e: React.MouseEvent) {
     e.stopPropagation(); // 이벤트 전파 방지
-
+    
     if (confirm("정말로 이 예약을 취소하시겠습니까?")) {
       try {
         await cancelBooking(bookingId);
         // 로컬 상태 업데이트
-        setBookingList((prevList) =>
-          prevList.map((booking) =>
-            booking.bookingId === bookingId
-              ? { ...booking, bookingStatus: "CANCELLED" }
+        setBookingList(prevList => 
+          prevList.map(booking => 
+            booking.bookingId === bookingId 
+              ? { ...booking, bookingStatus: 'CANCELLED' }
               : booking
           )
         );
@@ -98,12 +82,12 @@ const HotelBookingList = function ({
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "COMPLETED":
-        return "완료";
-      case "CANCELLED":
-        return "취소";
-      case "CONFIRMED":
-        return "확정";
+      case 'COMPLETED':
+        return '완료';
+      case 'CANCELLED':
+        return '취소';
+      case 'CONFIRMED':
+        return '확정';
       default:
         return status;
     }
@@ -111,14 +95,14 @@ const HotelBookingList = function ({
 
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case "COMPLETED":
-        return "text-green-600";
-      case "CANCELLED":
-        return "text-red-600";
-      case "CONFIRMED":
-        return "text-blue-600";
+      case 'COMPLETED':
+        return 'text-green-600';
+      case 'CANCELLED':
+        return 'text-red-600';
+      case 'CONFIRMED':
+        return 'text-blue-600';
       default:
-        return "text-gray-600";
+        return 'text-gray-600';
     }
   };
 
@@ -144,21 +128,11 @@ const HotelBookingList = function ({
                   key={booking.bookingId}
                   className="hover:bg-gray-50 transition duration-300"
                 >
-                  <TableCell className="p-3 text-center">
-                    {booking.bookingId}
-                  </TableCell>
-                  <TableCell className="p-3 text-center">
-                    {booking.memberName}
-                  </TableCell>
-                  <TableCell className="p-3 text-center">
-                    {booking.roomName}
-                  </TableCell>
-                  <TableCell className="p-3 text-center">
-                    {booking.checkInDate}
-                  </TableCell>
-                  <TableCell className="p-3 text-center">
-                    {booking.checkOutDate}
-                  </TableCell>
+                  <TableCell className="p-3 text-center">{booking.bookingId}</TableCell>
+                  <TableCell className="p-3 text-center">{booking.memberName}</TableCell>
+                  <TableCell className="p-3 text-center">{booking.roomName}</TableCell>
+                  <TableCell className="p-3 text-center">{booking.checkInDate}</TableCell>
+                  <TableCell className="p-3 text-center">{booking.checkOutDate}</TableCell>
                   <TableCell className="p-3 text-center">
                     <span className={getStatusStyle(booking.bookingStatus)}>
                       {getStatusText(booking.bookingStatus)}
@@ -172,21 +146,19 @@ const HotelBookingList = function ({
                         </div>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-32">
-                        <DropdownMenuItem
-                          onClick={() =>
-                            openBookingDetailsPopup(booking.bookingId)
-                          }
+                        <DropdownMenuItem 
+                          onClick={() => openBookingDetailsPopup(booking.bookingId)}
                           className="cursor-pointer"
                         >
                           자세히
                         </DropdownMenuItem>
-                        <DropdownMenuItem
+                        <DropdownMenuItem 
                           onClick={(e) => handleComplete(booking.bookingId, e)}
                           className="cursor-pointer text-green-600"
                         >
                           완료 처리
                         </DropdownMenuItem>
-                        <DropdownMenuItem
+                        <DropdownMenuItem 
                           onClick={(e) => handleCancel(booking.bookingId, e)}
                           className="cursor-pointer text-red-600"
                         >

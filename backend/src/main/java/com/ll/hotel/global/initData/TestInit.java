@@ -1,4 +1,4 @@
-package com.ll.hotel.global.initdata;
+package com.ll.hotel.global.initData;
 
 import com.ll.hotel.domain.booking.booking.dto.BookingRequest;
 import com.ll.hotel.domain.booking.booking.entity.Booking;

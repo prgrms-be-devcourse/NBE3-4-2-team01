@@ -81,6 +81,17 @@ public class RoomOptionServiceTest {
     }
 
     @Test
+    @DisplayName("객실 옵션 조회")
+    void findRoomOptionTest() {
+        // When
+        RoomOption result = roomOptionService.findById(testId);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("객실 옵션");
+    }
+
+    @Test
     @DisplayName("객실 옵션 수정")
     void modifyRoomOptionTest() {
         // Given

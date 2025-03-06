@@ -10,7 +10,7 @@ import {
   deleteHotelOption,
   getAllHotelOptions,
   modifyHotelOption,
-} from "@/lib/api/admin/HotelOptionApi";
+} from "@/lib/api/Admin/HotelOptionApi";
 import { OptionResponse } from "@/lib/types/admin/response/OptionResponse";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";

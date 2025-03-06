@@ -1,4 +1,5 @@
 import { HotelStatus } from "../../hotel/HotelStatus";
+import { HotelDto } from "../../HotelDto";
 
 export interface HotelApprovalResult {
   name: string;

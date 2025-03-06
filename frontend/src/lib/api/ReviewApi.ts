@@ -1,10 +1,10 @@
-import { GetReviewResponse } from "../../types/review/GetReviewResponse";
-import { HotelReviewListResponse } from "../../types/review/HotelReviewListResponse";
-import { MyReviewResponse } from "../../types/review/MyReviewResponse";
-import { PageDto } from "../../types/PageDto";
-import { PostReviewRequest } from "../../types/review/PostReviewRequest";
-import { PresignedUrlsResponse } from "../../types/review/PresignedUrlsResponse";
-import { UpdateReviewRequest } from "../../types/review/UpdateReviewRequest";
+import { GetReviewResponse } from "../types/review/GetReviewResponse";
+import { HotelReviewListResponse } from "../types/review/HotelReviewListResponse";
+import { MyReviewResponse } from "../types/review/MyReviewResponse";
+import { PageDto } from "../types/PageDto";
+import { PostReviewRequest } from "../types/review/PostReviewRequest";
+import { PresignedUrlsResponse } from "../types/review/PresignedUrlsResponse";
+import { UpdateReviewRequest } from "../types/review/UpdateReviewRequest";
 
 // 리뷰 생성 요청 후 PresignedUrlReponse 응답
 export const postReview = async (
@@ -26,11 +26,10 @@ export const postReview = async (
       }
     );
 
-    if (!response.ok) {
-      throw new Error(await response.text());
-    }
-
     const rsData = await response.json();
+    if (!response.ok) {
+      throw new Error(rsData.msg);
+    }
     return rsData.data;
   } catch (error) {
     throw error;
@@ -52,12 +51,9 @@ export const uploadImageUrls = async (reviewId: number, viewUrls: string[]) => {
       }
     );
 
-    if (response.status === 204) {
-      return;
-    }
-
+    const rsData = await response.json();
     if (!response.ok) {
-      throw new Error(await response.text());
+      throw new Error(rsData.msg);
     }
   } catch (error) {
     throw error;
@@ -75,12 +71,9 @@ export const deleteReview = async (reviewId: number) => {
       }
     );
 
-    if (response.status === 204) {
-      return;
-    }
-
+    const rsData = await response.json();
     if (!response.ok) {
-      throw new Error(await response.text());
+      throw new Error(rsData.msg);
     }
   } catch (error) {
     throw error;
@@ -100,11 +93,10 @@ export const getHotelReviews = async (
       }
     );
 
-    if (!response.ok) {
-      throw new Error(await response.text());
-    }
-
     const rsData = await response.json();
+    if (!response.ok) {
+      throw new Error(rsData.msg);
+    }
     return rsData.data;
   } catch (error) {
     throw error;
@@ -122,11 +114,10 @@ export const getMyReviews = async (
         credentials: "include",
       }
     );
-    if (!response.ok) {
-      throw new Error(await response.text());
-    }
-
     const rsData = await response.json();
+    if (!response.ok) {
+      throw new Error(rsData.msg);
+    }
     return rsData.data;
   } catch (error) {
     throw error;
@@ -144,11 +135,10 @@ export const fetchReview = async (
         credentials: "include",
       }
     );
-    if (!response.ok) {
-      throw new Error(await response.text());
-    }
-
     const rsData = await response.json();
+    if (!response.ok) {
+      throw new Error(rsData.msg);
+    }
     return rsData.data;
   } catch (error) {
     throw error;
@@ -173,11 +163,10 @@ export const updateReview = async (
       }
     );
 
-    if (!response.ok) {
-      throw new Error(await response.text());
-    }
-
     const rsData = await response.json();
+    if (!response.ok) {
+      throw new Error(rsData.msg);
+    }
     return rsData.data;
   } catch (error) {
     throw error;

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { deleteHotel } from "@/lib/api/hotel/BusinessHotelApi";
+import { deleteHotel } from "@/lib/api/BusinessHotelApi";
 import { HotelDetailDto } from "@/lib/types/hotel/HotelDetailDto";
 import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
 import { useParams, useRouter } from "next/navigation";
@@ -8,7 +8,7 @@ import {
   addFavorite,
   removeFavorite,
   checkFavorite,
-} from "@/lib/api/member/FavoriteApi";
+} from "@/lib/api/FavoriteApi";
 import {
   FaEnvelope,
   FaPhone,
@@ -97,8 +97,9 @@ const HotelDetail: React.FC<HotelDetailProps> = ({ hotel }) => {
       alert("호텔이 삭제되었습니다.");
       router.push("/business/hotel/management");
     } catch (error) {
-      console.error("Error : ", error);
-      alert(error);
+      if (error instanceof Error) {
+        alert(error.message);
+      }
     }
   };
 

@@ -3,7 +3,16 @@ package com.ll.hotel.domain.hotel.hotel.service;
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.booking.booking.type.BookingStatus;
 import com.ll.hotel.domain.booking.payment.entity.Payment;
-import com.ll.hotel.domain.hotel.hotel.dto.*;
+import com.ll.hotel.domain.hotel.hotel.dto.GetAllHotelOptionsResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelRevenueResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.HotelDetailDto;
+import com.ll.hotel.domain.hotel.hotel.dto.HotelWithImageDto;
+import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
+import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
+import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
@@ -29,6 +38,21 @@ import com.ll.hotel.standard.util.Ut.json;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -38,15 +62,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -81,7 +96,8 @@ public class HotelService {
             return new PostHotelResponse(this.hotelRepository.save(hotel),
                     this.saveHotelImages(hotel.getId(), postHotelRequest.imageExtensions()));
         } catch (DataIntegrityViolationException e) {
-            throw ErrorCode.HOTEL_EMAIL_ALREADY_EXISTS.throwServiceException();
+            ErrorCode.HOTEL_EMAIL_ALREADY_EXISTS.throwServiceException();
+            return null;
         }
     }
 

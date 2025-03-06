@@ -1,11 +1,11 @@
-import { Empty } from "../../../types/Empty";
+import { Empty } from "../types/Empty";
 import { GetAllRoomOptionsResponse } from "@/lib/types/room/GetAllRoomOptionsResponse";
 import { GetRoomDetailResponse } from "@/lib/types/room/GetRoomDetailResponse";
 import { GetRoomResponse } from "@/lib/types/room/GetRoomResponse";
 import { PostRoomResponse } from "@/lib/types/room/PostRoomResponse";
 import { PutRoomRequest } from "@/lib/types/room/PutRoomRequest";
 import { PutRoomResponse } from "@/lib/types/room/PutRoomResponse";
-import { RsData } from "../../../types/RsData";
+import { RsData } from "../types/RsData";
 import { PostRoomRequest } from "@/lib/types/room/PostRoomRequest";
 
 const BASE_URL = "http://localhost:8080/api/hotels";
@@ -25,13 +25,9 @@ export const createRoom = async (
       body: JSON.stringify(postRoomRequest),
     });
 
-    const rsData = await response
-      .clone()
-      .json()
-      .catch(() => response.text());
-
-    if (!response.ok) {
-      throw rsData;
+    const rsData: RsData<PostRoomResponse> = await response.json();
+    if (rsData.resultCode !== "201-1") {
+      throw new Error(rsData.msg);
     }
 
     return rsData.data;
@@ -59,11 +55,10 @@ export const saveRoomImageUrls = async (
       }
     );
 
-    if (response.status === 204) {
-      return;
+    const rsData: RsData<Empty> = await response.json();
+    if (rsData.resultCode !== "201-1") {
+      throw new Error(rsData.msg);
     }
-
-    throw await response.text();
   } catch (error) {
     throw error;
   }
@@ -76,14 +71,10 @@ export const findRoomDetail = async (
 ): Promise<GetRoomDetailResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/rooms/${roomId}`);
+    const rsData: RsData<GetRoomDetailResponse> = await response.json();
 
-    const rsData = await response
-      .clone()
-      .json()
-      .catch(() => response.text());
-
-    if (!response.ok) {
-      throw rsData;
+    if (rsData.resultCode !== "200-1") {
+      throw new Error(rsData.msg);
     }
 
     return rsData.data;
@@ -108,13 +99,9 @@ export const modifyRoom = async (
       body: JSON.stringify(request),
     });
 
-    const rsData = await response
-      .clone()
-      .json()
-      .catch(() => response.text());
-
-    if (!response.ok) {
-      throw rsData;
+    const rsData: RsData<PutRoomResponse> = await response.json();
+    if (rsData.resultCode !== "200-1") {
+      throw new Error(rsData.msg);
     }
 
     return rsData.data;
@@ -134,11 +121,10 @@ export const deleteRoom = async (
       method: "DELETE",
     });
 
-    if (response.status === 204) {
-      return;
+    const rsData: RsData<Empty> = await response.json();
+    if (rsData.resultCode !== "200-1") {
+      throw new Error(rsData.msg);
     }
-
-    throw await response.text();
   } catch (error) {
     throw error;
   }
@@ -150,14 +136,10 @@ export const findAllRooms = async (
 ): Promise<GetRoomResponse[]> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/rooms`);
+    const rsData: RsData<GetRoomResponse[]> = await response.json();
 
-    const rsData = await response
-      .clone()
-      .json()
-      .catch(() => response.text());
-
-    if (!response.ok) {
-      throw rsData;
+    if (rsData.resultCode !== "200-1") {
+      throw new Error(rsData.msg);
     }
 
     return rsData.data;
@@ -174,14 +156,10 @@ export const findAllRoomOptions = async (
     const response = await fetch(`${BASE_URL}/${hotelId}/rooms/room-option`, {
       credentials: "include",
     });
+    const rsData: RsData<GetAllRoomOptionsResponse> = await response.json();
 
-    const rsData = await response
-      .clone()
-      .json()
-      .catch(() => response.text());
-
-    if (!response.ok) {
-      throw rsData;
+    if (rsData.resultCode !== "200-1") {
+      throw new Error(rsData.msg);
     }
 
     return rsData.data;

@@ -1,18 +1,14 @@
 package com.ll.hotel.global.aspect;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ll.hotel.global.app.AppConfig;
-import com.ll.hotel.global.response.RsData;
+import com.ll.hotel.global.rsData.RsData;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
 @Aspect
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ResponseAspect {
@@ -41,21 +37,10 @@ public class ResponseAspect {
             @annotation(org.springframework.web.bind.annotation.ResponseBody)
             """)
     public Object handleResponse(ProceedingJoinPoint joinPoint) throws Throwable {
-        String className = joinPoint.getSignature().getDeclaringTypeName();
-        String methodName = joinPoint.getSignature().getName();
-
-        log.info("Request = [{}.{}]", className, methodName);
-
         Object proceed = joinPoint.proceed();
 
-        if (proceed instanceof RsData<?> rsData) {
-            ObjectMapper objectMapper = AppConfig.getObjectMapper();
-            String jsonData = objectMapper.writeValueAsString(rsData.getData());
-
-            log.info("Response = [{}.{}], status: [{}], message: [{}], data: [{}]",
-                    className, methodName, rsData.getResultCode(), rsData.getMsg(), jsonData
-            );
-
+        if (proceed instanceof RsData<?>) {
+            RsData<?> rsData = (RsData<?>) proceed;
             response.setStatus(rsData.getResultCode().value());
         }
 

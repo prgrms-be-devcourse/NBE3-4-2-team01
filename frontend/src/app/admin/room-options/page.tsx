@@ -10,7 +10,7 @@ import {
   deleteRoomOption,
   getAllRoomOptions,
   modifyRoomOption,
-} from "@/lib/api/admin/RoomOptionApi";
+} from "@/lib/api/Admin/RoomOptionApi";
 import { OptionResponse } from "@/lib/types/admin/response/OptionResponse";
 import { Pencil, Plus } from "lucide-react";
 import { useEffect, useState } from "react";

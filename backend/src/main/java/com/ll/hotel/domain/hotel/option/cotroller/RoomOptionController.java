@@ -4,9 +4,7 @@ import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
 import com.ll.hotel.domain.hotel.option.dto.response.OptionResponse;
 import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import com.ll.hotel.domain.hotel.option.service.RoomOptionService;
-import com.ll.hotel.global.response.RsData;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.ll.hotel.global.rsData.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,14 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "RoomOptionController")
 @RestController
 @RequestMapping("/api/admin/room-options")
 @RequiredArgsConstructor
 public class RoomOptionController {
     private final RoomOptionService roomOptionService;
 
-    @Operation(summary = "객실 옵션 추가")
     @PostMapping
     public RsData<OptionResponse> add(@RequestBody @Valid OptionRequest optionRequest) {
 
@@ -30,7 +26,6 @@ public class RoomOptionController {
         return RsData.success(HttpStatus.CREATED, OptionResponse.from(roomOption));
     }
 
-    @Operation(summary = "객실 옵션 전체 조회")
     @GetMapping
     public RsData<List<OptionResponse>> getAll() {
 
@@ -41,9 +36,17 @@ public class RoomOptionController {
         return RsData.success(HttpStatus.OK, roomAmenityList);
     }
 
+    @GetMapping("/{id}")
+    public RsData<OptionResponse> getById(@PathVariable("id") Long id) {
+
+        RoomOption roomOption = roomOptionService.findById(id);
+
+        return RsData.success(HttpStatus.OK, OptionResponse.from(roomOption));
+    }
+
     @PatchMapping("/{id}")
     public RsData<OptionResponse> modify(@PathVariable("id") Long id,
-                                         @RequestBody OptionRequest optionRequest) {
+                                        @RequestBody OptionRequest optionRequest) {
         RoomOption roomOption = roomOptionService.findById(id);
         roomOptionService.modify(roomOption, optionRequest);
 
@@ -52,7 +55,6 @@ public class RoomOptionController {
         return RsData.success(HttpStatus.OK, OptionResponse.from(roomOption));
     }
 
-    @Operation(summary = "객실 옵션 삭제")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") Long id) {

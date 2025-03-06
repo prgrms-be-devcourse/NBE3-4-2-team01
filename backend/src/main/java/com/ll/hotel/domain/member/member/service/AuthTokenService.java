@@ -1,17 +1,19 @@
 package com.ll.hotel.domain.member.member.service;
 
 
-import com.ll.hotel.global.jwt.dto.GeneratedToken;
-import com.ll.hotel.global.jwt.dto.JwtProperties;
-import com.ll.hotel.standard.util.Ut;
-import io.jsonwebtoken.Claims;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import com.ll.hotel.global.jwt.dto.GeneratedToken;
+import com.ll.hotel.global.jwt.dto.JwtProperties;
+import com.ll.hotel.standard.util.Ut;
+
+import io.jsonwebtoken.Claims;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -42,6 +44,7 @@ public class AuthTokenService {
             Claims claims = Ut.jwt.getClaims(jwtProperties, token);
             return claims.getExpiration().after(new Date());
         } catch (Exception e) {
+            log.error("Token verification failed: {}", e.getMessage());
             return false;
         }
     }

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
+import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { getUid } from "@/lib/api/booking/payment/PaymentApi";
-import { KakaoPaymentRequest } from "@/lib/types/booking/payment/KakaoPaymentRequest";
-import { PaymentProps } from "@/lib/types/booking/BookingProps";
+import { getUid } from '@/lib/api/Booking/Payment/PaymentApi';
+import { KakaoPaymentRequest } from '@/lib/types/Booking/Payment/KakaoPaymentRequest';
+import { PaymentProps } from '@/lib/types/Booking/BookingProps';
 
 declare global {
   interface Window {
@@ -12,17 +12,11 @@ declare global {
   }
 }
 
-const Payment = ({
-  buyerEmail,
-  buyerName,
-  amount,
-  productName,
-  onPaymentComplete,
-}: PaymentProps) => {
+const Payment = ({buyerEmail, buyerName, amount, productName, onPaymentComplete}: PaymentProps) => {
   useEffect(() => {
     // iamport.js 스크립트 로드
-    const script = document.createElement("script");
-    script.src = "https://cdn.iamport.kr/v1/iamport.js";
+    const script = document.createElement('script');
+    script.src = 'https://cdn.iamport.kr/v1/iamport.js';
     script.async = true;
     document.body.appendChild(script);
 
@@ -36,10 +30,10 @@ const Payment = ({
       try {
         // 결제 정보 가져오기
         const { apiId, channelKey, merchantUid } = await getUid();
-
+  
         // IMP 초기화
         window.IMP.init(apiId);
-
+        
         // 결제 요청
         window.IMP.request_pay(
           {
@@ -56,9 +50,9 @@ const Payment = ({
               const kakaoPaymentRequest: KakaoPaymentRequest = {
                 merchantUid: merchantUid,
                 amount: amount,
-                paidAtTimestamp: rsp.paid_at,
+                paidAtTimestamp: rsp.paid_at
               };
-
+              
               // bookingRequest 데이터 반환
               onPaymentComplete(kakaoPaymentRequest);
             } else {
@@ -74,7 +68,11 @@ const Payment = ({
   };
 
   return (
-    <Button onClick={handlePayment} size="lg" className="w-full">
+    <Button 
+      onClick={handlePayment}
+      size="lg"
+      className="w-full"
+    >
       결제하기
     </Button>
   );

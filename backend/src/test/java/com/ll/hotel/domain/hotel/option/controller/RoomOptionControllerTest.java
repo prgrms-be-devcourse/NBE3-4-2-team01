@@ -90,6 +90,22 @@ public class RoomOptionControllerTest {
     }
 
     @Test
+    @DisplayName("객실 옵션 조회")
+    void getRoomOptionByIdTest() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        get("/api/admin/room-options/{id}", testId)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(RoomOptionController.class))
+                .andExpect(handler().methodName("getById"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK.name()));
+    }
+
+    @Test
     @DisplayName("객실 옵션 수정")
     void modifyRoomOptionTest() throws Exception {
         ResultActions resultActions = mockMvc

@@ -1,20 +1,17 @@
-import React from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Star } from "lucide-react";
-import { MyReviewResponse } from "@/lib/types/review/MyReviewResponse";
-import { deleteReview } from "@/lib/api/review/ReviewApi";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import React from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Star } from 'lucide-react';
+import { MyReviewResponse } from '@/lib/types/review/MyReviewResponse';
+import { deleteReview } from '@/lib/api/ReviewApi';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation'; 
 
 interface MyReviewWithCommentProps {
   review: MyReviewResponse;
   onReviewDelete?: () => void;
 }
 
-export const MyReviewWithComment: React.FC<MyReviewWithCommentProps> = ({
-  review,
-  onReviewDelete,
-}) => {
+export const MyReviewWithComment: React.FC<MyReviewWithCommentProps> = ({ review, onReviewDelete }) => {
   const router = useRouter(); // Initialize the useRouter hook for navigation
 
   const getReviewData = (review: MyReviewResponse) => {
@@ -25,7 +22,7 @@ export const MyReviewWithComment: React.FC<MyReviewWithCommentProps> = ({
       reviewDto: myReviewWithCommentDto.reviewDto,
       reviewCommentDto: myReviewWithCommentDto.reviewCommentDto,
       createdAt: myReviewWithCommentDto.createdAt,
-      imageUrls,
+      imageUrls
     };
   };
 
@@ -35,22 +32,17 @@ export const MyReviewWithComment: React.FC<MyReviewWithCommentProps> = ({
     reviewDto,
     reviewCommentDto,
     createdAt,
-    imageUrls,
+    imageUrls
   } = getReviewData(review);
 
   const handleEditClick = () => {
-    router.push(`/me/reviews/${reviewDto.reviewId}`);
+    router.push(`/me/reviews/${reviewDto.reviewId}`); 
   };
 
   const handleDeleteClick = async () => {
-    try {
-      await deleteReview(reviewDto.reviewId);
-    } catch (error) {
-      alert("리뷰 삭제 실패 : 존재하지 않는 리뷰입니다");
-      return;
-    }
+    await deleteReview(reviewDto.reviewId);
     onReviewDelete?.();
-    alert("리뷰가 삭제되었습니다");
+    alert('리뷰가 삭제되었습니다');
   };
 
   return (
@@ -69,8 +61,8 @@ export const MyReviewWithComment: React.FC<MyReviewWithCommentProps> = ({
                 key={index}
                 className={`w-5 h-5 ${
                   index < reviewDto.rating
-                    ? "text-yellow-400 fill-yellow-400"
-                    : "text-gray-300"
+                    ? 'text-yellow-400 fill-yellow-400'
+                    : 'text-gray-300'
                 }`}
               />
             ))}
@@ -102,7 +94,10 @@ export const MyReviewWithComment: React.FC<MyReviewWithCommentProps> = ({
 
         {/* Edit and Delete Buttons */}
         <div className="flex justify-end gap-2">
-          <Button className="bg-blue-500 px-4 py-2" onClick={handleEditClick}>
+          <Button
+            className="bg-blue-500 px-4 py-2"
+            onClick={handleEditClick}
+          >
             수정
           </Button>
           <Button

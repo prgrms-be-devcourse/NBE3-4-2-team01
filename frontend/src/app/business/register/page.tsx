@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { registerBusiness } from "@/lib/api/business/BusinessRegisterApi";
+import { registerBusiness } from "@/lib/api/Business/BusinessRegisterApi";
 import { BusinessRegistrationForm } from "@/lib/types/business/BusinessRequest";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

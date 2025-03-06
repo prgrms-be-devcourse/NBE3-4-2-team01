@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./Navigation.module.css";
 import { getRoleFromCookie, RoleData } from "@/lib/utils/CookieUtil";
-import { logout } from "@/lib/api/auth/AuthApi";
+import { logout } from "@/lib/api/AuthApi";
 
 interface UserState {
   isLoggedIn: boolean;

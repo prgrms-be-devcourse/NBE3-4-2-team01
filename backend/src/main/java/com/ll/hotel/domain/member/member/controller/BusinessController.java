@@ -6,10 +6,8 @@ import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.service.BusinessService;
 import com.ll.hotel.domain.member.member.service.BusinessValidationService;
-import com.ll.hotel.global.request.Rq;
-import com.ll.hotel.global.response.RsData;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.ll.hotel.global.rq.Rq;
+import com.ll.hotel.global.rsData.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,13 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/businesses")
 @RequiredArgsConstructor
-@Tag(name = "BusinessController")
 public class BusinessController {
     private final BusinessService businessService;
     private final BusinessValidationService businessValidationService;
     private final Rq rq;
 
-    @Operation(summary = "사업자 등록")
     @PostMapping("/register")
     public RsData<BusinessResponse.ApprovalResult> register(@RequestBody @Valid BusinessRequest.RegistrationInfo registrationInfo) {
 

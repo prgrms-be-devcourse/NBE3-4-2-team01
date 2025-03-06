@@ -1,6 +1,6 @@
 "use client";
 
-import { approveHotel, getHotelForAdmin } from "@/lib/api/admin/AdminHotelApi";
+import { approveHotel, getHotelForAdmin } from "@/lib/api/Admin/AdminHotelApi";
 import { AdminHotelRequest } from "@/lib/types/admin/request/AdminHotelRequest";
 import { HotelStatus } from "@/lib/types/hotel/HotelStatus";
 import { useParams } from "next/navigation";

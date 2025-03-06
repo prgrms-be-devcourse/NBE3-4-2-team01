@@ -1,7 +1,7 @@
 "use client";
 
 import Navigation from "@/components/navigation/Navigation";
-import HotelReviews from "@/components/reviewwithcomment/HotelReviews";
+import HotelReviews from "@/components/ReviewWithComment/HotelReviews";
 import { useSearchParams, useParams } from "next/navigation";
 import { Card } from "@/components/ui/card";
 

@@ -322,4 +322,23 @@ public class ReviewCommentControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("리뷰 답변이 존재하지 않습니다"));
     }
+
+    @Test
+    @DisplayName("정상 답변 조회")
+    void 정상답변조회() throws Exception {
+
+        long reviewId = 1L;
+        ReviewComment reviewComment = setReviewComment(reviewId);
+        long commentId = reviewComment.getId();
+
+        ResultActions resultActions = mvc.perform(
+                get("/api/reviews/{reviewId}/comments/{commentId}", reviewId, commentId)
+        ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ReviewCommentController.class))
+                .andExpect(handler().methodName("getReviewComment"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content").value(reviewComment.getContent()));
+    }
 }

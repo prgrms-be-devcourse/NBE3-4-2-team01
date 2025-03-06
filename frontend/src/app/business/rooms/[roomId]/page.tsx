@@ -5,7 +5,7 @@ import {
   findRoomDetail,
   modifyRoom,
   saveRoomImageUrls,
-} from "@/lib/api/hotel/room/BusinessRoomApi";
+} from "@/lib/api/BusinessRoomApi";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BED_TYPES, BedTypeNumber } from "@/lib/types/room/BedTypeNumber";
 import { PutRoomRequest } from "@/lib/types/room/PutRoomRequest";
 import { MoveLeft, XCircle } from "lucide-react";
-import { uploadImagesToS3 } from "@/lib/api/aws/AwsS3Api";
+import { uploadImagesToS3 } from "@/lib/api/AwsS3Api";
 import { PutRoomResponse } from "../../../../lib/types/room/PutRoomResponse";
 import { PresignedUrlsResponse } from "@/lib/types/review/PresignedUrlsResponse";
 import { GetAllRoomOptionsResponse } from "@/lib/types/room/GetAllRoomOptionsResponse";

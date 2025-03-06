@@ -2,7 +2,7 @@
 
 import HotelDetail from "@/components/business/hotel/HotelDetail";
 import { Card, CardContent } from "@/components/ui/card";
-import { findHotelDetailWithAvailableRooms } from "@/lib/api/hotel/BusinessHotelApi";
+import { findHotelDetailWithAvailableRooms } from "@/lib/api/BusinessHotelApi";
 import { GetHotelDetailResponse } from "@/lib/types/hotel/GetHotelDetailResponse";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";

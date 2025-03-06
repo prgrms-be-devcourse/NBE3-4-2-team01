@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { PageDto } from "@/lib/types/PageDto";
 import { GetHotelResponse } from "@/lib/types/hotel/GetHotelResponse";
-import SearchComponent from "@/components/search/SearchComponent";
+import SearchComponent from "@/components/Search/SearchComponent";
 
 interface HotelsPageClientProps {
   hotelData: PageDto<GetHotelResponse>;

@@ -32,6 +32,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             log.debug("OAuth2User Attributes: {}", oauth2User.getAttributes());
             return processOAuth2User(userRequest, oauth2User);
         } catch (Exception e) {
+            log.error("OAuth2 로그인 처리 중 오류 발생", e);
             throw new OAuth2AuthenticationException("OAuth2 로그인 처리 중 오류가 발생했습니다.");
         }
     }
@@ -47,6 +48,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             case "naver" -> {
                 Map<String, Object> response = (Map<String, Object>) oauth2User.getAttributes().get("response");
                 if (response == null) {
+                    log.error("네이버 응답에 'response' 필드가 없습니다.");
                     throw new OAuth2AuthenticationException("Invalid Naver response");
                 }
                 email = (String) response.get("email");
@@ -72,6 +74,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         if (email == null || name == null || oauthId == null) {
+            log.error("필수 정보가 없습니다. Provider: {}", registrationId);
             throw new OAuth2AuthenticationException("Required attributes are missing");
         }
 

@@ -1,7 +1,7 @@
-"use client";
-import { useEffect, useState } from "react";
-import { getHotelRevenue } from "@/lib/api/booking/revenue/RevenueApi";
-import { HotelRevenueResponse } from "@/lib/types/booking/revenue/HotelRevenueResponse";
+'use client'
+import { useEffect, useState } from "react"
+import { getHotelRevenue } from "@/lib/api/Booking/Revenue/RevenueApi"
+import { HotelRevenueResponse } from "@/lib/types/Booking/Revenue/HotelRevenueResponse"
 import {
   Table,
   TableBody,
@@ -9,31 +9,29 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/components/ui/table"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 
-const HotelRevenue = function ({ hotelId }: { hotelId: number }) {
-  const [hotelRevenue, setHotelRevenue] = useState<HotelRevenueResponse | null>(
-    null
-  );
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+const HotelRevenue = function({ hotelId }: { hotelId: number }) {
+  const [hotelRevenue, setHotelRevenue] = useState<HotelRevenueResponse | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
     const fetchBooking = async () => {
-      setIsLoading(true);
-      let data: HotelRevenueResponse | null = null;
+      setIsLoading(true)
+      let data: HotelRevenueResponse | null = null
       try {
-        data = await getHotelRevenue(hotelId);
+        data = await getHotelRevenue(hotelId)
       } catch (error) {
-        console.error(error);
+        console.error(error)
       } finally {
-        setHotelRevenue(data);
-        setIsLoading(false);
+        setHotelRevenue(data)
+        setIsLoading(false)
       }
-    };
-    fetchBooking();
-  }, [hotelId]);
+    }
+    fetchBooking()
+  }, [hotelId])
 
   if (isLoading) {
     return (
@@ -45,19 +43,17 @@ const HotelRevenue = function ({ hotelId }: { hotelId: number }) {
           <Skeleton className="h-80 w-full" />
         </CardContent>
       </Card>
-    );
+    )
   }
 
   if (!hotelRevenue) {
     return (
       <Card className="w-3/4 mx-auto min-h-96">
         <CardContent className="flex items-center justify-center h-80">
-          <p className="text-muted-foreground">
-            매출 통계를 불러올 수 없습니다.
-          </p>
+          <p className="text-muted-foreground">매출 통계를 불러올 수 없습니다.</p>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
@@ -94,7 +90,7 @@ const HotelRevenue = function ({ hotelId }: { hotelId: number }) {
         </Table>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default HotelRevenue;
+export default HotelRevenue

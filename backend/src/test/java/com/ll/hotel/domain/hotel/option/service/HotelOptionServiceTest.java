@@ -81,6 +81,17 @@ public class HotelOptionServiceTest {
     }
 
     @Test
+    @DisplayName("호텔 옵션 조회")
+    void findHotelOptionTest() {
+        // When
+        HotelOption result = hotelOptionService.findById(testId);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("호텔 옵션");
+    }
+
+    @Test
     @DisplayName("호텔 옵션 수정")
     void modifyHotelOptionTest() {
         // Given

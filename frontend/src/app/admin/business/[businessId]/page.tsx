@@ -3,7 +3,7 @@
 import Loading from "@/components/hotellist/Loading";
 import Navigation from "@/components/navigation/Navigation";
 import { Button } from "@/components/ui/button";
-import { getBusiness, modifyBusiness } from "@/lib/api/admin/AdminBusinessApi";
+import { getBusiness, modifyBusiness } from "@/lib/api/Admin/AdminBusinessApi";
 import { AdminBusinessRequest } from "@/lib/types/admin/request/AdminBusinessRequest";
 import { AdminBusinessDetailResponse } from "@/lib/types/admin/response/AdminBusinessResponse";
 import { BusinessApprovalStatus } from "@/lib/types/business/BusinessApprovalStatus";

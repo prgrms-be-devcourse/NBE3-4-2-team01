@@ -5,7 +5,7 @@ import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.service.MemberService;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
-import com.ll.hotel.global.request.Rq;
+import com.ll.hotel.global.rq.Rq;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import com.ll.hotel.global.security.oauth2.repository.OAuthRepository;
 import jakarta.servlet.http.Cookie;

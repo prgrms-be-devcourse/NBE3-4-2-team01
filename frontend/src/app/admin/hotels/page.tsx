@@ -4,7 +4,7 @@ import Loading from "@/components/hotellist/Loading";
 import Navigation from "@/components/navigation/Navigation";
 import Pagination from "@/components/pagination/Pagination";
 import { Button } from "@/components/ui/button";
-import { getAllHotelsForAdmin } from "@/lib/api/admin/AdminHotelApi";
+import { getAllHotelsForAdmin } from "@/lib/api/Admin/AdminHotelApi";
 import { AdminHotelSummaryReponse } from "@/lib/types/admin/response/AdminHotelResponse";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

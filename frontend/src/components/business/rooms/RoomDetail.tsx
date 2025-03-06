@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { deleteRoom } from "@/lib/api/hotel/room/BusinessRoomApi";
+import { deleteRoom } from "@/lib/api/BusinessRoomApi";
 import { GetRoomDetailResponse } from "@/lib/types/room/GetRoomDetailResponse";
 import { getRoleFromCookie } from "@/lib/utils/CookieUtil";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
@@ -62,8 +62,9 @@ const RoomDetail: React.FC<RoomDetailProps> = ({ room }) => {
       alert("객실이 삭제되었습니다.");
       router.push("/business/hotel/management");
     } catch (error) {
-      console.error("Error : ", error);
-      alert(error);
+      if (error instanceof Error) {
+        alert(error.message);
+      }
     }
   };
 

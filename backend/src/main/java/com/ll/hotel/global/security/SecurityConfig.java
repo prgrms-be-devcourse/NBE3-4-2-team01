@@ -73,9 +73,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/businesses/register").hasAnyRole("USER", "BUSINESS")
                         .requestMatchers("/api/businesses/**").hasRole("BUSINESS")
 
-                        // 애플리케이션에만 나머지 인증 요구
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint((request, response, authException) -> {
