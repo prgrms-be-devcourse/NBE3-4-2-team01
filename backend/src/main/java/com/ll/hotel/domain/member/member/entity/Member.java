@@ -1,13 +1,24 @@
 package com.ll.hotel.domain.member.member.entity;
 
+import static com.ll.hotel.global.exceptions.ErrorCode.BUSINESS_ACCESS_FORBIDDEN;
+
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
-import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.jpa.entity.BaseTime;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
-import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.http.HttpStatus;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,8 +29,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import static com.ll.hotel.global.exceptions.ErrorCode.BUSINESS_ACCESS_FORBIDDEN;
 
 @Entity
 @Getter
@@ -93,7 +102,7 @@ public class Member extends BaseTime {
 
     public void checkBusiness() {
         if (!this.isBusiness()) {
-            throw BUSINESS_ACCESS_FORBIDDEN.throwServiceException();
+            BUSINESS_ACCESS_FORBIDDEN.throwServiceException();
         }
     }
 }

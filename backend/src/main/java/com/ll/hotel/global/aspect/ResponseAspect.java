@@ -48,8 +48,7 @@ public class ResponseAspect {
 
         Object proceed = joinPoint.proceed();
 
-        if (proceed instanceof RsData<?>) {
-            RsData<?> rsData = (RsData<?>) proceed;
+        if (proceed instanceof RsData<?> rsData) {
             ObjectMapper objectMapper = AppConfig.getObjectMapper();
             String jsonData = objectMapper.writeValueAsString(rsData.getData());
 
