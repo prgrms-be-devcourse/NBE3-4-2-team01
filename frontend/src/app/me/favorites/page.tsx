@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getFavorites, removeFavorite } from '@/lib/api/FavoriteApi';
-import { HotelDto } from '@/lib/types/HotelDto';
+import { FavoriteHotelDto } from '@/lib/types/FavoriteHotelDto';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Heart, Hotel, Star, Trash2 } from 'lucide-react';
@@ -16,7 +16,7 @@ interface Alert {
 }
 
 export default function FavoritesPage() {
-  const [favorites, setFavorites] = useState<HotelDto[]>([]);
+  const [favorites, setFavorites] = useState<FavoriteHotelDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [alert, setAlert] = useState<Alert | null>(null);
   const router = useRouter();
