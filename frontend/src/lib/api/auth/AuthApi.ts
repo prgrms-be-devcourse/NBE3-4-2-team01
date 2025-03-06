@@ -29,14 +29,24 @@ export const join = async (joinRequest: {
   oauthId: string;
   birthDate: string;
 }) => {
-  const response = await fetch("http://localhost:8080/api/users/join", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(joinRequest),
-  });
+  try {
+    const response = await fetch("http://localhost:8080/api/users/join", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(joinRequest),
+    });
 
-  return await response.json();
+    if (response.ok) {
+      const rsData = await response.json();
+      return rsData;
+    }
+
+    throw new Error(await response.text());
+  } catch (error) {
+    console.error("회원가입 API 오류:", error);
+    throw error;
+  }
 };
