@@ -25,9 +25,13 @@ export const createRoom = async (
       body: JSON.stringify(postRoomRequest),
     });
 
-    const rsData: RsData<PostRoomResponse> = await response.json();
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
+
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw rsData;
     }
 
     return rsData.data;
@@ -59,10 +63,7 @@ export const saveRoomImageUrls = async (
       return;
     }
 
-    const rsData: RsData<Empty> = await response.json();
-    if (!response.ok) {
-      throw new Error(rsData.msg);
-    }
+    throw await response.text();
   } catch (error) {
     throw error;
   }
@@ -75,10 +76,14 @@ export const findRoomDetail = async (
 ): Promise<GetRoomDetailResponse> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/rooms/${roomId}`);
-    const rsData: RsData<GetRoomDetailResponse> = await response.json();
+
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
 
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw rsData;
     }
 
     return rsData.data;
@@ -103,9 +108,13 @@ export const modifyRoom = async (
       body: JSON.stringify(request),
     });
 
-    const rsData: RsData<PutRoomResponse> = await response.json();
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
+
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw rsData;
     }
 
     return rsData.data;
@@ -129,10 +138,7 @@ export const deleteRoom = async (
       return;
     }
 
-    const rsData: RsData<Empty> = await response.json();
-    if (!response.ok) {
-      throw new Error(rsData.msg);
-    }
+    throw await response.text();
   } catch (error) {
     throw error;
   }
@@ -144,10 +150,14 @@ export const findAllRooms = async (
 ): Promise<GetRoomResponse[]> => {
   try {
     const response = await fetch(`${BASE_URL}/${hotelId}/rooms`);
-    const rsData: RsData<GetRoomResponse[]> = await response.json();
+
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
 
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw rsData;
     }
 
     return rsData.data;
@@ -164,10 +174,14 @@ export const findAllRoomOptions = async (
     const response = await fetch(`${BASE_URL}/${hotelId}/rooms/room-option`, {
       credentials: "include",
     });
-    const rsData: RsData<GetAllRoomOptionsResponse> = await response.json();
+
+    const rsData = await response
+      .clone()
+      .json()
+      .catch(() => response.text());
 
     if (!response.ok) {
-      throw new Error(rsData.msg);
+      throw rsData;
     }
 
     return rsData.data;

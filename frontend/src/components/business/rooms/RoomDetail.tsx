@@ -62,9 +62,8 @@ const RoomDetail: React.FC<RoomDetailProps> = ({ room }) => {
       alert("객실이 삭제되었습니다.");
       router.push("/business/hotel/management");
     } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message);
-      }
+      console.error("Error : ", error);
+      alert(error);
     }
   };
 
