@@ -41,6 +41,7 @@ public class RoomOptionController {
         return RsData.success(HttpStatus.OK, roomAmenityList);
     }
 
+    @Operation(summary = "객실 옵션 수정")
     @PatchMapping("/{id}")
     public RsData<OptionResponse> modify(@PathVariable("id") Long id,
                                          @RequestBody OptionRequest optionRequest) {
