@@ -1,78 +1,108 @@
 package com.ll.hotel.domain.member.member.controller;
 
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.ll.hotel.domain.member.member.dto.JoinRequest;
 import com.ll.hotel.domain.member.member.dto.MemberDTO;
 import com.ll.hotel.domain.member.member.dto.MemberResponse;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.service.MemberService;
-import com.ll.hotel.domain.member.member.service.RefreshTokenService;
+import static com.ll.hotel.global.exceptions.ErrorCode.EMAIL_ALREADY_EXISTS;
+import static com.ll.hotel.global.exceptions.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.global.security.dto.SecurityUser;
+import com.ll.hotel.global.response.RsData;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
+@Tag(name = "MemberController", description = "회원 관리 API")
 public class MemberController {
     private final MemberService memberService;
-    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/join")
+    @Operation(summary = "회원 가입", description = "새로운 회원을 등록합니다.")
     public RsData<MemberResponse> join(@RequestBody @Valid JoinRequest joinRequest, 
-                                     @AuthenticationPrincipal SecurityUser securityUser) {
-        log.debug("Join attempt for email: {}", joinRequest.email());
+                                     HttpServletResponse response,
+                                     BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            String errorMessage = bindingResult.getFieldErrors()
+                .stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.joining(", "));
+
+            EMAIL_ALREADY_EXISTS.throwServiceException();
+        }
+        
         try {
-            if (securityUser != null && securityUser.getOauthId() != null) {
-                log.debug("SecurityUser OAuth 정보 - provider: {}, oauthId: {}", 
-                         securityUser.getProvider(), securityUser.getOauthId());
-                         
-                joinRequest = new JoinRequest(
-                    joinRequest.email(),
-                    joinRequest.name(),
-                    joinRequest.phoneNumber(),
-                    joinRequest.birthDate(),
-                    securityUser.getProvider(),
-                    securityUser.getOauthId()
-                );
+            Member member = memberService.join(joinRequest);
+            
+            // OAuth2 회원가입인 경우 자동 로그인 처리
+            if (joinRequest.provider() != null && joinRequest.oauthId() != null) {
+                memberService.oAuth2Login(member, response);
             }
             
-            Member member = memberService.join(joinRequest);
-            MemberResponse response = new MemberResponse(
+            MemberResponse memberResponse = new MemberResponse(
                 MemberDTO.from(member),
                 member.getMemberEmail()
             );
-            return new RsData<>("200", "회원가입이 완료되었습니다.", response);
+            return RsData.success(HttpStatus.OK, memberResponse);
         } catch (ServiceException e) {
-            return new RsData<>("400-1", e.getMessage(), new MemberResponse(null, null));
+            throw EMAIL_ALREADY_EXISTS.throwServiceException(e);
         }
     }
 
     @PostMapping("/logout")
-    public RsData<Void> logout(@RequestHeader("Authorization") String bearerToken) {
-        if (!StringUtils.hasText(bearerToken) || !bearerToken.startsWith("Bearer ")) {
-            throw new ServiceException("400-1", "잘못된 토큰 형식입니다.");
-        }
-
-        String token = bearerToken.substring(7);
-        memberService.logout(token);
-        
-        return new RsData<>("200-1", "로그아웃 되었습니다.");
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "로그아웃", description = "사용자를 로그아웃 처리합니다.")
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        memberService.logout(request, response);
     }
 
     @PostMapping("/refresh")
-    public RsData<String> refresh(@RequestHeader("Authorization") final String refreshToken) {
-        if (!refreshToken.startsWith("Bearer ")) {
-            return new RsData<>("401-1", "잘못된 토큰 형식입니다.", "");
-        }
-        String token = refreshToken.substring(7);
+    @Operation(summary = "토큰 갱신", description = "리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급합니다.")
+    public RsData<String> refresh(HttpServletRequest request) {
+        String refreshToken = null;
+        Cookie[] cookies = request.getCookies();
         
-        return memberService.refreshAccessToken(token);
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refresh_token".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        
+        if (refreshToken == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                refreshToken = authHeader.substring(7);
+            }
+        }
+        
+        if (refreshToken == null) {
+            REFRESH_TOKEN_NOT_FOUND.throwServiceException();
+        }
+        
+        return memberService.refreshAccessToken(refreshToken);
     }
 }

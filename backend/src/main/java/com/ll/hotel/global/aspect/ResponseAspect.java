@@ -1,14 +1,17 @@
 package com.ll.hotel.global.aspect;
 
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.response.RsData;
+import com.ll.hotel.standard.util.LogUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
 @Aspect
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ResponseAspect {
@@ -37,11 +40,17 @@ public class ResponseAspect {
             @annotation(org.springframework.web.bind.annotation.ResponseBody)
             """)
     public Object handleResponse(ProceedingJoinPoint joinPoint) throws Throwable {
+        String className = joinPoint.getSignature().getDeclaringType().getSimpleName();
+        String methodName = joinPoint.getSignature().getName();
+
+        LogUtil.logControllerRequest(log, className, methodName);
+
         Object proceed = joinPoint.proceed();
 
-        if (proceed instanceof RsData<?>) {
-            RsData<?> rsData = (RsData<?>) proceed;
-            response.setStatus(rsData.getStatusCode());
+        if (proceed instanceof RsData<?> rsData) {
+            LogUtil.logControllerResponse(log, className, methodName, rsData);
+
+            response.setStatus(rsData.getResultCode().value());
         }
 
         return proceed;

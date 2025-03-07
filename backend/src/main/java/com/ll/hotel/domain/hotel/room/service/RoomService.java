@@ -2,16 +2,9 @@ package com.ll.hotel.domain.hotel.room.service;
 
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
-import com.ll.hotel.domain.hotel.option.roomOption.repository.RoomOptionRepository;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
-import com.ll.hotel.domain.hotel.room.dto.RoomDto;
-import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
-import com.ll.hotel.domain.hotel.room.dto.PostRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.PutRoomRequest;
-import com.ll.hotel.domain.hotel.room.dto.PutRoomResponse;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.repository.RoomOptionRepository;
+import com.ll.hotel.domain.hotel.room.dto.*;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
@@ -20,9 +13,15 @@ import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.service.ImageService;
 import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
+import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
+import com.ll.hotel.global.annotation.BusinessOnly;
 import com.ll.hotel.global.aws.s3.S3Service;
-import com.ll.hotel.global.exceptions.ServiceException;
+import com.ll.hotel.global.exceptions.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
@@ -30,10 +29,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -45,12 +40,13 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomOptionRepository roomOptionRepository;
 
+    @BusinessOnly
     @Transactional
-    public PostRoomResponse create(long hotelId, Member actor, PostRoomRequest postRoomRequest) {
-        Hotel hotel = this.getHotel(hotelId);
+    public PostRoomResponse createRoom(long hotelId, Member actor, PostRoomRequest postRoomRequest) {
+        Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
-            throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
         BedTypeNumber bedTypeNumber = BedTypeNumber.fromJson(postRoomRequest.bedTypeNumber());
@@ -58,42 +54,41 @@ public class RoomService {
         Set<RoomOption> roomOptions = this.roomOptionRepository.findByNameIn(postRoomRequest.roomOptions());
 
         if (roomOptions.size() != postRoomRequest.roomOptions().size()) {
-            throw new ServiceException("404-2", "사용할 수 없는 객실 옵션이 존재합니다.");
+            ErrorCode.ROOM_OPTION_NOT_FOUND.throwServiceException();
         }
 
-        Room room = Room.builder()
-                .hotel(hotel)
-                .roomName(postRoomRequest.roomName())
-                .roomNumber(postRoomRequest.roomNumber())
-                .basePrice(postRoomRequest.basePrice())
-                .standardNumber(postRoomRequest.standardNumber())
-                .maxNumber(postRoomRequest.maxNumber())
-                .bedTypeNumber(bedTypeNumber)
-                .roomOptions(roomOptions)
-                .build();
+        Room room = Room.roomBuild(hotel, postRoomRequest, bedTypeNumber, roomOptions);
 
         try {
             return new PostRoomResponse(this.roomRepository.save(room),
                     this.saveRoomImages(room.getId(), postRoomRequest.imageExtensions()));
         } catch (DataIntegrityViolationException e) {
-            throw new ServiceException("409-1", "동일한 이름의 방이 이미 호텔에 존재합니다.");
+            throw ErrorCode.ROOM_NAME_ALREADY_EXISTS.throwServiceException();
         }
     }
 
+    @BusinessOnly
     @Transactional
-    public void saveImages(ImageType imageType, long roomId, List<String> urls) {
+    public void saveImages(Member actor, ImageType imageType, long roomId, List<String> urls) {
+        Hotel hotel = getRoomById(roomId).getHotel();
+
+        if (!hotel.isOwnedBy(actor)) {
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
+        }
+
         this.imageService.saveImages(imageType, roomId, urls);
     }
 
+    @BusinessOnly
     @Transactional
-    public void delete(long hotelId, long roomId, Member actor) {
-        Hotel hotel = this.getHotel(hotelId);
+    public void deleteRoom(long hotelId, long roomId, Member actor) {
+        Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
-            throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
-        Room room = this.getRoom(roomId);
+        Room room = this.getRoomById(roomId);
 
         room.setRoomStatus(RoomStatus.UNAVAILABLE);
 
@@ -102,14 +97,14 @@ public class RoomService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<GetRoomResponse> findAllRooms(long hotelId) {
         return this.roomRepository.findAllRooms(hotelId, ImageType.ROOM).stream()
                 .map(GetRoomResponse::new)
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public GetRoomDetailResponse findRoomDetail(long hotelId, long roomId) {
         checkHotelExists(hotelId);
 
@@ -122,27 +117,19 @@ public class RoomService {
         return new GetRoomDetailResponse(new RoomDto(room), imageUrls);
     }
 
+    @BusinessOnly
     @Transactional
-    public GetRoomOptionResponse findRoomOptions(long hotelId, long roomId) {
-        this.checkHotelExists(hotelId);
-
-        Room room = this.getRoom(roomId);
-
-        return new GetRoomOptionResponse(room);
-    }
-
-    @Transactional
-    public PutRoomResponse modify(long hotelId, long roomId, Member actor, PutRoomRequest request) {
-        Hotel hotel = this.getHotel(hotelId);
+    public PutRoomResponse modifyRoom(long hotelId, long roomId, Member actor, PutRoomRequest request) {
+        Hotel hotel = this.getHotelById(hotelId);
 
         if (!hotel.isOwnedBy(actor)) {
-            throw new ServiceException("403-2", "해당 호텔의 사업가가 아닙니다.");
+            ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
         Room room = this.getRoomDetail(hotelId, roomId);
 
         if (this.roomRepository.existsByHotelIdAndRoomNameAndIdNot(hotelId, request.roomName(), roomId)) {
-            throw new ServiceException("409-1", "동일한 이름의 방이 이미 호텔에 존재합니다.");
+            ErrorCode.ROOM_NAME_ALREADY_EXISTS.throwServiceException();
         }
 
         modifyIfPresent(request.roomName(), room::getRoomName, room::setRoomName);
@@ -156,7 +143,7 @@ public class RoomService {
             try {
                 room.setRoomStatus(RoomStatus.valueOf(request.roomStatus().toUpperCase()));
             } catch (Exception e) {
-                throw new ServiceException("404-3", "객실 상태 정보를 정확히 입력해주세요.");
+                ErrorCode.ROOM_STATUS_NOT_FOUND.throwServiceException();
             }
         }
 
@@ -186,30 +173,30 @@ public class RoomService {
         Set<RoomOption> options = this.roomOptionRepository.findByNameIn(optionNames);
 
         if (options.size() != optionNames.size()) {
-            throw new ServiceException("404-4", "사용할 수 없는 객실 옵션이 존재합니다.");
+            ErrorCode.ROOM_OPTION_NOT_FOUND.throwServiceException();
         }
 
         room.setRoomOptions(options);
     }
 
-    private Hotel getHotel(long hotelId) {
+    private Hotel getHotelById(long hotelId) {
         return this.hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ServiceException("404-1", "호텔 정보가 존재하지 않습니다."));
+                .orElseThrow(ErrorCode.HOTEL_NOT_FOUND::throwServiceException);
     }
 
-    private Room getRoom(long roomId) {
+    private Room getRoomById(long roomId) {
         return this.roomRepository.findById(roomId)
-                .orElseThrow(() -> new ServiceException("404-2", "객실 정보가 존재하지 않습니다."));
+                .orElseThrow(ErrorCode.ROOM_NOT_FOUND::throwServiceException);
     }
 
     private Room getRoomDetail(long hotelId, long roomId) {
         return this.roomRepository.findRoomDetail(hotelId, roomId)
-                .orElseThrow(() -> new ServiceException("404-2", "객실 정보를 조회할 수 없습니다."));
+                .orElseThrow(ErrorCode.ROOM_NOT_FOUND::throwServiceException);
     }
 
     private void checkHotelExists(long hotelId) {
         if (!this.hotelRepository.existsById(hotelId)) {
-            throw new ServiceException("404-1", "호텔 정보가 존재하지 않습니다.");
+            ErrorCode.HOTEL_NOT_FOUND.throwServiceException();
         }
     }
 
@@ -218,5 +205,11 @@ public class RoomService {
         List<URL> urls = this.s3Service.generatePresignedUrls(ImageType.ROOM, roomId, extensions);
 
         return new PresignedUrlsResponse(roomId, urls);
+    }
+
+    @BusinessOnly
+    @Transactional(readOnly = true)
+    public GetAllRoomOptionsResponse findAllRoomOptions(Member actor) {
+        return new GetAllRoomOptionsResponse(this.roomOptionRepository.findAll());
     }
 }

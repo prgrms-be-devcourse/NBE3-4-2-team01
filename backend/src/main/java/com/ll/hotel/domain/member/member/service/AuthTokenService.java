@@ -1,8 +1,8 @@
 package com.ll.hotel.domain.member.member.service;
 
 
-import com.ll.hotel.global.security.dto.GeneratedToken;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
+import com.ll.hotel.global.jwt.dto.GeneratedToken;
+import com.ll.hotel.global.jwt.dto.JwtProperties;
 import com.ll.hotel.standard.util.Ut;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -17,21 +17,21 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class AuthTokenService {
-    private final CustomOAuth2JwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
     private final RefreshTokenService refreshTokenService;
 
-    public GeneratedToken generateToken(String email) {
-        String accessToken = genAccessToken(email);
+    public GeneratedToken generateToken(String email, String role) {
+        String accessToken = genAccessToken(email, role);
         String refreshToken = refreshTokenService.generateRefreshToken(email);
 
         refreshTokenService.saveTokenInfo(email, refreshToken, accessToken);
         return new GeneratedToken(accessToken, refreshToken);
     }
 
-    String genAccessToken(String email) {
+    String genAccessToken(String email, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("sub", email);
-        claims.put("role", "ROLE_USER");
+        claims.put("role", role);
         claims.put("type", "access");
 
         return Ut.jwt.toString(jwtProperties, claims);
@@ -42,7 +42,6 @@ public class AuthTokenService {
             Claims claims = Ut.jwt.getClaims(jwtProperties, token);
             return claims.getExpiration().after(new Date());
         } catch (Exception e) {
-            log.error("Token verification failed: {}", e.getMessage());
             return false;
         }
     }

@@ -1,6 +1,5 @@
 package com.ll.hotel.domain.review.comment.entity;
 
-import com.ll.hotel.domain.review.comment.type.ReviewCommentStatus;
 import com.ll.hotel.domain.review.review.entity.Review;
 import com.ll.hotel.global.jpa.entity.BaseTime;
 import jakarta.persistence.*;
@@ -17,7 +16,7 @@ import lombok.Setter;
 @Table(name = "review_comments")
 public class ReviewComment extends BaseTime {
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToOne(fetch = FetchType.LAZY)
     @NotNull(message = "리뷰 정보는 필수입니다.")
     private Review review;
 
@@ -26,15 +25,9 @@ public class ReviewComment extends BaseTime {
     @Size(min = 5, max = 200, message = "답변 내용은 필수입니다.")
     private String content;
 
-    @Enumerated(EnumType.STRING)
-    @Setter
-    @NotNull(message = "리뷰 답변 상태는 필수입니다.")
-    private ReviewCommentStatus reviewCommentStatus;
-
     @Builder
-    private ReviewComment(Review review, String content, ReviewCommentStatus reviewCommentStatus) {
+    private ReviewComment(Review review, String content) {
         this.review = review;
         this.content = content;
-        this.reviewCommentStatus = reviewCommentStatus;
     }
 }

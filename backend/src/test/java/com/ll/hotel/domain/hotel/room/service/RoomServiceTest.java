@@ -1,23 +1,11 @@
 package com.ll.hotel.domain.hotel.room.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
-import com.ll.hotel.domain.hotel.option.roomOption.dto.request.RoomOptionRequest;
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
-import com.ll.hotel.domain.hotel.option.roomOption.service.RoomOptionService;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomDetailResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomOptionResponse;
-import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
-import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
-import com.ll.hotel.domain.hotel.room.dto.PutRoomRequest;
-import com.ll.hotel.domain.hotel.room.dto.PutRoomResponse;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.service.RoomOptionService;
+import com.ll.hotel.domain.hotel.room.dto.*;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.hotel.room.repository.RoomRepository;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
@@ -30,20 +18,21 @@ import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -70,35 +59,26 @@ class RoomServiceTest {
     @Autowired
     private BusinessRepository businessRepository;
 
-    @BeforeEach
-    public void beforeEach() {
-        this.createHotel();
-    }
-
     @Test
     @DisplayName("객실 생성")
     public void createRoom() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Hotel hotel = this.hotelRepository.findAll().getFirst();
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
 
-        this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("AirConditioner"));
-
-        Set<String> roomOptions = new HashSet<>(Set.of("TV", "AirConditioner"));
-
+        Set<String> roomOptions = new HashSet<>(Set.of("객실 내 금고", "미니 냉장고"));
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        PostRoomResponse res1 = this.roomService.createRoom(hotel.getId(), business.getMember(), req1);
 
-        Room room = this.roomRepository.findAll().getFirst();
-        Long roomId = room.getId();
+        Long roomId = res1.roomId();
+        Room room = this.roomRepository.findById(roomId).get();
 
         Set<String> roomOption = room.getRoomOptions().stream().map(RoomOption::getName).collect(Collectors.toSet());
 
         assertEquals(room.getRoomName(), "객실1");
-        assertEquals(room.getHotel().getId(), hotel.getId());
+        assertEquals(hotel.getId(), res1.hotelId());
         assertEquals(room.getBasePrice(), 300000);
         assertEquals(room.getBedTypeNumber().bed_single(), 4);
         assertEquals(room.getBedTypeNumber().bed_double(), 2);
@@ -106,67 +86,93 @@ class RoomServiceTest {
         assertEquals(room.getBedTypeNumber().bed_triple(), 0);
         assertEquals(room.getStandardNumber(), 2);
         assertEquals(roomOption.size(), 2);
-        assertTrue(roomOption.contains("TV"));
-        assertTrue(roomOption.contains("AirConditioner"));
-
-        bedTypeNumber = Map.of("DOUBLE", 4, "QUEEN", 1);
-        PostRoomRequest req2 = new PostRoomRequest("객실2", 2, 500000, 3, 4, bedTypeNumber, null, null);
-
-        this.roomService.create(hotel.getId(), actor, req2);
-
-        room = this.roomRepository.findById(roomId + 1).get();
-
-        assertEquals(room.getRoomName(), "객실2");
-        assertEquals(room.getHotel().getId(), hotel.getId());
-        assertEquals(room.getBasePrice(), 500000);
-        assertEquals(room.getBedTypeNumber().bed_double(), 4);
-        assertEquals(room.getBedTypeNumber().bed_queen(), 1);
-        assertEquals(room.getBedTypeNumber().bed_triple(), 0);
-        assertEquals(room.getStandardNumber(), 3);
+        assertTrue(roomOption.contains("객실 내 금고"));
+        assertTrue(roomOption.contains("미니 냉장고"));
     }
 
     @Test
     @DisplayName("객실 생성 실패 - 존재하지 않는 객실 옵션")
-    public void createRoomInvalidRoomOptions() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Hotel hotel = this.hotelRepository.findAll().getFirst();
+    public void createRoomFailed_invalidRoomOptions() {
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
 
-        Set<String> roomOptions = new HashSet<>(Set.of("TV", "AirConditioner"));
-
+        Set<String> roomOptions = new HashSet<>(Set.of("청소기"));
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        ServiceException error = assertThrows(ServiceException.class, () -> {
-            this.roomService.create(hotel.getId(), actor, req1);
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            this.roomService.createRoom(hotel.getId(), business.getMember(), req1);
         });
 
-        assertEquals(404, error.getRsData().getStatusCode());
-        assertEquals("사용할 수 없는 객실 옵션이 존재합니다.", error.getRsData().getMsg());
+        assertEquals(404, exception.getResultCode().value());
+        assertEquals("사용할 수 없는 객실 옵션이 존재합니다.", exception.getMsg());
+    }
+
+    @Test
+    @DisplayName("객실 생성 실패 - 사업가가 아닐 경우")
+    public void createRoomFailed_notBusiness() {
+        Member actor = this.getActor();
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+
+        Set<String> roomOptions = new HashSet<>(Set.of("객실 내 금고", "미니 냉장고"));
+        Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
+
+        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            this.roomService.createRoom(hotel.getId(), actor, req1);
+        });
+
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
+    }
+
+    @Test
+    @DisplayName("객실 생성 실패 - 호텔 소유주가 아닐 경우")
+    public void createRoomFailed_notEqualBusiness() {
+        Business newBusiness = this.createBusiness("새사장1","newHotel1@gmail.com");
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+
+        Set<String> roomOptions = new HashSet<>(Set.of("객실 내 금고", "미니 냉장고"));
+        Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
+
+        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            this.roomService.createRoom(hotel.getId(), newBusiness.getMember(), req1);
+        });
+
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("해당 호텔의 사업자가 아닙니다.", exception.getMsg());
     }
 
     @Test
     @DisplayName("객실 전체 조회")
     public void findAllRooms() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Hotel hotel = this.hotelRepository.findAll().getFirst();
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+
+        Set<String> roomOptions = new HashSet<>(Set.of("객실 내 금고", "미니 냉장고"));
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
 
-        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, null);
+        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        PostRoomResponse res1 = this.roomService.createRoom(hotel.getId(), business.getMember(), req1);
 
-        Room room = this.roomRepository.findAll().getFirst();
-        Long roomId = room.getId();
+        Long roomId = res1.roomId();
 
         bedTypeNumber = Map.of("DOUBLE", 4, "QUEEN", 1);
         PostRoomRequest req2 = new PostRoomRequest("객실2", 2, 500000, 3, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), actor, req2);
+        PostRoomResponse res2 = this.roomService.createRoom(hotel.getId(), business.getMember(), req2);
 
         List<GetRoomResponse> rooms = this.roomService.findAllRooms(hotel.getId());
-        GetRoomResponse res = rooms.getFirst();
+        GetRoomResponse res = rooms.get(1);
 
+        assertEquals(rooms.size(), 3);
         assertEquals(res.roomId(), roomId);
         assertEquals(res.roomName(), "객실1");
         assertEquals(res.basePrice(), 300000);
@@ -176,9 +182,9 @@ class RoomServiceTest {
         assertEquals(res.bedTypeNumber().bed_triple(), 0);
         assertEquals(res.standardNumber(), 2);
 
-        res = rooms.get(1);
+        res = rooms.get(2);
 
-        assertEquals(res.roomId(), roomId + 1);
+        assertEquals(res2.roomId(), roomId + 1);
         assertEquals(res.roomName(), "객실2");
         assertEquals(res.basePrice(), 500000);
         assertEquals(res.bedTypeNumber().bed_double(), 4);
@@ -190,21 +196,22 @@ class RoomServiceTest {
     @Test
     @DisplayName("특정 객실 조회")
     public void findRoom() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Hotel hotel = this.hotelRepository.findAll().getFirst();
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+
+        Set<String> roomOptions = new HashSet<>(Set.of("객실 내 금고", "미니 냉장고"));
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
 
-        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, null);
+        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        PostRoomResponse res1 = this.roomService.createRoom(hotel.getId(), business.getMember(), req1);
 
-        Room room = this.roomRepository.findAll().getFirst();
-        Long roomId = room.getId();
+        Long roomId = res1.roomId();
 
         bedTypeNumber = Map.of("DOUBLE", 4, "QUEEN", 1);
         PostRoomRequest req2 = new PostRoomRequest("객실2", 2, 500000, 3, 4, bedTypeNumber, null, null);
 
-        this.roomService.create(hotel.getId(), actor, req2);
+        PostRoomResponse res2 = this.roomService.createRoom(hotel.getId(), business.getMember(), req2);
 
         GetRoomDetailResponse detRes1 = this.roomService.findRoomDetail(hotel.getId(), roomId);
 
@@ -217,12 +224,12 @@ class RoomServiceTest {
         assertEquals(detRes1.roomDto().bedTypeNumber().bed_double(), req1.bedTypeNumber().get("DOUBLE"));
         assertEquals(detRes1.roomDto().bedTypeNumber().bed_king(), req1.bedTypeNumber().get("KING"));
         assertEquals(detRes1.roomDto().bedTypeNumber().bed_triple(), 0);
-        assertEquals(detRes1.roomDto().roomStatus(), RoomStatus.AVAILABLE.getValue());
+        assertEquals(detRes1.roomDto().roomStatus(), RoomStatus.AVAILABLE.name());
         assertEquals(detRes1.roomImageUrls().size(), 0);
-        assertEquals(detRes1.roomDto().roomOptions().size(), 0);
+        assertEquals(detRes1.roomDto().roomOptions().size(), 2);
         assertEquals(detRes1.roomDto().standardNumber(), 2);
 
-        roomId += 1;
+        roomId = res2.roomId();
         detRes1 = this.roomService.findRoomDetail(hotel.getId(), roomId);
 
         assertEquals(detRes1.roomDto().id(), roomId);
@@ -233,73 +240,41 @@ class RoomServiceTest {
         assertEquals(detRes1.roomDto().bedTypeNumber().bed_double(), req2.bedTypeNumber().get("DOUBLE"));
         assertEquals(detRes1.roomDto().bedTypeNumber().bed_queen(), req2.bedTypeNumber().get("QUEEN"));
         assertEquals(detRes1.roomDto().bedTypeNumber().bed_triple(), 0);
-        assertEquals(detRes1.roomDto().roomStatus(), RoomStatus.AVAILABLE.getValue());
+        assertEquals(detRes1.roomDto().roomStatus(), RoomStatus.AVAILABLE.name());
         assertEquals(detRes1.roomImageUrls().size(), 0);
         assertEquals(detRes1.roomDto().roomOptions().size(), 0);
         assertEquals(detRes1.roomDto().standardNumber(), 3);
     }
 
     @Test
-    @DisplayName("객실 옵션 조회")
-    public void findRoomOptions() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Hotel hotel = this.hotelRepository.findAll().getFirst();
-
-        this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("Computer"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("ShowerRoom"));
-
-        Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
-        Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
-
-        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
-
-        this.roomService.create(hotel.getId(), actor, req1);
-
-        Room room = this.roomRepository.findAll().getFirst();
-        Long roomId = room.getId();
-
-        GetRoomOptionResponse res = this.roomService.findRoomOptions(hotel.getId(), roomId);
-
-        assertEquals(res.roomId(), roomId);
-        assertEquals(res.roomOptions().size(), 3);
-        assertTrue(res.roomOptions().contains("ShowerRoom"));
-        assertTrue(res.roomOptions().contains("Computer"));
-        assertTrue(res.roomOptions().contains("TV"));
-        assertFalse(res.roomOptions().contains("AirConditioner"));
-    }
-
-    @Test
     @DisplayName("객실 수정")
     public void modifyRoom() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Hotel hotel = this.hotelRepository.findAll().getFirst();
-
-        this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("Computer"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("ShowerRoom"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("AirConditioner"));
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
 
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
-        Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
+        Set<String> roomOptions = this.roomOptionService.findAll()
+                .stream()
+                .map(RoomOption::getName)
+                .collect(Collectors.toSet());
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        PostRoomResponse res1 = this.roomService.createRoom(hotel.getId(), business.getMember(), req1);
 
-        Room room = this.roomRepository.findAll().getFirst();
-        Long roomId = room.getId();
+        Long roomId = res1.roomId();
+        Room room = this.roomRepository.findById(roomId).get();
 
-        roomOptions = new HashSet<>(Set.of("TV", "AirConditioner"));
+        roomOptions = new HashSet<>(Set.of("미니 냉장고"));
         PutRoomRequest putReq1 = new PutRoomRequest("수정 객실1", 5, null, null, 5, null,
                 "in_booking", null, null, roomOptions);
 
-        PutRoomResponse res1 = this.roomService.modify(hotel.getId(), roomId, actor, putReq1);
+        PutRoomResponse putRes1 = this.roomService.modifyRoom(hotel.getId(), roomId, business.getMember(), putReq1);
 
-        assertEquals(res1.hotelId(), hotel.getId());
-        assertEquals(res1.roomId(), room.getId());
-        assertEquals(res1.roomName(), room.getRoomName());
-        assertEquals(res1.roomStatus(), RoomStatus.IN_BOOKING.getValue());
+        assertEquals(putRes1.hotelId(), hotel.getId());
+        assertEquals(putRes1.roomId(), room.getId());
+        assertEquals(putRes1.roomName(), room.getRoomName());
+        assertEquals(putRes1.roomStatus(), RoomStatus.IN_BOOKING.getValue());
 
         room = this.roomRepository.findById(roomId).get();
 
@@ -315,106 +290,198 @@ class RoomServiceTest {
         assertEquals(room.getBedTypeNumber(), BedTypeNumber.fromJson(req1.bedTypeNumber()));
         assertEquals(room.getRoomStatus(), RoomStatus.IN_BOOKING);
         assertEquals(room.getHotel().getId(), hotel.getId());
+        assertEquals(1, roomOptions.size());
         assertEquals(roomNames, roomOptions);
     }
 
     @Test
     @DisplayName("객실 수정 실패 - 존재하지 않는 객실 옵션")
-    public void modifyRoomInvalidRoomOption() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Hotel hotel = this.hotelRepository.findAll().getFirst();
-
-        this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("Computer"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("ShowerRoom"));
+    public void modifyRoomFailed_invalidRoomOption() {
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
 
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
-        Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
 
-        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
+        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, new HashSet<>());
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        PostRoomResponse res1 = this.roomService.createRoom(hotel.getId(), business.getMember(), req1);
 
-        Room room = this.roomRepository.findAll().getFirst();
-        Long roomId = room.getId();
+        Long roomId = res1.roomId();
 
-        roomOptions = new HashSet<>(Set.of("TV", "AirConditioner"));
+        Set<String> roomOptions = new HashSet<>(Set.of("TV", "AirConditioner"));
         PutRoomRequest putReq1 = new PutRoomRequest("수정 객실1", 5, null, null, 5, null,
                 "in_booking", null, null, roomOptions);
 
-        ServiceException error = assertThrows(ServiceException.class, () -> {
-            this.roomService.modify(hotel.getId(), roomId, actor, putReq1);
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            this.roomService.modifyRoom(hotel.getId(), roomId, business.getMember(), putReq1);
         });
 
-        assertEquals(404, error.getRsData().getStatusCode());
-        assertEquals("사용할 수 없는 객실 옵션이 존재합니다.", error.getRsData().getMsg());
+        assertEquals(404, exception.getResultCode().value());
+        assertEquals("사용할 수 없는 객실 옵션이 존재합니다.", exception.getMsg());
+    }
+
+    @Test
+    @DisplayName("객실 수정 실패 - 사업자가 아닐 경우")
+    public void modifyRoomFailed_notBusiness() {
+        Member actor = this.getActor();
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+
+        Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
+        Set<String> roomOptions = this.roomOptionService.findAll()
+                .stream()
+                .map(RoomOption::getName)
+                .collect(Collectors.toSet());
+
+        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
+
+        PostRoomResponse res1 = this.roomService.createRoom(hotel.getId(), business.getMember(), req1);
+
+        Long roomId = res1.roomId();
+
+        roomOptions = new HashSet<>(Set.of("미니 냉장고"));
+        PutRoomRequest putReq1 = new PutRoomRequest("수정 객실1", 5, null, null, 5, null,
+                "in_booking", null, null, roomOptions);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            this.roomService.modifyRoom(hotel.getId(), roomId, actor, putReq1);
+        });
+
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
+    }
+
+    @Test
+    @DisplayName("객실 수정 실패 - 호텔 소유주가 아닐 경우")
+    public void modifyRoomFailed_notEqualBusiness() {
+        Business newBusiness = this.createBusiness("새사장1", "newHotel1@gmail.com");
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+
+        Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
+        Set<String> roomOptions = this.roomOptionService.findAll()
+                .stream()
+                .map(RoomOption::getName)
+                .collect(Collectors.toSet());
+
+        PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
+
+        PostRoomResponse res1 = this.roomService.createRoom(hotel.getId(), business.getMember(), req1);
+
+        Long roomId = res1.roomId();
+
+        roomOptions = new HashSet<>(Set.of("미니 냉장고"));
+        PutRoomRequest putReq1 = new PutRoomRequest("수정 객실1", 5, null, null, 5, null,
+                "in_booking", null, null, roomOptions);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            this.roomService.modifyRoom(hotel.getId(), roomId, newBusiness.getMember(), putReq1);
+        });
+
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("해당 호텔의 사업자가 아닙니다.", exception.getMsg());
     }
 
     @Test
     @DisplayName("객실 삭제")
     public void deleteRoom() {
-        Member actor = this.memberRepository.findAll().getFirst();
-        Hotel hotel = this.hotelRepository.findAll().getFirst();
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
 
-        this.roomOptionService.add(new RoomOptionRequest.Details("TV"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("Computer"));
-        this.roomOptionService.add(new RoomOptionRequest.Details("ShowerRoom"));
+        Set<String> roomOptions = new HashSet<>(Set.of("객실 내 금고", "미니 냉장고"));
 
         Map<String, Integer> bedTypeNumber = Map.of("SINGLE", 4, "DOUBLE", 2, "KING", 1);
-        Set<String> roomOptions = new HashSet<>(Set.of("ShowerRoom", "Computer", "TV"));
 
         PostRoomRequest req1 = new PostRoomRequest("객실1", 1, 300000, 2, 4, bedTypeNumber, null, roomOptions);
 
-        this.roomService.create(hotel.getId(), actor, req1);
+        PostRoomResponse res1 = this.roomService.createRoom(hotel.getId(), business.getMember(), req1);
 
-        Room room = this.roomRepository.findAll().getFirst();
-        Long roomId = room.getId();
+        Long roomId = res1.roomId();
+        Room room = this.roomRepository.findById(roomId).get();
 
-        this.roomService.delete(hotel.getId(), roomId, actor);
+        this.roomService.deleteRoom(hotel.getId(), roomId, business.getMember());
 
         assertEquals(RoomStatus.UNAVAILABLE, room.getRoomStatus());
     }
 
-    public void createHotel() {
-        Member member = Member.builder()
-                .memberEmail("member@naver.com")
-                .password("123")
-                .memberName("business")
-                .memberPhoneNumber("010-1234-5678")
-                .birthDate(LocalDate.of(2020, 2, 2))
-                .role(Role.BUSINESS)
+    @Test
+    @DisplayName("객실 삭제 실패 - 사업자가 아닐 경우")
+    public void deleteRoomFailed_notBusiness() {
+        Member member = this.getActor();
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+        Long roomId = hotel.getRooms().getFirst().getId();
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            this.roomService.deleteRoom(hotel.getId(), roomId, member);
+        });
+
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("사업자만 관리할 수 있습니다.", exception.getMsg());
+    }
+
+    @Test
+    @DisplayName("객실 삭제 실패 - 호텔 소유주가 아닐 경우")
+    public void deleteRoomFailed_notEqualBusiness() {
+        Business newBusiness = this.createBusiness("새사장1", "newHotel1@gmail.com");
+        Business business = this.getBusiness();
+        Hotel hotel = this.hotelRepository.findByBusiness(business).get();
+        Long roomId = hotel.getRooms().getFirst().getId();
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            this.roomService.deleteRoom(hotel.getId(), roomId, newBusiness.getMember());
+        });
+
+        assertEquals(403, exception.getResultCode().value());
+        assertEquals("해당 호텔의 사업자가 아닙니다.", exception.getMsg());
+    }
+
+    // business1 비즈니스 호출
+    private Business getBusiness() {
+        Member actor = this.memberRepository.findByMemberName("business1").get();
+        return actor.getBusiness();
+    }
+
+    private Member getActor() {
+        return this.memberRepository.findByMemberName("customer1").get();
+    }
+
+    // 사업가 생성
+    private Business createBusiness(String name, String email) {
+        // 회원 생성
+        Member member = Member
+                .builder()
+                .birthDate(LocalDate.now())
+                .memberEmail(email)
+                .memberName(name)
+                .memberPhoneNumber("01011111111")
                 .memberStatus(MemberStatus.ACTIVE)
+                .role(Role.BUSINESS)
                 .build();
 
-        Business business = Business.builder()
-                .businessRegistrationNumber("1234567890")
+        // 회원 저장
+        memberRepository.save(member);
+
+        // 사업가 등록
+        Business business = Business
+                .builder()
+                .businessRegistrationNumber(createRegistrationNumber())
+                .startDate(LocalDate.now())
+                .ownerName(name)
                 .approvalStatus(BusinessApprovalStatus.APPROVED)
                 .member(member)
+                .hotel(null)
                 .build();
 
-        member.setBusiness(business);
+        // 사업가 저장
+        businessRepository.save(business);
 
-        this.memberRepository.save(member);
-        this.businessRepository.save(business);
+        return business;
+    }
 
-        PostHotelRequest postHotelRequest = new PostHotelRequest(business.getId(), "호텔1", "hotel@naver.com",
-                "010-1234-1234", "서울시", 0123,
-                3, LocalTime.of(12, 0), LocalTime.of(14, 0), "호텔입니다.", null, null);
-
-        this.hotelService.create(member, postHotelRequest);
-
-        Hotel hotel = this.hotelRepository.findAll().getFirst();
-
-        business.setHotel(hotel);
-        this.businessRepository.save(business);
-
-        assertEquals(this.hotelRepository.count(), 1L);
-
-        assertEquals(hotel.getHotelName(), "호텔1");
-        assertEquals(hotel.getHotelEmail(), "hotel@naver.com");
-        assertEquals(hotel.getHotelPhoneNumber(), "010-1234-1234");
-        assertEquals(hotel.getBusiness().getId(), business.getId());
-        assertEquals(hotel.getBusiness().getMember().getRole(), Role.BUSINESS);
-        assertEquals(hotel.getBusiness().getHotel(), hotel);
+    // 사업가 번호 난수 생성
+    private String createRegistrationNumber() {
+        // 1000000000 ~ 9999999999 난수 생성
+        return String.valueOf((long) ((Math.random() * 9000000000L) + 1000000000L));
     }
 }

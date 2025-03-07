@@ -11,26 +11,37 @@ import java.time.LocalDate;
 
 public class AdminBusinessResponse {
     public record ApprovalResult(
+            Long businessId,
             String businessRegistrationNumber,
+            LocalDate startDate,
+            String ownerName,
             BusinessApprovalStatus approvalStatus
     ) {
         public static ApprovalResult from(Business business) {
             return new ApprovalResult(
+                    business.getId(),
                     business.getBusinessRegistrationNumber(),
+                    business.getStartDate(),
+                    business.getOwnerName(),
                     business.getApprovalStatus()
             );
         }
     }
     public record Summary(
-            Long id,
-            String businessRegistrationNumber,
-            BusinessApprovalStatus approvalStatus
+            Long businessId,
+            String ownerName,
+            String contact,
+            BusinessApprovalStatus approvalStatus,
+            String hotelName
     ) {
         public static Summary from(Business business) {
+            Hotel hotel = business.getHotel();
             return new Summary(
                     business.getId(),
-                    business.getBusinessRegistrationNumber(),
-                    business.getApprovalStatus()
+                    business.getOwnerName(),
+                    business.getMember().getMemberPhoneNumber(),
+                    business.getApprovalStatus(),
+                    (hotel != null) ? hotel.getHotelName() : null
             );
         }
     }
@@ -38,19 +49,20 @@ public class AdminBusinessResponse {
     public record Detail(
             Long businessId,
             String businessRegistrationNumber,
-            BusinessApprovalStatus approvalStatus,
+            String ownerName,
+            LocalDate startDate,
 
-            Long userId,
-            String name,
-            String email,
-            String phoneNumber,
-            LocalDate birth,
+            String memberName,
+            String memberEmail,
+            String memberPhoneNumber,
             MemberStatus memberStatus,
 
             Long hotelId,
             String hotelName,
             String streetAddress,
-            HotelStatus hotelStatus
+            HotelStatus hotelStatus,
+
+            BusinessApprovalStatus approvalStatus
     ) {
         public static Detail from(Business business) {
             Member owner = business.getMember();
@@ -58,17 +70,20 @@ public class AdminBusinessResponse {
             return new Detail(
                     business.getId(),
                     business.getBusinessRegistrationNumber(),
-                    business.getApprovalStatus(),
-                    owner.getId(),
+                    business.getOwnerName(),
+                    business.getStartDate(),
+
                     owner.getMemberName(),
                     owner.getMemberEmail(),
                     owner.getMemberPhoneNumber(),
-                    owner.getBirthDate(),
                     owner.getMemberStatus(),
+
                     (hotel != null) ? hotel.getId() : null,
                     (hotel != null) ? hotel.getHotelName() : null,
                     (hotel != null) ? hotel.getStreetAddress() : null,
-                    (hotel != null) ? hotel.getHotelStatus() : null
+                    (hotel != null) ? hotel.getHotelStatus() : null,
+
+                    business.getApprovalStatus()
             );
         }
     }

@@ -1,6 +1,6 @@
 package com.ll.hotel.domain.image.service;
 
-import com.ll.hotel.domain.hotel.room.converter.ImageConverter;
+import com.ll.hotel.domain.image.converter.ImageConverter;
 import com.ll.hotel.domain.image.entity.Image;
 import com.ll.hotel.domain.image.repository.ImageRepository;
 import com.ll.hotel.domain.image.type.ImageType;

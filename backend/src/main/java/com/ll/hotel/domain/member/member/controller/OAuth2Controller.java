@@ -1,11 +1,11 @@
 package com.ll.hotel.domain.member.member.controller;
 
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.member.member.service.MemberService;
-import com.ll.hotel.global.rq.Rq;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.request.Rq;
+import com.ll.hotel.global.response.RsData;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class OAuth2Controller {
     private final Rq rq;
 
-    @GetMapping("/oauth2/callback")
+    @GetMapping("/oauth2/callback") // 사용하지 않는 컨트롤러 (임시 테스트를 위해 일단 보류)
     public RsData<OAuth2Response> callback(
             @RequestParam(required = false) String accessToken,
             @RequestParam(required = false) String refreshToken,
             @RequestParam String status
     ) {
         if (!"SUCCESS".equals(status)) {
-            return new RsData<>("400", "잘못된 요청입니다.", new OAuth2Response(
+            return RsData.success(HttpStatus.BAD_REQUEST, new OAuth2Response(
                 null, null, status, null, null, null,
                 false, false, false, null, null
             ));
@@ -32,7 +32,7 @@ public class OAuth2Controller {
 
         Member actor = rq.getActor();
         if (actor == null) {
-            return new RsData<>("401", "사용자를 찾을 수 없습니다.", new OAuth2Response(
+            return RsData.success(HttpStatus.UNAUTHORIZED, new OAuth2Response(
                 null, null, status, null, null, null,
                 false, false, false, null, null
             ));
@@ -40,7 +40,7 @@ public class OAuth2Controller {
 
         OAuth oAuth = actor.getFirstOAuth();
         if (oAuth == null) {
-            return new RsData<>("400", "OAuth 정보를 찾을 수 없습니다.", new OAuth2Response(
+            return RsData.success(HttpStatus.BAD_REQUEST, new OAuth2Response(
                 actor.getMemberEmail(), actor.getMemberName(), status,
                 actor.getUserRole(), null, null,
                 actor.isUser(), actor.isAdmin(), actor.isBusiness(),
@@ -62,7 +62,7 @@ public class OAuth2Controller {
             refreshToken
         );
 
-        return new RsData<>("200", "OAuth2 로그인 성공", response);
+        return RsData.success(HttpStatus.OK, response);
     }
 }
 

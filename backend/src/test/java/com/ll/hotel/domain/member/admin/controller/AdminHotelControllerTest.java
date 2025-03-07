@@ -1,5 +1,12 @@
 package com.ll.hotel.domain.member.admin.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
@@ -10,28 +17,22 @@ import com.ll.hotel.domain.member.member.repository.BusinessRepository;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -56,24 +57,22 @@ public class AdminHotelControllerTest {
 
     @BeforeEach
     void setUp() {
-        hotelRepository.deleteAll();
-        businessRepository.deleteAll();
-        memberRepository.deleteAll();
-
-        Member member = memberRepository.save(Member
+        Member member = Member
                 .builder()
                 .birthDate(LocalDate.now())
                 .memberEmail("member@gmail.com")
                 .memberName("member")
-                .password("dfkajl12333")
                 .memberPhoneNumber("01012345678")
                 .memberStatus(MemberStatus.ACTIVE)
                 .role(Role.BUSINESS)
-                .build()
-        );
+                .build();
+        memberRepository.save(member);
+
         Business business = Business
                 .builder()
-                .businessRegistrationNumber(String.format("1234567890"))
+                .businessRegistrationNumber("1234567890")
+                .startDate(LocalDate.now())
+                .ownerName("김사장")
                 .approvalStatus(BusinessApprovalStatus.PENDING)
                 .member(member)
                 .hotel(null)
@@ -108,7 +107,7 @@ public class AdminHotelControllerTest {
     void findAllPagedTest1() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/hotels")
+                        get("/api/admin/hotels")
                 )
                 .andDo(print());
 
@@ -116,8 +115,7 @@ public class AdminHotelControllerTest {
                 .andExpect(handler().handlerType(AdminHotelController.class))
                 .andExpect(handler().methodName("getAll"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200"))
-                .andExpect(jsonPath("$.msg").value("모든 호텔 정보가 조회되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK.name()));
     }
 
     @Test
@@ -125,14 +123,14 @@ public class AdminHotelControllerTest {
     void findAllPaged2() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/hotels?page=20")
+                        get("/api/admin/hotels?page=20")
                 )
                 .andDo(print());
 
         resultActions
                 .andExpect(handler().handlerType(AdminHotelController.class))
                 .andExpect(handler().methodName("getAll"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -140,7 +138,7 @@ public class AdminHotelControllerTest {
     void getByIdTest1() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/hotels/{id}", testHotelId)
+                        get("/api/admin/hotels/{id}", testHotelId)
                 )
                 .andDo(print());
 
@@ -148,8 +146,7 @@ public class AdminHotelControllerTest {
                 .andExpect(handler().handlerType(AdminHotelController.class))
                 .andExpect(handler().methodName("getById"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200"))
-                .andExpect(jsonPath("$.msg").value("호텔 정보가 조회되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK.name()));
     }
 
     @Test
@@ -157,7 +154,7 @@ public class AdminHotelControllerTest {
     void getByIdTest2() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/admin/hotels/25")
+                        get("/api/admin/hotels/25")
                 )
                 .andDo(print());
 
@@ -172,7 +169,7 @@ public class AdminHotelControllerTest {
     void approveTest() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        patch("/admin/hotels/{id}", testHotelId)
+                        patch("/api/admin/hotels/{id}", testHotelId)
                                 .content("""
                                         {
                                             "hotelStatus": "AVAILABLE"
@@ -188,7 +185,6 @@ public class AdminHotelControllerTest {
                 .andExpect(handler().handlerType(AdminHotelController.class))
                 .andExpect(handler().methodName("approve"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200"))
-                .andExpect(jsonPath("$.msg").value("호텔 승인 정보가 수정되었습니다."));
+                .andExpect(jsonPath("$.resultCode").value(HttpStatus.OK.name()));
     }
 }
