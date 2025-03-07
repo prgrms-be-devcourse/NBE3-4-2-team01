@@ -24,7 +24,9 @@ public class LogUtil {
     }
 
     public static void logServiceRequest(Logger log, String className, String methodName) {
-        log.info("Request Service = [{}.{}]", className, methodName);
+        if (checkValidLog(className, methodName)) {
+            log.info("Request Service = [{}.{}]", className, methodName);
+        }
     }
 
     public static void logError(Logger log, JoinPoint joinPoint, Throwable ex) {
@@ -55,5 +57,14 @@ public class LogUtil {
         log.error("ERROR = [{}.{}], status: [{}], message: [{}]",
                 className, methodName, status, msg
         );
+    }
+
+    private static boolean checkValidLog(String className, String methodName) {
+        if (className.equals("MemberService") || className.equals("CustomOAuth2UserService")) {
+            return methodName.equals("join") || methodName.toLowerCase().contains("login") || methodName.toLowerCase()
+                    .contains("logout");
+        }
+
+        return !(className.equals("AuthTokenService") || className.equals("RefreshTokenService"));
     }
 }
