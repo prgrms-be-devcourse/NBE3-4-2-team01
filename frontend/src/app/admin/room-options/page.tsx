@@ -1,5 +1,6 @@
 "use client";
 
+import Loading from "@/components/hotellist/Loading";
 import Navigation from "@/components/navigation/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +10,7 @@ import {
   deleteRoomOption,
   getAllRoomOptions,
   modifyRoomOption,
-} from "@/lib/api/admin/RoomOptionApi";
+} from "@/lib/api/Admin/RoomOptionApi";
 import { OptionResponse } from "@/lib/types/admin/response/OptionResponse";
 import { Pencil, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -20,6 +21,8 @@ export default function RoomOptionsPage() {
     {}
   );
   const [newOption, setNewOption] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchOptions();
@@ -30,8 +33,10 @@ export default function RoomOptionsPage() {
       const data = await getAllRoomOptions();
       setOptions(data);
       setEditingOptions({});
-    } catch (error) {
-      console.error("객실 옵션을 불러오는 중 오류 발생:", error);
+    } catch {
+      setError("옵션을 불러오는 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,8 +59,8 @@ export default function RoomOptionsPage() {
         delete updatedEditingOptions[id];
         return updatedEditingOptions;
       });
-    } catch (error) {
-      console.error("객실 옵션 수정 중 오류 발생:", error);
+    } catch {
+      setError("옵션 수정 중 오류가 발생했습니다.");
     }
   };
 
@@ -66,8 +71,8 @@ export default function RoomOptionsPage() {
       await addRoomOption({ name: newOption });
       setNewOption("");
       fetchOptions();
-    } catch (error) {
-      console.error("객실 옵션 추가 중 오류 발생:", error);
+    } catch {
+      setError("옵션 추가 중 오류가 발생헀습니다.");
     }
   };
 
@@ -76,11 +81,17 @@ export default function RoomOptionsPage() {
     try {
       await deleteRoomOption(optionId);
       fetchOptions();
-    } catch (error: any) {
-      console.error("옵션 삭제 중 오류 발생:", error);
-      alert(error.response?.data?.msg || "옵션 삭제 중 오류가 발생했습니다.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        setError("옵션 삭제 중 오류가 발생했습니다.");
+      }
     }
   };
+
+  if (loading) return <Loading />;
+  if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
   return (
     <div className="relative min-h-screen bg-background">
