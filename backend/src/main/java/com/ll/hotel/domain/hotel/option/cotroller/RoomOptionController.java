@@ -4,7 +4,7 @@ import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
 import com.ll.hotel.domain.hotel.option.dto.response.OptionResponse;
 import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import com.ll.hotel.domain.hotel.option.service.RoomOptionService;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.response.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -41,6 +41,7 @@ public class RoomOptionController {
         return RsData.success(HttpStatus.OK, roomAmenityList);
     }
 
+    @Operation(summary = "객실 옵션 수정")
     @PatchMapping("/{id}")
     public RsData<OptionResponse> modify(@PathVariable("id") Long id,
                                          @RequestBody OptionRequest optionRequest) {

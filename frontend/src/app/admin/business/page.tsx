@@ -22,12 +22,9 @@ export default function AdminBusinessesPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("현재 페이지:", currentPage);
-
     const fetchBusinesses = async () => {
       try {
         const data = await getAllBusinesses(currentPage);
-        console.log("API에서 가져온 데이터:", data);
         setBusinesses(data);
       } catch (err) {
         setError((err as Error).message);

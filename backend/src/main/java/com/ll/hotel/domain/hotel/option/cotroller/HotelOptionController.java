@@ -4,7 +4,7 @@ import com.ll.hotel.domain.hotel.option.dto.request.OptionRequest;
 import com.ll.hotel.domain.hotel.option.dto.response.OptionResponse;
 import com.ll.hotel.domain.hotel.option.entity.HotelOption;
 import com.ll.hotel.domain.hotel.option.service.HotelOptionService;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.response.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

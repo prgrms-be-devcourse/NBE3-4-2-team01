@@ -38,7 +38,10 @@ export default function JoinPage() {
       console.log("회원가입 응답:", response);
 
       // 응답이 성공적이면 (OK 메시지가 있거나 resultCode가 200인 경우)
-      if (response && (response.msg === "OK" || response.resultCode === "200")) {
+      if (
+        response &&
+        (response.msg === "OK" || response.resultCode === "200")
+      ) {
         // 회원가입 성공 후 쿠키 확인
         const roleData = getRoleFromCookie();
         if (roleData) {
