@@ -1,8 +1,7 @@
 package com.ll.hotel.global.aspect;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ll.hotel.global.app.AppConfig;
 import com.ll.hotel.global.response.RsData;
+import com.ll.hotel.standard.util.LogUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,17 +43,12 @@ public class ResponseAspect {
         String className = joinPoint.getSignature().getDeclaringType().getSimpleName();
         String methodName = joinPoint.getSignature().getName();
 
-        log.info("Request Controller = [{}.{}]", className, methodName);
+        LogUtil.logControllerRequest(log, className, methodName);
 
         Object proceed = joinPoint.proceed();
 
         if (proceed instanceof RsData<?> rsData) {
-            ObjectMapper objectMapper = AppConfig.getObjectMapper();
-            String jsonData = objectMapper.writeValueAsString(rsData.getData());
-
-            log.info("Response Controller = [{}.{}], status: [{}], message: [{}], data: [{}]",
-                    className, methodName, rsData.getResultCode(), rsData.getMsg(), jsonData
-            );
+            LogUtil.logControllerResponse(log, className, methodName, rsData);
 
             response.setStatus(rsData.getResultCode().value());
         }
