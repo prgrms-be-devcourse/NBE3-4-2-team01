@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { registerBusiness } from "@/lib/api/business/BusinessRegisterApi";
+import { registerBusiness } from "@/lib/api/Business/BusinessRegisterApi";
 import { BusinessRegistrationForm } from "@/lib/types/business/BusinessRequest";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,10 +27,9 @@ export default function RegisterBusiness() {
       document.cookie =
         "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       router.push("/login");
-    } catch (error: any) {
-      const msg = error.response?.data?.msg;
-      if (msg) {
-        alert(msg);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
       } else {
         setError("사업자 등록에 실패했습니다.");
       }

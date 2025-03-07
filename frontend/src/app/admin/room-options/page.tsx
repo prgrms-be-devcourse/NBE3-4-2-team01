@@ -10,7 +10,7 @@ import {
   deleteRoomOption,
   getAllRoomOptions,
   modifyRoomOption,
-} from "@/lib/api/admin/RoomOptionApi";
+} from "@/lib/api/Admin/RoomOptionApi";
 import { OptionResponse } from "@/lib/types/admin/response/OptionResponse";
 import { Pencil, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -33,7 +33,7 @@ export default function RoomOptionsPage() {
       const data = await getAllRoomOptions();
       setOptions(data);
       setEditingOptions({});
-    } catch (err) {
+    } catch {
       setError("옵션을 불러오는 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
@@ -59,8 +59,8 @@ export default function RoomOptionsPage() {
         delete updatedEditingOptions[id];
         return updatedEditingOptions;
       });
-    } catch (err) {
-      setError("객실 옵션 수정 중 오류가 발생했습니다.");
+    } catch {
+      setError("옵션 수정 중 오류가 발생했습니다.");
     }
   };
 
@@ -71,8 +71,8 @@ export default function RoomOptionsPage() {
       await addRoomOption({ name: newOption });
       setNewOption("");
       fetchOptions();
-    } catch (error) {
-      setError("객실 옵션 추가 중 오류가 발생헀습니다.");
+    } catch {
+      setError("옵션 추가 중 오류가 발생헀습니다.");
     }
   };
 
@@ -81,10 +81,9 @@ export default function RoomOptionsPage() {
     try {
       await deleteRoomOption(optionId);
       fetchOptions();
-    } catch (error: any) {
-      const msg = error.response?.data?.msg;
-      if (msg) {
-        alert(error.response?.data?.msg);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
       } else {
         setError("옵션 삭제 중 오류가 발생했습니다.");
       }
