@@ -17,6 +17,7 @@ public record PostHotelResponse(
         @NonNull
         LocalDateTime createdAt,
 
+        @NonNull
         PresignedUrlsResponse urlsResponse
 ) {
     public PostHotelResponse(Hotel hotel, PresignedUrlsResponse response) {

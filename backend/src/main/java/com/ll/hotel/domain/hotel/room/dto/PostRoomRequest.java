@@ -13,15 +13,19 @@ import java.util.Set;
 import org.hibernate.validator.constraints.Length;
 
 public record PostRoomRequest(
-        @NotBlank @Length(min = 2, max = 30) String roomName,
+        @NotBlank @Length(min = 2, max = 30)
+        String roomName,
 
-        @NotNull @Min(value = 0) Integer roomNumber,
+        @NotNull @Min(value = 0)
+        Integer roomNumber,
 
         @NotNull Integer basePrice,
 
-        @NotNull @Min(value = 1) Integer standardNumber,
+        @NotNull @Min(value = 1)
+        Integer standardNumber,
 
-        @NotNull @Min(value = 1) Integer maxNumber,
+        @NotNull @Min(value = 1)
+        Integer maxNumber,
 
         Map<String, Integer> bedTypeNumber,
 

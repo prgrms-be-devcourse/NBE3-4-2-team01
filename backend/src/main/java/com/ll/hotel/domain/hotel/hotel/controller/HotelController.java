@@ -9,7 +9,6 @@ import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.service.HotelService;
-import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.global.request.Rq;
 import com.ll.hotel.global.response.RsData;
@@ -47,10 +46,19 @@ public class HotelController {
 
     @PostMapping
     @Operation(summary = "호텔 등록")
-    public RsData<PostHotelResponse> create(@RequestBody @Valid PostHotelRequest postHotelRequest) {
+    public RsData<PostHotelResponse> create(@RequestBody @Valid PostHotelRequest postHotelRequest,
+                                            HttpServletRequest request,
+                                            HttpServletResponse response) {
         Member actor = this.rq.getActor();
 
-        return RsData.success(HttpStatus.CREATED, this.hotelService.createHotel(actor, postHotelRequest));
+        PostHotelResponse postHotelResponse = this.hotelService.createHotel(actor, postHotelRequest);
+
+        // 요청 이미지가 없으면 바로 쿠키 업데이트
+        if (postHotelRequest.imageExtensions().isEmpty()) {
+            this.hotelService.updateRoleCookie(request, response, postHotelResponse.hotelId());
+        }
+
+        return RsData.success(HttpStatus.CREATED, postHotelResponse);
     }
 
     @PostMapping("/{hotelId}/urls")
@@ -63,7 +71,7 @@ public class HotelController {
     ) {
         Member actor = this.rq.getActor();
 
-        this.hotelService.saveImages(actor, ImageType.HOTEL, hotelId, urls);
+        this.hotelService.saveImages(actor, hotelId, urls);
         this.hotelService.updateRoleCookie(request, response, hotelId);
     }
 

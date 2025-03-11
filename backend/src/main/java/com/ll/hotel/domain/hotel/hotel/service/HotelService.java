@@ -59,62 +59,70 @@ public class HotelService {
     private final RoomRepository roomRepository;
     private final BusinessRepository businessRepository;
 
+    // 호텔 등록
     @BusinessOnly
     @Transactional
     public PostHotelResponse createHotel(Member actor, PostHotelRequest postHotelRequest) {
         Business business = this.businessRepository.findByMember(actor)
                 .orElseThrow(ErrorCode.BUSINESS_NOT_FOUND::throwServiceException);
 
+        // 이미 호텔을 소유하고 있는 경우
         if (business.getHotel() != null) {
             ErrorCode.BUSINESS_HOTEL_LIMIT_EXCEEDED.throwServiceException();
         }
 
         Set<HotelOption> hotelOptions = this.hotelOptionRepository.findByNameIn(postHotelRequest.hotelOptions());
 
+        // 요청한 옵션 중 존재하지 않는 옵션이 있는 경우
         if (hotelOptions.size() != postHotelRequest.hotelOptions().size()) {
             ErrorCode.HOTEL_OPTION_NOT_FOUND.throwServiceException();
         }
 
-        Hotel hotel = Hotel.hotelBuild(postHotelRequest, business, hotelOptions);
+        Hotel hotel = Hotel.from(postHotelRequest, business, hotelOptions);
 
         try {
             return new PostHotelResponse(this.hotelRepository.save(hotel),
                     this.saveHotelImages(hotel.getId(), postHotelRequest.imageExtensions()));
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException e) {   // 중복된 이메일인 경우
             throw ErrorCode.HOTEL_EMAIL_ALREADY_EXISTS.throwServiceException();
         }
     }
 
+    // 호텔 사진 URL 리스트 저장
     @BusinessOnly
     @Transactional
-    public void saveImages(Member actor, ImageType imageType, long hotelId, List<String> urls) {
-        Hotel hotel = getHotelById(hotelId);
+    public void saveImages(Member actor, long hotelId, List<String> urls) {
+        Hotel hotel = this.getHotelById(hotelId);
 
+        // 호텔 소유자가 아닌 경우
         if (!hotel.isOwnedBy(actor)) {
             ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
-        this.imageService.saveImages(imageType, hotelId, urls);
+        this.imageService.saveImages(ImageType.HOTEL, hotelId, urls);
     }
 
+    // 전체 호텔 목록 조회
     @Transactional(readOnly = true)
     public Page<GetHotelResponse> findAllHotels(int page, int pageSize, String filterName, String filterDirection,
                                                 String streetAddress, LocalDate checkInDate, LocalDate checkOutDate,
                                                 int personal) {
+        // 필터링을 위한 정렬 필드 매핑
         Map<String, String> sortFieldMapping = Map.of(
                 "latest", "createdAt",
                 "averageRating", "averageRating",
                 "reviewCount", "totalReviewCount"
         );
 
+        // 정렬 필드 기본값을 생성 순으로
         String sortField = sortFieldMapping.getOrDefault(filterName, "createdAt");
 
         Direction direction = null;
         if (filterDirection == null) {
-            direction = Direction.DESC;
+            direction = Direction.DESC; // 정렬 방향 기본값을 내림차순으로
         } else {
             try {
-                direction = Direction.valueOf(filterDirection.toUpperCase());
+                direction = Direction.valueOf(filterDirection.toUpperCase());   // 정렬 방향 대소문자 구분 없이 변환
             } catch (IllegalArgumentException e) {
                 ErrorCode.INVALID_FILTER_DIRECTION.throwServiceException();
             }
@@ -127,6 +135,7 @@ public class HotelService {
                         PageRequest.of(0, Integer.MAX_VALUE, sort))
                 .getContent();
 
+        // 예약 가능한 호텔 리스트 조회
         List<GetHotelResponse> availableHotels = this.getAvailableHotels(checkInDate, checkOutDate, personal, hotels);
 
         int start = (int) pageRequest.getOffset();
@@ -137,6 +146,7 @@ public class HotelService {
         return new PageImpl<>(paginatedHotels, pageRequest, availableHotels.size());
     }
 
+    // 호텔 상세 정보 조회
     @Transactional(readOnly = true)
     public GetHotelDetailResponse findHotelDetail(long hotelId) {
         Hotel hotel = this.hotelRepository.findHotelDetail(hotelId)
@@ -151,6 +161,7 @@ public class HotelService {
         return new GetHotelDetailResponse(new HotelDetailDto(hotel, roomDtos), imageUrls);
     }
 
+    // 호텔 상세 정보 조회 (예약 가능한 객실만)
     @Transactional(readOnly = true)
     public GetHotelDetailResponse findHotelDetailWithAvailableRooms(long hotelId, LocalDate checkInDate,
                                                                     LocalDate checkoutDate, int personal) {
@@ -165,6 +176,7 @@ public class HotelService {
                 .stream()
                 .map(dto -> {
                     Room room = dto.room();
+                    // 예약 가능한 객실 수만 설정
                     room.setRoomNumber(this.countAvailableRoomNumber(room, checkInDate, checkoutDate, personal));
                     return dto;
                 })
@@ -173,28 +185,33 @@ public class HotelService {
         return new GetHotelDetailResponse(new HotelDetailDto(hotel, roomDtos), imageUrls);
     }
 
+    // 호텔 수정
     @BusinessOnly
     @Transactional
     public PutHotelResponse modifyHotel(long hotelId, Member actor, PutHotelRequest request) {
         Hotel hotel = this.getHotelById(hotelId);
 
+        // 호텔 소유자가 아닌 경우
         if (!hotel.isOwnedBy(actor)) {
             ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
+        // 이메일 중복 확인
         if (this.hotelRepository.existsByHotelEmailAndIdNot(request.hotelEmail(), hotelId)) {
             ErrorCode.HOTEL_EMAIL_ALREADY_EXISTS.throwServiceException();
         }
 
-        modifyIfPresent(request.hotelName(), hotel::getHotelName, hotel::setHotelName);
-        modifyIfPresent(request.hotelEmail(), hotel::getHotelEmail, hotel::setHotelEmail);
-        modifyIfPresent(request.hotelPhoneNumber(), hotel::getHotelPhoneNumber, hotel::setHotelPhoneNumber);
-        modifyIfPresent(request.streetAddress(), hotel::getStreetAddress, hotel::setStreetAddress);
-        modifyIfPresent(request.zipCode(), hotel::getZipCode, hotel::setZipCode);
-        modifyIfPresent(request.hotelGrade(), hotel::getHotelGrade, hotel::setHotelGrade);
-        modifyIfPresent(request.checkInTime(), hotel::getCheckInTime, hotel::setCheckInTime);
-        modifyIfPresent(request.checkOutTime(), hotel::getCheckOutTime, hotel::setCheckOutTime);
-        modifyIfPresent(request.hotelExplainContent(), hotel::getHotelExplainContent, hotel::setHotelExplainContent);
+        // 변경된 필드만 수정
+        this.modifyIfPresent(request.hotelName(), hotel::getHotelName, hotel::setHotelName);
+        this.modifyIfPresent(request.hotelEmail(), hotel::getHotelEmail, hotel::setHotelEmail);
+        this.modifyIfPresent(request.hotelPhoneNumber(), hotel::getHotelPhoneNumber, hotel::setHotelPhoneNumber);
+        this.modifyIfPresent(request.streetAddress(), hotel::getStreetAddress, hotel::setStreetAddress);
+        this.modifyIfPresent(request.zipCode(), hotel::getZipCode, hotel::setZipCode);
+        this.modifyIfPresent(request.hotelGrade(), hotel::getHotelGrade, hotel::setHotelGrade);
+        this.modifyIfPresent(request.checkInTime(), hotel::getCheckInTime, hotel::setCheckInTime);
+        this.modifyIfPresent(request.checkOutTime(), hotel::getCheckOutTime, hotel::setCheckOutTime);
+        this.modifyIfPresent(request.hotelExplainContent(), hotel::getHotelExplainContent,
+                hotel::setHotelExplainContent);
 
         if (request.hotelStatus() != null) {
             try {
@@ -204,7 +221,7 @@ public class HotelService {
             }
         }
 
-        modifyOptions(hotel, request.hotelOptions());
+        this.modifyOptions(hotel, request.hotelOptions());
 
         List<String> deleteImageUrls = request.deleteImageUrls();
 
@@ -214,13 +231,16 @@ public class HotelService {
         return new PutHotelResponse(hotel, this.saveHotelImages(hotelId, request.imageExtensions()));
     }
 
+    // null이 아니고, 기존 값과 같지 않은 필드 수정
     private <T> void modifyIfPresent(T newValue, Supplier<T> getter, Consumer<T> setter) {
         if (newValue != null && !newValue.equals(getter.get())) {
             setter.accept(newValue);
         }
     }
 
+    // 호텔 옵션 수정
     private void modifyOptions(Hotel hotel, Set<String> optionNames) {
+        // 요청한 옵션이 없는 경우
         if (optionNames == null || optionNames.isEmpty()) {
             hotel.setHotelOptions(new HashSet<>());
             return;
@@ -228,6 +248,7 @@ public class HotelService {
 
         Set<HotelOption> options = this.hotelOptionRepository.findByNameIn(optionNames);
 
+        // 요청한 옵션 중 존재하지 않는 옵션이 있는 경우
         if (options.size() != optionNames.size()) {
             ErrorCode.HOTEL_OPTION_NOT_FOUND.throwServiceException();
         }
@@ -235,27 +256,32 @@ public class HotelService {
         hotel.setHotelOptions(options);
     }
 
+    // 호텔 삭제
     @BusinessOnly
     @Transactional
     public void deleteHotel(Long hotelId, Member actor) {
         Hotel hotel = this.getHotelById(hotelId);
 
+        // 호텔 소유자가 아닌 경우
         if (!hotel.isOwnedBy(actor)) {
             ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
 
         hotel.setHotelStatus(HotelStatus.UNAVAILABLE);
 
+        // 삭제한 이미지가 있으면 S3에서 삭제
         if (this.imageService.deleteImages(ImageType.HOTEL, hotelId) > 0) {
             this.s3Service.deleteAllObjectsById(ImageType.HOTEL, hotelId);
         }
     }
 
+    // 호텔 매출 정보 조회
     @BusinessOnly
     @Transactional
     public GetHotelRevenueResponse findRevenue(long hotelId, Member actor) {
-        Hotel hotel = getHotelById(hotelId);
+        Hotel hotel = this.getHotelById(hotelId);
 
+        // 호텔 소유자가 아닌 경우
         if (!hotel.isOwnedBy(actor)) {
             ErrorCode.INVALID_BUSINESS.throwServiceException();
         }
@@ -264,7 +290,7 @@ public class HotelService {
         List<GetRoomRevenueResponse> roomRevenueResponses = new ArrayList<>();
         for (Room room : hotel.getRooms()) {
             long roomRevenue = room.getBookings().stream()
-                    .filter(booking -> booking.getBookingStatus().equals(BookingStatus.COMPLETED))
+                    .filter(booking -> booking.getBookingStatus().equals(BookingStatus.COMPLETED))  // 완료된 예약만
                     .map(Booking::getPayment)
                     .mapToLong(Payment::getAmount)
                     .sum();
@@ -278,6 +304,7 @@ public class HotelService {
         return new GetHotelRevenueResponse(roomRevenueResponses, hotelRevenue);
     }
 
+
     // 호텔 이미지 저장
     private PresignedUrlsResponse saveHotelImages(long hotelId, List<String> extensions) {
         List<URL> urls = this.s3Service.generatePresignedUrls(ImageType.HOTEL, hotelId, extensions);
@@ -285,6 +312,7 @@ public class HotelService {
         return new PresignedUrlsResponse(hotelId, urls);
     }
 
+    // 호텔 ID로 호텔 조회
     public Hotel getHotelById(Long hotelId) {
         return this.hotelRepository.findById(hotelId)
                 .orElseThrow(ErrorCode.HOTEL_NOT_FOUND::throwServiceException);
@@ -300,14 +328,15 @@ public class HotelService {
                 .map(dto -> {
                     Hotel hotel = dto.hotel();
                     List<Room> availableRooms = hotel.getRooms().stream()
-                            .filter(room -> room.getRoomStatus() == RoomStatus.AVAILABLE)
+                            .filter(room -> room.getRoomStatus() == RoomStatus.AVAILABLE)   // 예약 가능한 객실만
                             .filter(room -> personal >= room.getStandardNumber() && personal <= room.getMaxNumber())
                             .map(room -> {
+                                // 예약 가능한 객실 수 설정
                                 room.setRoomNumber(
                                         this.countAvailableRoomNumber(room, checkInDate, checkOutDate, personal));
                                 return room;
                             })
-                            .filter(room -> room.getRoomNumber() > 0)
+                            .filter(room -> room.getRoomNumber() > 0)   // 예약 가능한 객실이 없으면 제거
                             .toList();
 
                     if (availableRooms.isEmpty()) {
@@ -316,21 +345,13 @@ public class HotelService {
 
                     // 최저가 객실 찾기
                     Room minPriceRoom = availableRooms.stream()
-                            .min(Comparator.comparing(Room::getBasePrice))
-                            .orElse(null);
+                            .min(Comparator.comparing(Room::getBasePrice)).get();
 
                     return new GetHotelResponse(dto, minPriceRoom.getBasePrice());
                 })
-                .filter(Objects::nonNull)
+                .filter(Objects::nonNull)   // 예약 가능한 객실이 없으면 해당 호텔은 보여주지 않음
                 .toList();
     }
-
-    // 예약 가능한 객실 여부
-//    private boolean roomIsAvailable(Room room, LocalDate checkInDate, LocalDate checkOutDate) {
-//        return room.getBookings().stream()
-//                .noneMatch(booking -> (booking.getCheckInDate().isBefore(checkOutDate)
-//                                       && booking.getCheckOutDate().isAfter(checkInDate)));
-//    }
 
     // 호텔의 예약 가능한 객실 수 Count
     private int countAvailableRoomNumber(Room room, LocalDate checkInDate, LocalDate checkOutDate, int personal) {
@@ -347,12 +368,14 @@ public class HotelService {
         return room.getRoomNumber() - (int) resolvedCount;
     }
 
+    // 호텔 옵션 조회
     @BusinessOnly
     @Transactional(readOnly = true)
-    public GetAllHotelOptionsResponse findHotelOptions(Member actor) {
+    public GetAllHotelOptionsResponse findHotelOptions(Member actor) {  // AOP로 BusinessOnly 처리
         return new GetAllHotelOptionsResponse(this.hotelOptionRepository.findAll());
     }
 
+    // 역할 쿠키 업데이트
     public void updateRoleCookie(HttpServletRequest request, HttpServletResponse response, long hotelId) {
         Optional<Cookie> roleCookieOpt = CookieUtil.getCookie(request, "role");
         if (roleCookieOpt.isPresent()) {
@@ -377,7 +400,7 @@ public class HotelService {
                 response.addCookie(updatedCookie);
             } catch (Exception e) {
                 // 에러 처리
-                e.printStackTrace();
+                ErrorCode.BUSINESS_FAILED_COOKIE_UPDATE.throwServiceException();
             }
         }
     }

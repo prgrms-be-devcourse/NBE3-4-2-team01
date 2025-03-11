@@ -22,7 +22,7 @@ public record PostHotelRequest(
         @Email @NotBlank
         String hotelEmail,
 
-        @NotBlank @Pattern(regexp = "^01[0-9]-\\d{4}-\\d{4}$", message = "Invalid phone number format")
+        @NotBlank @Pattern(regexp = "^01[0-9]-\\d{4}-\\d{4}$", message = "000-0000-0000 형식으로 입력해주세요")
         String hotelPhoneNumber,
 
         @NotBlank
@@ -31,7 +31,7 @@ public record PostHotelRequest(
         @NotNull
         Integer zipCode,
 
-        @NotNull @Min(value = 0) @Max(value = 5)
+        @NotNull @Min(value = 1) @Max(value = 5)
         Integer hotelGrade,
 
         @NotNull

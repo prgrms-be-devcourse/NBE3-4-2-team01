@@ -22,12 +22,12 @@ public record GetHotelResponse(
 
         long totalReviewCount,
 
-        Integer price,
+        int price,
 
         @NotBlank
         String thumbnailUrl
 ) {
-    public GetHotelResponse(HotelWithImageDto hotelWithImageDto, Integer price) {
+    public GetHotelResponse(HotelWithImageDto hotelWithImageDto, int price) {
         this(
                 hotelWithImageDto.hotel().getId(),
                 hotelWithImageDto.hotel().getHotelName(),

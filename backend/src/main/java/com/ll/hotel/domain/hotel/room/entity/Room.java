@@ -40,25 +40,25 @@ import lombok.Setter;
         }
 )
 public class Room extends BaseTime {
-    @Column
+    @Column(nullable = false)
     private String roomName;
 
-    @Column
+    @Column(nullable = false)
     private Integer roomNumber;
 
-    @Column
+    @Column(nullable = false)
     private Integer basePrice;
 
-    @Column
+    @Column(nullable = false)
     private Integer standardNumber;
 
-    @Column
+    @Column(nullable = false)
     private Integer maxNumber;
 
     @Embedded
     private BedTypeNumber bedTypeNumber;
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private RoomStatus roomStatus = RoomStatus.AVAILABLE;
@@ -70,11 +70,11 @@ public class Room extends BaseTime {
     @Builder.Default
     private List<Booking> bookings = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany
     Set<RoomOption> roomOptions;
 
-    public static Room roomBuild(Hotel hotel, PostRoomRequest request, BedTypeNumber bedTypeNumber,
-                                 Set<RoomOption> roomOptions) {
+    public static Room from(Hotel hotel, PostRoomRequest request, BedTypeNumber bedTypeNumber,
+                            Set<RoomOption> roomOptions) {
         return Room.builder()
                 .hotel(hotel)
                 .roomName(request.roomName())

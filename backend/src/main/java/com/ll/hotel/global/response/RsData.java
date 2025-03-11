@@ -21,11 +21,6 @@ public class RsData<T> {
     @JsonIgnore
     public boolean isSuccess() { return !resultCode.isError(); }
 
-    @JsonIgnore
-    public boolean isFail() {
-        return resultCode.isError();
-    }
-
     public static <T> RsData<T> success(HttpStatus resultCode, T data) {
         return new RsData<>(resultCode, "OK", data);
     }

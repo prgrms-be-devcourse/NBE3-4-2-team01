@@ -21,23 +21,29 @@ public record PutHotelRequest(
         @NotBlank @Email
         String hotelEmail,
 
-        @NotBlank @Pattern(regexp = "^01[0-9]-\\d{4}-\\d{4}$", message = "Invalid phone number format")
+        @NotBlank @Pattern(regexp = "^01[0-9]-\\d{4}-\\d{4}$", message = "000-0000-0000 형식으로 입력해주세요")
         String hotelPhoneNumber,
 
-        @NotBlank String streetAddress,
+        @NotBlank
+        String streetAddress,
 
-        @NotNull Integer zipCode,
+        @NotNull
+        Integer zipCode,
 
         @NotNull @Min(value = 1) @Max(value = 5)
         Integer hotelGrade,
 
-        @NotNull LocalTime checkInTime,
+        @NotNull
+        LocalTime checkInTime,
 
-        @NotNull LocalTime checkOutTime,
+        @NotNull
+        LocalTime checkOutTime,
 
-        @NotBlank String hotelExplainContent,
+        @NotBlank
+        String hotelExplainContent,
 
-        @NotBlank String hotelStatus,
+        @NotBlank
+        String hotelStatus,
 
         List<String> deleteImageUrls,
 
