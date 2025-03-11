@@ -19,7 +19,7 @@ public record GetRoomResponse(
         @NonNull
         Integer maxNumber,
 
-        @NotBlank
+        @NonNull
         BedTypeNumber bedTypeNumber,
 
         @NonNull

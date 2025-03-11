@@ -20,6 +20,7 @@ public record PutRoomResponse(
         @NonNull
         LocalDateTime modifiedAt,
 
+        @NonNull
         PresignedUrlsResponse urlResponse
 ) {
     public PutRoomResponse(Room room, PresignedUrlsResponse response) {

@@ -14,18 +14,16 @@ public record PostRoomResponse(
         @NotBlank
         String roomName,
 
-        @NonNull
-        Integer basePrice,
+        int basePrice,
 
-        @NonNull
-        Integer standardNumber,
+        int standardNumber,
 
-        @NonNull
-        Integer maxNumber,
+        int maxNumber,
 
         @NonNull
         LocalDateTime createdAt,
 
+        @NonNull
         PresignedUrlsResponse urlsResponse
 ) {
     public PostRoomResponse(Room room, PresignedUrlsResponse response) {

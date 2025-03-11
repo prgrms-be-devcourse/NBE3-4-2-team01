@@ -20,6 +20,7 @@ public record PutHotelResponse(
         @NonNull
         LocalDateTime modifiedAt,
 
+        @NonNull
         PresignedUrlsResponse urlsResponse
 ) {
     public PutHotelResponse(Hotel hotel, PresignedUrlsResponse response) {

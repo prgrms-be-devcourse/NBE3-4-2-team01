@@ -39,6 +39,7 @@ public enum ErrorCode {
     FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "즐겨찾기에 없는 호텔입니다."),
 
     // Business
+    BUSINESS_FAILED_COOKIE_UPDATE(HttpStatus.BAD_REQUEST, "쿠키 업데이트에 실패했습니다."),
     BUSINESS_ACCESS_FORBIDDEN(HttpStatus.FORBIDDEN, "사업자만 관리할 수 있습니다."),
     INVALID_BUSINESS(HttpStatus.FORBIDDEN, "해당 호텔의 사업자가 아닙니다."),
     BUSINESS_NOT_FOUND(HttpStatus.NOT_FOUND, "사업자가 존재하지 않습니다."),

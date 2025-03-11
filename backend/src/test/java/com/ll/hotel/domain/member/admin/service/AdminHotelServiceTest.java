@@ -1,24 +1,25 @@
 package com.ll.hotel.domain.member.admin.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
 import com.ll.hotel.domain.member.admin.dto.request.AdminHotelRequest;
 import com.ll.hotel.global.exceptions.ErrorCode;
 import com.ll.hotel.global.exceptions.ServiceException;
-import org.junit.jupiter.api.*;
+import java.time.LocalTime;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalTime;
-import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -40,7 +41,10 @@ public class AdminHotelServiceTest {
                     .hotelName(String.format("호텔[%02d]", i))
                     .hotelEmail(String.format("hotel[%02d]@gmail.com", i))
                     .hotelGrade(5)
+                    .hotelExplainContent(String.format("호텔 설명[%02d]", i))
+                    .streetAddress(String.format("호텔 주소[%02d]", i))
                     .hotelStatus(HotelStatus.PENDING)
+                    .zipCode((i))
                     .checkInTime(LocalTime.of(15, 0))
                     .checkOutTime(LocalTime.of(11, 0))
                     .hotelPhoneNumber("01012345678")
@@ -112,10 +116,10 @@ public class AdminHotelServiceTest {
     void testFindTodoById2() {
 
         long invalidId = hotelRepository.findAll()
-                .stream()
-                .mapToLong(Hotel::getId)
-                .max()
-                .orElse(0L) + 1;
+                                 .stream()
+                                 .mapToLong(Hotel::getId)
+                                 .max()
+                                 .orElse(0L) + 1;
 
         // When
         ServiceException exception = assertThrows(ServiceException.class, () -> {

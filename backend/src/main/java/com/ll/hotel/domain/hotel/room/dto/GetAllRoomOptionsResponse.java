@@ -4,8 +4,10 @@ import com.ll.hotel.domain.hotel.option.entity.RoomOption;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.NonNull;
 
 public record GetAllRoomOptionsResponse(
+        @NonNull
         Set<String> roomOptions
 ) {
     public GetAllRoomOptionsResponse(List<RoomOption> roomOptions) {

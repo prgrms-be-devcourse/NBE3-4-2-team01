@@ -6,7 +6,6 @@ import com.ll.hotel.domain.hotel.room.dto.GetRoomResponse;
 import com.ll.hotel.domain.hotel.room.dto.RoomWithImageDto;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,11 +26,9 @@ public record HotelDetailDto(
         @NotBlank
         String streetAddress,
 
-        @NonNull
-        Integer zipCode,
+        int zipCode,
 
-        @NonNull
-        Integer hotelGrade,
+        int hotelGrade,
 
         @NonNull
         LocalTime checkInTime,
@@ -45,8 +42,10 @@ public record HotelDetailDto(
         @NotBlank
         String hotelStatus,
 
+        @NonNull
         List<GetRoomResponse> rooms,
 
+        @NonNull
         Set<String> hotelOptions
 ) {
     public HotelDetailDto(Hotel hotel, List<RoomWithImageDto> dtos) {
@@ -65,11 +64,9 @@ public record HotelDetailDto(
                 dtos.stream()
                         .map(GetRoomResponse::new)
                         .toList(),
-                hotel.getHotelOptions() != null
-                ? hotel.getHotelOptions().stream()
+                hotel.getHotelOptions().stream()
                         .map(HotelOption::getName)
                         .collect(Collectors.toSet())
-                        : new HashSet<>()
         );
     }
 }

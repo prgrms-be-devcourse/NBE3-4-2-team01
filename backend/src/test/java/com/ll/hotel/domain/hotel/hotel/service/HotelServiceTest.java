@@ -1,6 +1,17 @@
 package com.ll.hotel.domain.hotel.hotel.service;
 
-import com.ll.hotel.domain.hotel.hotel.dto.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelDetailResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.GetHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.HotelWithImageDto;
+import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
+import com.ll.hotel.domain.hotel.hotel.dto.PostHotelResponse;
+import com.ll.hotel.domain.hotel.hotel.dto.PutHotelRequest;
+import com.ll.hotel.domain.hotel.hotel.dto.PutHotelResponse;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.hotel.hotel.repository.HotelRepository;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
@@ -17,6 +28,12 @@ import com.ll.hotel.domain.member.member.repository.MemberRepository;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.exceptions.ServiceException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +42,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -182,6 +190,7 @@ class HotelServiceTest {
                 .roomName("새객실1")
                 .roomNumber(3)
                 .hotel(hotel)
+                .basePrice(100000)
                 .standardNumber(2)
                 .maxNumber(6)
                 .build();
@@ -206,6 +215,7 @@ class HotelServiceTest {
                 .roomName("새객실2")
                 .roomNumber(3)
                 .hotel(hotel)
+                .basePrice(100000)
                 .standardNumber(2)
                 .maxNumber(6)
                 .build();
@@ -255,6 +265,7 @@ class HotelServiceTest {
                 .roomName("새객실1")
                 .roomNumber(3)
                 .hotel(hotel)
+                .basePrice(100000)
                 .standardNumber(2)
                 .maxNumber(6)
                 .build();
@@ -279,6 +290,7 @@ class HotelServiceTest {
                 .roomName("새객실2")
                 .roomNumber(3)
                 .hotel(hotel)
+                .basePrice(100000)
                 .standardNumber(2)
                 .maxNumber(6)
                 .build();
@@ -322,6 +334,7 @@ class HotelServiceTest {
                 .roomName("새객실1")
                 .roomNumber(3)
                 .hotel(hotel)
+                .basePrice(100000)
                 .standardNumber(2)
                 .maxNumber(6)
                 .build();
@@ -346,6 +359,7 @@ class HotelServiceTest {
                 .roomName("새객실2")
                 .roomNumber(3)
                 .hotel(hotel)
+                .basePrice(100000)
                 .standardNumber(2)
                 .maxNumber(6)
                 .build();

@@ -1,6 +1,5 @@
 package com.ll.hotel.domain.hotel.hotel.type;
 
-import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

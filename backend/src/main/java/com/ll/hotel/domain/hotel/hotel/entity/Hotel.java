@@ -22,34 +22,34 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class Hotel extends BaseTime {
-    @Column
+    @Column(nullable = false)
     private String hotelName;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String hotelEmail;
 
-    @Column
+    @Column(nullable = false)
     private String hotelPhoneNumber;
 
-    @Column
+    @Column(nullable = false)
     private String streetAddress;
 
-    @Column
+    @Column(nullable = false)
     private Integer zipCode;
 
-    @Column
+    @Column(nullable = false)
     private Integer hotelGrade;
 
-    @Column
+    @Column(nullable = false)
     private LocalTime checkInTime;
 
-    @Column
+    @Column(nullable = false)
     private LocalTime checkOutTime;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String hotelExplainContent;
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private HotelStatus hotelStatus = HotelStatus.PENDING;
@@ -68,13 +68,16 @@ public class Hotel extends BaseTime {
     Set<Member> favorites;
 
     @Column(nullable = false)
-    private Double averageRating;
+    @Builder.Default
+    private Double averageRating = 0.0;
 
     @Column(nullable = false)
-    private Long totalReviewRatingSum;
+    @Builder.Default
+    private Long totalReviewRatingSum = 0L;
 
     @Column(nullable = false)
-    private Long totalReviewCount;
+    @Builder.Default
+    private Long totalReviewCount = 0L;
 
     // 평균 레이팅 업데이트
     public void updateAverageRating(int countOffset, int ratingOffset) {
@@ -83,34 +86,12 @@ public class Hotel extends BaseTime {
         this.averageRating = Math.round(((double) totalReviewRatingSum / totalReviewCount) * 10.0) / 10.0;
     }
 
+    // 호텔 소유자 확인
     public boolean isOwnedBy(Member member) {
         return this.business != null && this.business.getMember().equals(member);
     }
 
-    /**
-     * 불필요 시 삭제
-     */
-    @PreRemove
-    private void preRemove() {
-        if (this.business != null) {
-            this.business.setHotel(null);
-        }
-    }
-
-    @PrePersist
-    public void prePersist() {
-        if (averageRating == null) {
-            averageRating = 0.0;
-        }
-        if (totalReviewRatingSum == null) {
-            totalReviewRatingSum = 0L;
-        }
-        if (totalReviewCount == null) {
-            totalReviewCount = 0L;
-        }
-    }
-
-    public static Hotel hotelBuild(PostHotelRequest request, Business business, Set<HotelOption> hotelOptions) {
+    public static Hotel from(PostHotelRequest request, Business business, Set<HotelOption> hotelOptions) {
         return Hotel.builder()
                 .hotelName(request.hotelName())
                 .hotelEmail(request.hotelEmail())
