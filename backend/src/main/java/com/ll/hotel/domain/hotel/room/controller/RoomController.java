@@ -84,7 +84,7 @@ public class RoomController {
     @Operation(summary = "객실 수정")
     public RsData<PutRoomResponse> modify(@PathVariable long hotelId,
                                           @PathVariable long roomId,
-                                          @RequestBody PutRoomRequest request) {
+                                          @RequestBody @Valid PutRoomRequest request) {
         Member actor = this.rq.getActor();
 
         return RsData.success(HttpStatus.OK, this.roomService.modifyRoom(hotelId, roomId, actor, request));
