@@ -11,20 +11,18 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.hibernate.validator.constraints.Length;
 
 public record PostHotelRequest(
-        @NotNull
-        Long businessId,
-
         @NotBlank @Length(min = 2, max = 30)
         String hotelName,
 
         @Email @NotBlank
         String hotelEmail,
 
-        @NotBlank @Pattern(regexp = "^01[0-9]-\\d{4}-\\d{4}$", message = "Invalid phone number format")
+        @NotBlank @Pattern(regexp = "^01[0-9]-\\d{4}-\\d{4}$", message = "000-0000-0000 형식으로 입력해주세요")
         String hotelPhoneNumber,
 
         @NotBlank
@@ -52,7 +50,7 @@ public record PostHotelRequest(
         Set<String> hotelOptions
 ) {
     public PostHotelRequest {
-        imageExtensions = imageExtensions == null ? new ArrayList<>() : imageExtensions;
-        hotelOptions = hotelOptions == null ? new HashSet<>() : hotelOptions;
+        imageExtensions = Objects.requireNonNullElse(imageExtensions, new ArrayList<>());
+        hotelOptions = Objects.requireNonNullElse(hotelOptions, new HashSet<>());
     }
 }

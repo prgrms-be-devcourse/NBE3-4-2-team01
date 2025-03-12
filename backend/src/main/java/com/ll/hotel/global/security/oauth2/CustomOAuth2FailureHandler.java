@@ -1,7 +1,6 @@
 package com.ll.hotel.global.security.oauth2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ll.hotel.global.rsData.RsData;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+import static com.ll.hotel.global.exceptions.ErrorCode.OAUTH_LOGIN_FAILED;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -21,12 +22,9 @@ public class CustomOAuth2FailureHandler implements AuthenticationFailureHandler 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                       AuthenticationException exception) throws IOException {
-        log.error("OAuth2 로그인 실패: {}", exception.getMessage());
-        
-        RsData<Void> rsData = new RsData<>("401-1", "OAuth2 로그인 실패: " + exception.getMessage());
-        
+
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write(objectMapper.writeValueAsString(rsData));
+        response.getWriter().write(objectMapper.writeValueAsString(OAUTH_LOGIN_FAILED));
     }
 } 

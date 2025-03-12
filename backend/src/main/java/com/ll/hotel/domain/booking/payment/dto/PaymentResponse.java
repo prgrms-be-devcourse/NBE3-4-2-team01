@@ -6,7 +6,7 @@ import com.ll.hotel.domain.booking.payment.type.PaymentStatus;
 import java.time.LocalDateTime;
 
 public record PaymentResponse(
-        Long paymentId,
+        long paymentId,
         String merchantUid,
         int amount,
         PaymentStatus paymentStatus,

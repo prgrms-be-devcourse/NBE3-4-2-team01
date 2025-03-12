@@ -1,24 +1,27 @@
 package com.ll.hotel.domain.member.member.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.ll.hotel.domain.member.member.dto.request.BusinessRequest;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.domain.member.member.entity.Role;
 import com.ll.hotel.domain.member.member.repository.MemberRepository;
-import com.ll.hotel.domain.member.member.service.BusinessService;
 import com.ll.hotel.domain.member.member.type.BusinessApprovalStatus;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
+import java.time.LocalDate;
+import java.util.ArrayList;
+
+import com.ll.hotel.global.exceptions.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -42,10 +45,10 @@ public class BusinessServiceTest {
                     .birthDate(LocalDate.now())
                     .memberEmail(String.format("member[%02d]", i))
                     .memberName("member")
-                    .password("dfkajl12333")
                     .memberPhoneNumber("01012345678")
                     .memberStatus(MemberStatus.ACTIVE)
                     .role(Role.BUSINESS)
+                    .oauths(new ArrayList<>())
                     .build()
             );
 
@@ -56,19 +59,44 @@ public class BusinessServiceTest {
     }
 
     @Test
-    @DisplayName("사업자 등록")
+    @DisplayName("사업자 등록 - 01")
     public void registerBusinessTest() {
         // Given
-        BusinessRequest businessRequest = new BusinessRequest("1234567890");
+        BusinessRequest.RegistrationInfo businessRequest = new BusinessRequest.RegistrationInfo(
+                "1234567890",
+                LocalDate.now(),
+                "김사장"
+        );
 
         Member member = memberRepository.findById(testId).get();
 
         // When
-        Business result = businessService.register(businessRequest, member);
+        Business result = businessService.register(businessRequest, member, "01");
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getApprovalStatus()).isEqualTo(BusinessApprovalStatus.PENDING);
+        assertThat(result.getApprovalStatus()).isEqualTo(BusinessApprovalStatus.APPROVED);
         assertThat(result.getBusinessRegistrationNumber()).isEqualTo(businessRequest.businessRegistrationNumber());
+    }
+
+    @Test
+    @DisplayName("사업자 등록 실패 - 02")
+    public void registerBusinessFailureTest() {
+        // Given
+        BusinessRequest.RegistrationInfo businessRequest = new BusinessRequest.RegistrationInfo(
+                "1234567890",
+                LocalDate.now(),
+                "김사장"
+        );
+
+        Member member = memberRepository.findById(testId).get();
+
+        // When
+        ServiceException exception = assertThrows(ServiceException.class, () ->
+                businessService.register(businessRequest, member, "02")
+        );
+
+        // Then
+        assertThat(exception.getResultCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 }

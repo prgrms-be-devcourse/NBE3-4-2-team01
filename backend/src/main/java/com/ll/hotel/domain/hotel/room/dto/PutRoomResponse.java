@@ -1,7 +1,7 @@
 package com.ll.hotel.domain.hotel.room.dto;
 
 import com.ll.hotel.domain.hotel.room.entity.Room;
-import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
+import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import lombok.NonNull;
@@ -20,6 +20,7 @@ public record PutRoomResponse(
         @NonNull
         LocalDateTime modifiedAt,
 
+        @NonNull
         PresignedUrlsResponse urlResponse
 ) {
     public PutRoomResponse(Room room, PresignedUrlsResponse response) {

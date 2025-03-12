@@ -1,39 +1,35 @@
 package com.ll.hotel.domain.review.review.controller;
 
-import com.ll.hotel.domain.image.service.ImageService;
-import com.ll.hotel.domain.image.type.ImageType;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.domain.review.review.dto.*;
+import com.ll.hotel.domain.review.review.dto.request.PostReviewRequest;
+import com.ll.hotel.domain.review.review.dto.request.UpdateReviewRequest;
+import com.ll.hotel.domain.review.review.dto.response.GetReviewResponse;
+import com.ll.hotel.domain.review.review.dto.response.HotelReviewListResponse;
+import com.ll.hotel.domain.review.review.dto.response.MyReviewResponse;
+import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import com.ll.hotel.domain.review.review.service.ReviewService;
-import com.ll.hotel.global.aws.s3.S3Service;
-import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.global.rq.Rq;
-import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.standard.base.Empty;
+import com.ll.hotel.global.app.AppConfig;
+import com.ll.hotel.global.request.Rq;
+import com.ll.hotel.global.response.RsData;
+import com.ll.hotel.standard.page.dto.PageDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URL;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/reviews")
 @RequiredArgsConstructor
-@Transactional
 @Tag(name = "ReviewController")
 public class ReviewController {
-
-    private final ImageService imageService;
     private final ReviewService reviewService;
-    private final S3Service s3Service;
     private final Rq rq;
+    private final AppConfig appConfig;
 
     @PostMapping("/{bookingId}")
     @Operation(summary = "리뷰 생성")
@@ -42,46 +38,23 @@ public class ReviewController {
             @RequestParam("hotelId") Long hotelId,
             @RequestParam("roomId") Long roomId,
             @RequestBody @Valid PostReviewRequest postReviewRequest) {
-        // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 생성 가능합니다.");
-        }
 
-        // 리뷰 생성 (+권한 체크)
-        long reviewId = reviewService.createReview(hotelId, roomId, actor.getId(), bookingId,
-                postReviewRequest.content(), postReviewRequest.rating());
+        PresignedUrlsResponse presignedUrlsResponse = reviewService.createReviewAndPresignedUrls(
+                hotelId, roomId, actor.getId(), bookingId, postReviewRequest);
 
-        // 리뷰 사진 저장
-        List<String> extensions = Optional.ofNullable(postReviewRequest.imageExtensions())
-                .orElse(Collections.emptyList());
-        List<URL> urls = s3Service.generatePresignedUrls(ImageType.REVIEW, reviewId, extensions);
-
-        return new RsData<>(
-                "200-1",
-                "리뷰가 생성되었습니다.",
-                new PresignedUrlsResponse(reviewId, urls));
+        return RsData.success(HttpStatus.CREATED, presignedUrlsResponse);
     }
 
     @PostMapping("/{reviewId}/urls")
     @Operation(summary = "사진 URL 리스트 저장")
-    public RsData<Empty> saveImageUrls(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void saveImageUrls(
             @PathVariable("reviewId") long reviewId,
             @RequestBody List<String> urls) {
-
-        // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 생성 가능합니다.");
-        }
 
-        // 권한 체크 (리뷰 작성자인가?)
-        if (!reviewService.getReview(reviewId).isWrittenBy(actor)) {
-            throw new ServiceException("403-1", "리뷰 작성자만 사진 등록이 가능합니다.");
-        }
-
-        imageService.saveImages(ImageType.REVIEW, reviewId, urls);
-        return RsData.OK;
+        reviewService.saveReviewImages(actor, reviewId, urls);
     }
 
     @PutMapping("/{reviewId}")
@@ -90,57 +63,22 @@ public class ReviewController {
             @PathVariable("reviewId") long reviewId,
             @RequestBody @Valid UpdateReviewRequest updateReviewRequest
     ) {
-        // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 수정 가능합니다.");
-        }
 
-        // content, rating 수정 (+권한 체크)
-        reviewService.updateReviewContentAndRating(actor, reviewId, updateReviewRequest.content(), updateReviewRequest.rating());
+        PresignedUrlsResponse presignedUrlsResponse = reviewService.updateReview(actor, reviewId, updateReviewRequest);
 
-        List<String> deleteImageUrls = Optional.ofNullable(updateReviewRequest.deleteImageUrls())
-                .orElse(Collections.emptyList());
-
-        // DB 사진 삭제
-        imageService.deleteImagesByIdAndUrls(ImageType.REVIEW, reviewId, deleteImageUrls);
-        // S3 사진 삭제
-        s3Service.deleteObjectsByUrls(deleteImageUrls);
-
-        List<String> extensions = Optional.ofNullable(updateReviewRequest.newImageExtensions())
-                .orElse(Collections.emptyList());
-
-        // 새로운 사진의 Presigned URL 반환
-        List<URL> urls = s3Service.generatePresignedUrls(ImageType.REVIEW, reviewId, extensions);
-
-        return new RsData<>(
-                "200-1",
-                "리뷰가 업데이트 되었습니다.",
-                new PresignedUrlsResponse(reviewId, urls)
-        );
+        return RsData.success(HttpStatus.OK, presignedUrlsResponse);
     }
 
     @DeleteMapping("/{reviewId}")
     @Operation(summary = "리뷰 삭제")
-    public RsData<Empty> deleteReview(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteReview(
             @PathVariable("reviewId") long reviewId
     ) {
-        // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 삭제 가능합니다.");
-        }
 
-        // 리뷰 상태를 DELETED 로 변경 (+권한 체크)
-        reviewService.deleteReview(actor, reviewId);
-        // DB 의 사진 URL 정보 삭제
-        long imageCount = imageService.deleteImages(ImageType.REVIEW, reviewId);
-        // S3 의 사진 삭제
-        if(imageCount > 0) {
-            s3Service.deleteAllObjectsById(ImageType.REVIEW, reviewId);
-        }
-
-        return RsData.OK;
+        reviewService.deleteReviewWithImages(actor, reviewId);
     }
 
     @GetMapping("/{reviewId}")
@@ -148,53 +86,32 @@ public class ReviewController {
     public RsData<GetReviewResponse> getReview(
             @PathVariable("reviewId") long reviewId
     ) {
-        // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 수정 가능합니다.");
-        }
 
-        return new RsData<>(
-                "200-1",
-                "리뷰 조회 성공",
-                reviewService.getReviewResponse(actor, reviewId) // (+권한 체크)
-        );
+        return RsData.success(HttpStatus.OK,reviewService.getReviewResponse(actor, reviewId));
     }
 
     @GetMapping("/me")
     @Operation(summary = "내 리뷰 목록 조회")
-    public RsData<Page<MyReviewResponse>> getMyReviews(
-            @RequestParam(value = "page", defaultValue = "0") int page
+    public RsData<PageDto<MyReviewResponse>> getMyReviews(
+            @RequestParam(value = "page", defaultValue = "1") int page
     ) {
-        // 인증 체크 (로그인된 사용자인가?)
         Member actor = rq.getActor();
-        if (actor == null) {
-            throw new ServiceException("401-1", "로그인한 사용자만 리뷰 목록 조회 가능합니다.");
-        }
 
-        // 권한 체크
-        if (!actor.isUser()) {
-            throw new ServiceException("403-1", "관리자, 사업자는 리뷰 목록 조회가 불가능합니다.");
-        }
+        Page<MyReviewResponse> myReviewPage = reviewService.getMyReviewResponses(actor, page);
 
-        return new RsData<>(
-                "200-1",
-                "나의 리뷰 목록 생성",
-                reviewService.getMyReviewResponses(actor.getId(), page)
-        );
+        return RsData.success(HttpStatus.OK, new PageDto<>(myReviewPage));
     }
 
     @GetMapping("/hotels/{hotelId}")
     @Operation(summary = "호텔 리뷰 목록 조회")
-    public RsData<Page<HotelReviewResponse>> getHotelReviews(
-            @RequestParam(value = "page", defaultValue = "0") int page,
+    public RsData<HotelReviewListResponse> getHotelReviews(
+            @RequestParam(value = "page", defaultValue = "1") int page,
             @PathVariable("hotelId") long hotelId
     ) {
+        HotelReviewListResponse hotelReviewListResponse = reviewService.getHotelReviewListResponse(hotelId, page);
 
-        return new RsData<>(
-                "200-1",
-                "호텔 리뷰 목록 생성",
-                reviewService.getHotelReviewResponses(hotelId, page)
-        );
+        return RsData.success(HttpStatus.OK, hotelReviewListResponse);
     }
+
 }

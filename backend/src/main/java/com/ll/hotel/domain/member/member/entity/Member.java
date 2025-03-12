@@ -1,15 +1,18 @@
 package com.ll.hotel.domain.member.member.entity;
 
+import static com.ll.hotel.global.exceptions.ErrorCode.BUSINESS_ACCESS_FORBIDDEN;
+
+import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
 import com.ll.hotel.domain.member.member.type.MemberStatus;
 import com.ll.hotel.global.jpa.entity.BaseTime;
 import com.ll.hotel.global.security.oauth2.entity.OAuth;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
+import java.util.Set;
 
 @Entity
 @Getter
@@ -17,7 +20,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "member")
+@Table(
+    name = "member",
+    indexes = {
+        @Index(name = "idx_member_email", columnList = "memberEmail")
+    }
+)
 public class Member extends BaseTime {
 
     @Column(unique = true, nullable = false)
@@ -29,11 +37,8 @@ public class Member extends BaseTime {
     @Column(nullable = false)
     private String memberPhoneNumber;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate birthDate;
-
-    @Column(name = "password", nullable = true)
-    private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -44,10 +49,20 @@ public class Member extends BaseTime {
     private MemberStatus memberStatus;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<OAuth> oauths = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(mappedBy="member", fetch = FetchType.LAZY)
     private Business business;
+
+    @ManyToMany
+    @JoinTable(
+        name = "favorite",
+        joinColumns = @JoinColumn(name = "member_id"),
+        inverseJoinColumns = @JoinColumn(name = "hotel_id")
+    )
+    @Builder.Default
+    private Set<Hotel> favoriteHotels = new HashSet<>();
 
     public boolean isAdmin() {
         return this.role == Role.ADMIN;
@@ -67,5 +82,11 @@ public class Member extends BaseTime {
 
     public OAuth getFirstOAuth() {
         return this.oauths.isEmpty() ? null : this.oauths.get(0);
+    }
+
+    public void checkBusiness() {
+        if (!this.isBusiness()) {
+            BUSINESS_ACCESS_FORBIDDEN.throwServiceException();
+        }
     }
 }

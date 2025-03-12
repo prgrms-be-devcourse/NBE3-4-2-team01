@@ -1,7 +1,7 @@
 package com.ll.hotel.domain.hotel.room.dto;
 
 import com.ll.hotel.domain.hotel.room.entity.Room;
-import com.ll.hotel.domain.review.review.dto.PresignedUrlsResponse;
+import com.ll.hotel.domain.review.review.dto.response.PresignedUrlsResponse;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import lombok.NonNull;
@@ -14,18 +14,16 @@ public record PostRoomResponse(
         @NotBlank
         String roomName,
 
-        @NonNull
-        Integer basePrice,
+        int basePrice,
 
-        @NonNull
-        Integer standardNumber,
+        int standardNumber,
 
-        @NonNull
-        Integer maxNumber,
+        int maxNumber,
 
         @NonNull
         LocalDateTime createdAt,
 
+        @NonNull
         PresignedUrlsResponse urlsResponse
 ) {
     public PostRoomResponse(Room room, PresignedUrlsResponse response) {

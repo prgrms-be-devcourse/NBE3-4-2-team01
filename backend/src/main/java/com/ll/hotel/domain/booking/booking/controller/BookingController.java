@@ -1,156 +1,101 @@
 package com.ll.hotel.domain.booking.booking.controller;
 
-import com.ll.hotel.domain.booking.booking.dto.BookingRequest;
-import com.ll.hotel.domain.booking.booking.dto.BookingResponse;
-import com.ll.hotel.domain.booking.booking.entity.Booking;
+import com.ll.hotel.domain.booking.booking.dto.*;
 import com.ll.hotel.domain.booking.booking.service.BookingService;
 import com.ll.hotel.domain.member.member.entity.Member;
-import com.ll.hotel.global.exceptions.ServiceException;
-import com.ll.hotel.global.rq.Rq;
-import com.ll.hotel.global.rsData.RsData;
+import com.ll.hotel.global.request.Rq;
+import com.ll.hotel.global.response.RsData;
 import com.ll.hotel.standard.page.dto.PageDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/bookings")
 @RequiredArgsConstructor
+@Tag(name = "BookingController", description = "예약 관련 API")
 public class BookingController {
     private final BookingService bookingService;
     private final Rq rq;
 
-    // 예약 및 결제
+    @GetMapping
+    @Operation(summary = "예약 페이지 정보 요청", description = "예약에 필요한 정보들을 요청하는 api")
+    public RsData<BookingFormResponse> preBook(
+            @RequestParam(name = "hotelId") long hotelId,
+            @RequestParam(name = "roomId") long roomId) {
+        Member actor = rq.getActor();
+
+        return RsData.success(
+                HttpStatus.OK,
+                bookingService.preCreate(hotelId, roomId, actor)
+        );
+    }
+
     @PostMapping
-    @Transactional
-    public RsData<BookingResponse> book(
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "예약 및 결제", description = "예약 및 결제 정보를 저장하는 api")
+    public void book(
             @RequestBody @Valid BookingRequest bookingRequest) {
         Member actor = rq.getActor();
-
-        // 사용자 정보가 없으면 예약 불가
-        if (actor == null) {
-            throw new ServiceException("401", "예약 권한이 없습니다.");
-        }
-
-        Booking booking = bookingService.create(actor, bookingRequest);
-
-        return new RsData<>(
-                "201",
-                "예약 및 결제에 성공하였습니다.",
-                BookingResponse.from(booking)
-        );
+        bookingService.create(actor, bookingRequest);
     }
 
-    // 전체 예약 조회
-    @GetMapping
-    @Transactional
-    public RsData<PageDto<BookingResponse>> getAllBookings(
-            @RequestParam(defaultValue = "1", name = "page") int page,
-            @RequestParam(defaultValue = "5", name = "page_size") int pageSize) {
-        Member actor = rq.getActor();
-
-        // 관리자만 조회 가능
-        if (actor == null || !(actor.isAdmin())) {
-            throw new ServiceException("401", "예약 조회 권한이 없습니다.");
-        }
-
-        return new RsData<>(
-                "200",
-                "호텔 예약 목록 조회에 성공했습니다.",
-                new PageDto<>(
-                        bookingService.findAll(page, pageSize)
-                                .map(BookingResponse::from)
-                )
-        );
-    }
-
-    // 사용자측 예약 조회
     @GetMapping("/me")
-    @Transactional
-    public RsData<PageDto<BookingResponse>> getMyBookings(
+    @Operation(summary = "내 예약 조회", description = "사용자의 예약 내역을 조회하는 api")
+    public RsData<PageDto<BookingResponseSummary>> getMyBookings(
             @RequestParam(defaultValue = "1", name = "page") int page,
             @RequestParam(defaultValue = "5", name = "page_size") int pageSize) {
         Member actor = rq.getActor();
 
-        // 사용자 정보가 없으면 조회 불가
-        if (actor == null) {
-            throw new ServiceException("401", "예약 조회 권한이 없습니다.");
-        }
-
-        return new RsData<>(
-                "200",
-                "내 예약 목록 조회에 성공했습니다.",
-                new PageDto<>(
-                        bookingService.findByMember(actor, page, pageSize)
-                                .map(BookingResponse::from)
-                )
+        return RsData.success(
+                HttpStatus.OK,
+                new PageDto<>(bookingService.tryGetMyBookings(actor, page, pageSize))
         );
     }
 
-    // 호텔측 예약 조회
-    @GetMapping("/hotels/{hotel_id}")
-    @Transactional
-    public RsData<PageDto<BookingResponse>> getHotelBookings(
-            @PathVariable("hotel_id") Long hotelId,
+    @GetMapping("/myHotel")
+    @Operation(summary = "호텔측 예약 조회", description = "호텔의 예약 내역을 조회하는 api")
+    public RsData<PageDto<BookingResponseSummary>> getHotelBookings(
             @RequestParam(defaultValue = "1", name = "page") int page,
             @RequestParam(defaultValue = "5", name = "page_size") int pageSize) {
         Member actor = rq.getActor();
 
-        // 관리자, 호텔 사업자만 조회 가능
-        if (actor == null || !(actor.isAdmin() || actor.isBusiness())) {
-            throw new ServiceException("401", "예약 조회 권한이 없습니다.");
-        }
-
-        return new RsData<>(
-                "200",
-                "호텔 예약 목록 조회에 성공했습니다.",
-                new PageDto<>(
-                        bookingService.findByHotelId(hotelId, page, pageSize)
-                                .map(BookingResponse::from)
-                )
+        return RsData.success(
+                HttpStatus.OK,
+                new PageDto<>(bookingService.tryGetHotelBookings(actor, page, pageSize))
         );
     }
 
-    // 예약 상세 조회
     @GetMapping("/{booking_id}")
-    @Transactional
-    public RsData<BookingResponse> getBooking(
-            @PathVariable("booking_id") Long bookingId) {
+    @Operation(summary = "예약 상세 조회", description = "예약의 상세 정보를 조회하는 api")
+    public RsData<BookingResponseDetails> getBookingDetails(
+            @PathVariable("booking_id") long bookingId) {
         Member actor = rq.getActor();
-        Booking booking = bookingService.findById(bookingId);
 
-        // 관리자, 예약자, 호텔 사업자만 조회 가능
-        if (actor == null || !(actor.isAdmin() || booking.isReservedBy(actor) || booking.isOwnedBy(actor))) {
-            throw new ServiceException("401", "예약 조회 권한이 없습니다.");
-        }
-
-        return new RsData<>(
-                "200",
-                "예약 상세 조회에 성공했습니다.",
-                BookingResponse.from(booking)
+        return RsData.success(
+                HttpStatus.OK,
+                bookingService.tryGetBookingDetails(actor, bookingId)
         );
     }
 
-    // 예약 취소
     @DeleteMapping("/{booking_id}")
-    @Transactional
-    public RsData<BookingResponse> cancel(
-            @PathVariable("booking_id") Long bookingId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "예약 취소", description = "예약을 취소하는 api")
+    public void cancel(
+            @PathVariable("booking_id") long bookingId) {
         Member actor = rq.getActor();
-        Booking booking = bookingService.findById(bookingId);
+        bookingService.tryCancel(actor, bookingId);
+    }
 
-        // 관리자, 예약자, 호텔 사업자만 취소 가능
-        if (actor == null || !(actor.isAdmin() || booking.isReservedBy(actor) || booking.isOwnedBy(actor))) {
-            throw new ServiceException("401", "예약 취소 권한이 없습니다.");
-        }
-
-        booking = bookingService.cancel(booking);
-
-        return new RsData<>(
-                "200",
-                "예약 및 결제가 취소되었습니다.",
-                BookingResponse.from(booking)
-        );
+    @PatchMapping("/{booking_id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "예약 완료 처리", description = "예약을 완료 처리하는 api")
+    public void complete(
+            @PathVariable("booking_id") long bookingId) {
+        Member actor = rq.getActor();
+        bookingService.trySetCompleted(actor, bookingId);
     }
 }

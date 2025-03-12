@@ -1,31 +1,19 @@
 package com.ll.hotel.domain.hotel.hotel.entity;
 
+import com.ll.hotel.domain.hotel.hotel.dto.PostHotelRequest;
 import com.ll.hotel.domain.hotel.hotel.type.HotelStatus;
-import com.ll.hotel.domain.hotel.option.hotelOption.entity.HotelOption;
+import com.ll.hotel.domain.hotel.option.entity.HotelOption;
 import com.ll.hotel.domain.hotel.room.entity.Room;
 import com.ll.hotel.domain.member.member.entity.Business;
 import com.ll.hotel.domain.member.member.entity.Member;
 import com.ll.hotel.global.jpa.entity.BaseTime;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreRemove;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
@@ -34,34 +22,34 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class Hotel extends BaseTime {
-    @Column
+    @Column(nullable = false)
     private String hotelName;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String hotelEmail;
 
-    @Column
+    @Column(nullable = false)
     private String hotelPhoneNumber;
 
-    @Column
+    @Column(nullable = false)
     private String streetAddress;
 
-    @Column
+    @Column(nullable = false)
     private Integer zipCode;
 
-    @Column
+    @Column(nullable = false)
     private Integer hotelGrade;
 
-    @Column
+    @Column(nullable = false)
     private LocalTime checkInTime;
 
-    @Column
+    @Column(nullable = false)
     private LocalTime checkOutTime;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String hotelExplainContent;
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private HotelStatus hotelStatus = HotelStatus.PENDING;
@@ -80,46 +68,42 @@ public class Hotel extends BaseTime {
     Set<Member> favorites;
 
     @Column(nullable = false)
-    private Double averageRating;
+    @Builder.Default
+    private Double averageRating = 0.0;
 
     @Column(nullable = false)
-    private Long totalReviewRatingSum;
+    @Builder.Default
+    private Long totalReviewRatingSum = 0L;
 
     @Column(nullable = false)
-    private Long totalReviewCount;
+    @Builder.Default
+    private Long totalReviewCount = 0L;
 
     // 평균 레이팅 업데이트
     public void updateAverageRating(int countOffset, int ratingOffset) {
         this.totalReviewCount += countOffset;
         this.totalReviewRatingSum += ratingOffset;
-        this.averageRating = Math.round(((double)totalReviewRatingSum / totalReviewCount) * 10.0) / 10.0;
+        this.averageRating = Math.round(((double) totalReviewRatingSum / totalReviewCount) * 10.0) / 10.0;
     }
 
+    // 호텔 소유자 확인
     public boolean isOwnedBy(Member member) {
         return this.business != null && this.business.getMember().equals(member);
     }
 
-    /**
-     * 불필요 시 삭제
-     */
-    @PreRemove
-    private void preRemove() {
-        if (this.business != null) {
-            this.business.setHotel(null);
-            this.business.setHotel(null);
-        }
-    }
-
-    @PrePersist
-    public void prePersist() {
-        if (averageRating == null) {
-            averageRating = 0.0;
-        }
-        if (totalReviewRatingSum == null) {
-            totalReviewRatingSum = 0L;
-        }
-        if (totalReviewCount == null) {
-            totalReviewCount = 0L;
-        }
+    public static Hotel from(PostHotelRequest request, Business business, Set<HotelOption> hotelOptions) {
+        return Hotel.builder()
+                .hotelName(request.hotelName())
+                .hotelEmail(request.hotelEmail())
+                .hotelPhoneNumber(request.hotelPhoneNumber())
+                .streetAddress(request.streetAddress())
+                .zipCode(request.zipCode())
+                .hotelGrade(request.hotelGrade())
+                .checkInTime(request.checkInTime())
+                .checkOutTime(request.checkOutTime())
+                .hotelExplainContent(request.hotelExplainContent())
+                .business(business)
+                .hotelOptions(hotelOptions)
+                .build();
     }
 }

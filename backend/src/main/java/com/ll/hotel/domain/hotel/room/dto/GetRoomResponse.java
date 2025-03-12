@@ -19,11 +19,14 @@ public record GetRoomResponse(
         @NonNull
         Integer maxNumber,
 
-        @NotBlank
+        @NonNull
         BedTypeNumber bedTypeNumber,
 
         @NonNull
-        String thumbnailUrl
+        String thumbnailUrl,
+
+        @NonNull
+        Integer roomNumber
 ) {
     public GetRoomResponse(RoomWithImageDto roomWithImageDto) {
         this(
@@ -35,7 +38,8 @@ public record GetRoomResponse(
                 roomWithImageDto.room().getBedTypeNumber(),
                 roomWithImageDto.image() == null
                         ? "/images/default.jpg"
-                        : roomWithImageDto.image().getImageUrl()
+                        : roomWithImageDto.image().getImageUrl(),
+                roomWithImageDto.room().getRoomNumber()
         );
     }
 }

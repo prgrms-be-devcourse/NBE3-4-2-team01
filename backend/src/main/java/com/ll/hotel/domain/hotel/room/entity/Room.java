@@ -2,7 +2,8 @@ package com.ll.hotel.domain.hotel.room.entity;
 
 import com.ll.hotel.domain.booking.booking.entity.Booking;
 import com.ll.hotel.domain.hotel.hotel.entity.Hotel;
-import com.ll.hotel.domain.hotel.option.roomOption.entity.RoomOption;
+import com.ll.hotel.domain.hotel.option.entity.RoomOption;
+import com.ll.hotel.domain.hotel.room.dto.PostRoomRequest;
 import com.ll.hotel.domain.hotel.room.type.BedTypeNumber;
 import com.ll.hotel.domain.hotel.room.type.RoomStatus;
 import com.ll.hotel.global.jpa.entity.BaseTime;
@@ -39,25 +40,25 @@ import lombok.Setter;
         }
 )
 public class Room extends BaseTime {
-    @Column
+    @Column(nullable = false)
     private String roomName;
 
-    @Column
+    @Column(nullable = false)
     private Integer roomNumber;
 
-    @Column
+    @Column(nullable = false)
     private Integer basePrice;
 
-    @Column
+    @Column(nullable = false)
     private Integer standardNumber;
 
-    @Column
+    @Column(nullable = false)
     private Integer maxNumber;
 
     @Embedded
     private BedTypeNumber bedTypeNumber;
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private RoomStatus roomStatus = RoomStatus.AVAILABLE;
@@ -69,6 +70,20 @@ public class Room extends BaseTime {
     @Builder.Default
     private List<Booking> bookings = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany
     Set<RoomOption> roomOptions;
+
+    public static Room from(Hotel hotel, PostRoomRequest request, BedTypeNumber bedTypeNumber,
+                            Set<RoomOption> roomOptions) {
+        return Room.builder()
+                .hotel(hotel)
+                .roomName(request.roomName())
+                .roomNumber(request.roomNumber())
+                .basePrice(request.basePrice())
+                .standardNumber(request.standardNumber())
+                .maxNumber(request.maxNumber())
+                .bedTypeNumber(bedTypeNumber)
+                .roomOptions(roomOptions)
+                .build();
+    }
 }

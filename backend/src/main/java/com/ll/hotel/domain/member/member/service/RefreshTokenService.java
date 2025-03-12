@@ -2,17 +2,23 @@ package com.ll.hotel.domain.member.member.service;
 
 
 import com.ll.hotel.domain.member.member.repository.RefreshTokenRepository;
-import com.ll.hotel.global.rsData.RsData;
-import com.ll.hotel.global.security.dto.RefreshToken;
-import com.ll.hotel.global.security.oauth2.CustomOAuth2JwtProperties;
+import com.ll.hotel.global.jwt.dto.JwtProperties;
+import com.ll.hotel.global.jwt.dto.RefreshToken;
+import com.ll.hotel.global.response.RsData;
 import com.ll.hotel.standard.util.Ut;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static com.ll.hotel.global.exceptions.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +26,8 @@ import java.util.Map;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository repository;
-    private final CustomOAuth2JwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional
     void saveTokenInfo(String email, String refreshToken, String accessToken) {
@@ -28,9 +35,11 @@ public class RefreshTokenService {
             log.debug("Saving token for email: {}", email);
             RefreshToken token = new RefreshToken(email, refreshToken, accessToken);
             repository.save(token);
+
+            String key = "rt:refreshToken:" + refreshToken;
+            redisTemplate.expire(key, 86400, TimeUnit.SECONDS);
             log.debug("Token saved successfully for email: {}", email);
         } catch (Exception e) {
-            log.error("Failed to save token for email: {}", email, e);
             throw e;
         }
     }
@@ -45,31 +54,36 @@ public class RefreshTokenService {
 
     @Transactional
     RsData<String> refreshAccessToken(String refreshToken) {
-        String token = refreshToken.replace("Bearer ", "").trim();
-        
-        String tokenType = Ut.jwt.getClaims(jwtProperties, token).get("type", String.class);
-        if (!"refresh".equals(tokenType)) {
-            return new RsData<>("401-1", "리프레시 토큰이 아닙니다.", "");
-        }
+        try {
+            String token = refreshToken.replace("Bearer ", "").trim();
 
-        boolean tokenExists = repository.existsByRefreshToken(token);
-        log.debug("Found refresh token in repository: {}", tokenExists);
+            String tokenType = Ut.jwt.getClaims(jwtProperties, token).get("type", String.class);
+            if (!"refresh".equals(tokenType)) {
+                REFRESH_TOKEN_INVALID.throwServiceException();
+            }
 
-        if (tokenExists) {
+            boolean tokenExists = repository.existsByRefreshToken(token);
+            log.debug("Found refresh token in repository: {}", tokenExists);
+
+            if (!tokenExists) {
+                REFRESH_TOKEN_NOT_FOUND.throwServiceException();
+            }
             RefreshToken resultToken = repository.findByRefreshToken(token)
-                .orElseThrow(() -> new RuntimeException("토큰을 찾을 수 없습니다."));
-            
+                .orElseThrow(REFRESH_TOKEN_NOT_FOUND::throwServiceException);
+
             String email = resultToken.getId();
             String role = Ut.jwt.getClaims(jwtProperties, token).get("role", String.class);
             String newAccessToken = Ut.jwt.toString(jwtProperties, Map.of("sub", email, "role", role));
-            
+
             resultToken.updateAccessToken(newAccessToken);
             repository.save(resultToken);
-            
-            return new RsData<>("200-1", "토큰이 갱신되었습니다.", newAccessToken);
-        }
 
-        return new RsData<>("400-1", "유효하지 않은 리프레시 토큰입니다.", "");
+            return RsData.success(HttpStatus.OK, newAccessToken);
+        } catch (MalformedJwtException e) {
+            throw TOKEN_INVALID.throwServiceException();
+        } catch (Exception e) {
+            throw INTERNAL_SERVER_ERROR.throwServiceException();
+        }
     }
 
     @Transactional
@@ -84,7 +98,6 @@ public class RefreshTokenService {
                 // 토큰이 없어도 오류로 처리하지 않음
             }
         } catch (Exception e) {
-            log.error("Failed to remove token for email: {}", email, e);
             throw e;
         }
     }
